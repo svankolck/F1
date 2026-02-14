@@ -1,0 +1,16 @@
+/** @type {import('next').NextConfig} */
+const nextConfig = {
+    images: {
+        remotePatterns: [
+            { protocol: 'https', hostname: 'flagcdn.com' },
+            { protocol: 'https', hostname: 'media.formula1.com' },
+            { protocol: 'https', hostname: 'lh3.googleusercontent.com' },
+        ],
+    },
+    eslint: {
+        // Only warn on custom font in layout (we want it in layout for SPA behavior)
+        ignoreDuringBuilds: false,
+    },
+};
+
+export default nextConfig;
