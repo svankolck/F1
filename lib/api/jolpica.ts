@@ -92,3 +92,17 @@ export async function getCircuitResults(
         return null;
     }
 }
+
+// Get sprint results
+export async function getSprintResults(season: string, round: string): Promise<{ race: Race; results: RaceResult[] }> {
+    const data = await fetchJolpica<{ RaceTable: { Races: Array<Race & { SprintResults: RaceResult[] }> } }>(
+        `/${season}/${round}/sprint`
+    );
+    const race = data.RaceTable.Races[0];
+    return { race, results: race?.SprintResults || [] };
+}
+
+// Get all drivers for a season (with constructors)
+export async function getDriverList(season: string = 'current'): Promise<DriverStanding[]> {
+    return getDriverStandings(season);
+}

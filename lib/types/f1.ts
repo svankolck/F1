@@ -24,6 +24,7 @@ export interface Race {
     ThirdPractice?: SessionTime;
     Qualifying?: SessionTime;
     Sprint?: SessionTime;
+    SprintQualifying?: SessionTime;
 }
 
 export interface Circuit {
@@ -348,3 +349,83 @@ export function getDriverImageUrl(driverId: string): string {
     const code = path.split('/')[0];
     return `https://media.formula1.com/d_driver_fallback_image.png/content/dam/fom-website/drivers/${code.charAt(0)}/${path}.png.transform/2col/image.png`;
 }
+
+// ===== Game Types =====
+
+export type GameSessionType = 'qualifying' | 'race' | 'sprint_qualifying' | 'sprint';
+
+export interface GameDriver {
+    driverId: string;
+    code: string;
+    firstName: string;
+    lastName: string;
+    teamName: string;
+    teamColor: string;
+    headshotUrl: string;
+    number: string;
+}
+
+export interface Prediction {
+    id?: string;
+    user_id: string;
+    season: number;
+    round: number;
+    session_type: GameSessionType;
+    pole_driver_id: string | null;
+    p1_driver_id: string | null;
+    p2_driver_id: string | null;
+    p3_driver_id: string | null;
+    is_default: boolean;
+    submitted_at?: string;
+}
+
+export interface GameScore {
+    id?: string;
+    user_id: string;
+    season: number;
+    round: number;
+    session_type: GameSessionType;
+    pole_points: number;
+    p1_points: number;
+    p2_points: number;
+    p3_points: number;
+    bonus_points: number;
+    total_points: number;
+    calculated_at?: string;
+}
+
+export interface SessionSchedule {
+    type: GameSessionType;
+    label: string;
+    startTime: string; // ISO string
+    isLocked: boolean;
+    isCompleted: boolean;
+    points?: number; // earned points (if completed)
+}
+
+export interface WeekendSchedule {
+    season: number;
+    round: number;
+    raceName: string;
+    circuitName: string;
+    country: string;
+    isSprint: boolean;
+    sessions: SessionSchedule[];
+}
+
+// Sprint scoring constants
+export const RACE_SCORING = {
+    pole: 25,
+    p1: 25,
+    p2: 18,
+    p3: 15,
+    bonus: 10, // right driver, wrong position
+} as const;
+
+export const SPRINT_SCORING = {
+    pole: 8,
+    p1: 8,
+    p2: 7,
+    p3: 6,
+    bonus: 5, // right driver, wrong position
+} as const;

@@ -6,6 +6,7 @@ import Image from 'next/image';
 import { createClient } from '@/lib/supabase/client';
 import { useAuth } from '@/components/auth/AuthProvider';
 import AvatarUpload from './AvatarUpload';
+import DefaultDriverSettings from '@/components/game/DefaultDriverSettings';
 import type { User } from '@supabase/supabase-js';
 
 interface Profile {
@@ -206,6 +207,11 @@ export default function ProfileClient({ user, initialProfile }: ProfileClientPro
                         </button>
                     </div>
                 )}
+            </div>
+
+            {/* Default Game Predictions */}
+            <div className="glass-card p-6 w-full border border-f1-border">
+                <DefaultDriverSettings drivers={[]} />
             </div>
 
             {/* Actions */}

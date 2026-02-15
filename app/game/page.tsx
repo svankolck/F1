@@ -1,14 +1,58 @@
-export default function GamePage() {
+import { Suspense } from 'react';
+import { createClient } from '@/lib/supabase/server';
+import { redirect } from 'next/navigation';
+import GameClient from '@/components/game/GameClient';
+import { GameDriver, WeekendSchedule } from '@/lib/types/f1';
+
+async function fetchSchedule(): Promise<WeekendSchedule | null> {
+    try {
+        const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
+        const res = await fetch(`${baseUrl}/api/game/schedule`, {
+            next: { revalidate: 300 },
+        });
+        if (!res.ok) return null;
+        return res.json();
+    } catch {
+        return null;
+    }
+}
+
+async function fetchDrivers(): Promise<GameDriver[]> {
+    try {
+        const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
+        const res = await fetch(`${baseUrl}/api/drivers`, {
+            next: { revalidate: 86400 },
+        });
+        if (!res.ok) return [];
+        return res.json();
+    } catch {
+        return [];
+    }
+}
+
+export default async function GamePage() {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (!user) {
+        redirect('/login?redirect=/game');
+    }
+
+    const [schedule, drivers] = await Promise.all([
+        fetchSchedule(),
+        fetchDrivers(),
+    ]);
+
     return (
-        <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4">
-            <span className="material-icons text-6xl text-f1-text-muted">sports_esports</span>
-            <h1 className="text-3xl font-bold uppercase tracking-tight">Prediction Game</h1>
-            <p className="text-f1-text-secondary text-center max-w-md">
-                Predict race results, earn points, and compete with friends.
-            </p>
-            <div className="glass-card px-4 py-2 mt-4">
-                <span className="text-xs font-mono text-f1-text-muted">Coming in Phase 7</span>
+        <Suspense fallback={
+            <div className="flex items-center justify-center min-h-[60vh]">
+                <span className="material-icons text-4xl text-f1-text-muted animate-spin">hourglass_top</span>
             </div>
-        </div>
+        }>
+            <GameClient
+                initialSchedule={schedule}
+                initialDrivers={drivers}
+            />
+        </Suspense>
     );
 }
