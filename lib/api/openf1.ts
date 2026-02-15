@@ -1,4 +1,12 @@
-import { OpenF1Session, OpenF1Driver, OpenF1Position, OpenF1Lap, OpenF1Stint, OpenF1Pit } from '@/lib/types/f1';
+import {
+    OpenF1Session,
+    OpenF1Driver,
+    OpenF1Position,
+    OpenF1Lap,
+    OpenF1Stint,
+    OpenF1Pit,
+    OpenF1RaceControl,
+} from '@/lib/types/f1';
 
 const BASE_URL = 'https://api.openf1.org/v1';
 
@@ -73,6 +81,13 @@ export async function getStints(sessionKey: number): Promise<OpenF1Stint[]> {
 // Get pit stops for a session
 export async function getPitStops(sessionKey: number): Promise<OpenF1Pit[]> {
     return fetchOpenF1<OpenF1Pit>('/pit', {
+        session_key: sessionKey.toString(),
+    });
+}
+
+// Get race control messages for a session
+export async function getRaceControl(sessionKey: number): Promise<OpenF1RaceControl[]> {
+    return fetchOpenF1<OpenF1RaceControl>('/race_control', {
         session_key: sessionKey.toString(),
     });
 }

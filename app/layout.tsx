@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import './globals.css';
 import BottomNav from '@/components/layout/BottomNav';
 import Header from '@/components/layout/Header';
+import AuthProvider from '@/components/auth/AuthProvider';
 
 export const metadata: Metadata = {
   title: 'F1 #247 — Formula 1 Companion',
@@ -33,11 +34,13 @@ export default function RootLayout({
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
       </head>
       <body className="font-display min-h-screen flex flex-col overflow-x-hidden selection:bg-f1-red selection:text-white">
-        <Header />
-        <main className="flex-grow flex flex-col pt-20 pb-nav px-4 md:px-8 lg:px-12 max-w-7xl mx-auto w-full">
-          {children}
-        </main>
-        <BottomNav />
+        <AuthProvider>
+          <Header />
+          <main className="flex-grow flex flex-col pt-20 pb-nav px-4 md:px-8 lg:px-12 max-w-7xl mx-auto w-full">
+            {children}
+          </main>
+          <BottomNav />
+        </AuthProvider>
       </body>
     </html>
   );

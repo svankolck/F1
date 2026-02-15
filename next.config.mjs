@@ -5,6 +5,7 @@ const nextConfig = {
             { protocol: 'https', hostname: 'flagcdn.com' },
             { protocol: 'https', hostname: 'media.formula1.com' },
             { protocol: 'https', hostname: 'lh3.googleusercontent.com' },
+            { protocol: 'https', hostname: 'rjswxfjzyuwvhiplocse.supabase.co' },
         ],
     },
     eslint: {

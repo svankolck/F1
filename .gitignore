@@ -36,3 +36,6 @@ dev_logs.txt
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Supabase
+.env.local

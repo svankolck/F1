@@ -1,7 +1,7 @@
 # Fase 4 — Battle Analytics
 
-> **Status:** Te doen  
-> **Geschatte duur:** Week 5
+> **Status:** Voltooid ✅  
+> **Voltooid op:** 2026-02-14
 
 ---
 
@@ -11,7 +11,7 @@ Interactieve puntentrajectgrafiek waarmee je seizoensverloop van rijders kunt ve
 
 ## Taken
 
-- [ ] **Battle pagina** (`/standings/battle` of als tab op standings)
+- [x] **Battle pagina** (`/standings/battle` of als tab op standings)
   - Grafiek: punten (Y-as) vs rondes (X-as)
   - Recharts `LineChart` met meerdere datasets
   - Default: top 3 rijders in de huidige stand geselecteerd
@@ -20,7 +20,7 @@ Interactieve puntentrajectgrafiek waarmee je seizoensverloop van rijders kunt ve
   - Hover op datapunt: tooltip met punten + rijderafkorting
   - Lijnkleuren = teamkleuren uit `TEAM_COLORS` mapping
   - Seizoenselector (zelfde als standings)
-- [ ] **Responsive design**
+- [x] **Responsive design**
   - Desktop: brede grafiek met legenda rechts
   - Tablet: grafiek met legenda onder
   - Mobiel: zoom/pan op grafiek, legenda als horizontale scroll

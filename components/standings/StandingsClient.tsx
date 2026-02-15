@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import Link from 'next/link';
 import { Race, DriverStanding, ConstructorStanding } from '@/lib/types/f1';
 import RoundSlider from './RoundSlider';
 import StandingsTable from './StandingsTable';
@@ -196,6 +197,13 @@ export default function StandingsClient({
 
                 {/* Season selector */}
                 <div className="flex items-center gap-3">
+                    <Link
+                        href={`/standings/battle?season=${selectedSeason}`}
+                        className="flex items-center gap-1 px-3 py-2 rounded-lg border border-f1-border text-xs font-bold uppercase tracking-widest text-f1-text-secondary hover:text-white hover:border-f1-red/40 transition-colors"
+                    >
+                        <span className="material-icons text-sm">show_chart</span>
+                        Battle
+                    </Link>
                     <span className="text-[10px] text-f1-text-muted uppercase tracking-widest font-mono">Season</span>
                     <select
                         value={selectedSeason}

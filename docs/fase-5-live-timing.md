@@ -1,7 +1,7 @@
 # Fase 5 — Live Timing
 
-> **Status:** Te doen  
-> **Geschatte duur:** Week 6–7
+> **Status:** Voltooid ✅  
+> **Voltooid op:** 2026-02-14
 
 ---
 
@@ -11,7 +11,7 @@ Responsieve live timing pagina met posities, rondetijden, pitstops en optioneel 
 
 ## Taken
 
-- [ ] **Live Timing pagina** (`/timing`)
+- [x] **Live Timing pagina** (`/timing`)
   - Detectie: is er een actieve sessie? (OpenF1 `/sessions`)
     - **Geen sessie:** Countdown naar volgende GP (hergebruik Home countdown)
     - **Sessie actief:** Live timing view
@@ -26,7 +26,7 @@ Responsieve live timing pagina met posities, rondetijden, pitstops en optioneel 
 | **Mobiel horizontaal** | + Laatste ronde, S1/S2/S3, Pitstops, Banden |
 | **Desktop** | + Track position map met auto-icoontjes |
 
-- [ ] **Track Position Map** (desktop only)
+- [x] **Track Position Map** (desktop only)
   - Circuit SVG als achtergrond
   - Auto-icoontjes (rijdernummer + teamkleur) op de baan
   - Positie-updates via OpenF1 `/location` endpoint

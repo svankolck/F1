@@ -1,14 +1,30 @@
-export default function TimingPage() {
+import { Suspense } from 'react';
+import TimingClient from '@/components/timing/TimingClient';
+import { getTimingBootstrap } from '@/lib/api/timing';
+
+export const revalidate = 15;
+
+export default async function TimingPage() {
+    const initialData = await getTimingBootstrap().catch(() => ({
+        mode: 'replay' as const,
+        liveSession: null,
+        replaySession: null,
+        selectedSession: null,
+        weekendSessions: [],
+        nextSession: null,
+        snapshot: null,
+    }));
+
     return (
-        <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4">
-            <span className="material-icons text-6xl text-f1-text-muted">timer</span>
-            <h1 className="text-3xl font-bold uppercase tracking-tight">Live Timing</h1>
-            <p className="text-f1-text-secondary text-center max-w-md">
-                Live timing data will appear here during practice, qualifying, and race sessions.
-            </p>
-            <div className="glass-card px-4 py-2 mt-4">
-                <span className="text-xs font-mono text-f1-text-muted">Coming in Phase 5</span>
-            </div>
-        </div>
+        <Suspense
+            fallback={
+                <div className="flex items-center justify-center py-20 gap-3">
+                    <div className="w-5 h-5 border-2 border-f1-red/30 border-t-f1-red rounded-full animate-spin" />
+                    <span className="text-sm text-f1-text-muted font-mono uppercase tracking-wider">Loading…</span>
+                </div>
+            }
+        >
+            <TimingClient initialData={initialData} />
+        </Suspense>
     );
 }

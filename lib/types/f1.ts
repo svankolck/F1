@@ -177,6 +177,20 @@ export interface OpenF1Pit {
     date: string;
 }
 
+export interface OpenF1RaceControl {
+    meeting_key: number;
+    session_key: number;
+    date: string;
+    driver_number: number | null;
+    lap_number: number | null;
+    category: string;
+    flag: string | null;
+    scope: string | null;
+    sector: number | null;
+    qualifying_phase: number | null;
+    message: string;
+}
+
 // ===== App Types =====
 
 export interface CountdownData {
