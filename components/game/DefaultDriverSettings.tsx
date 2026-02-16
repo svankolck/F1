@@ -62,15 +62,26 @@ export default function DefaultDriverSettings({ drivers }: DefaultDriverSettings
         if (!user) return;
         setSaving(true);
         try {
+            // Prepare update payload, converting empty strings to null
+            const updates = {
+                default_pole_driver: defaults.default_pole_driver || null,
+                default_p1_driver: defaults.default_p1_driver || null,
+                default_p2_driver: defaults.default_p2_driver || null,
+                default_p3_driver: defaults.default_p3_driver || null,
+            };
+
             const { error } = await supabase
                 .from('profiles')
-                .update(defaults)
+                .update(updates)
                 .eq('id', user.id);
+
             if (error) throw error;
+
             setSaved(true);
             setTimeout(() => setSaved(false), 2000);
-        } catch (err) {
+        } catch (err: any) { // key fix: catch any error
             console.error('Failed to save defaults:', err);
+            alert(`Failed to save: ${err.message || 'Unknown error'}`); // User feedback
         } finally {
             setSaving(false);
         }

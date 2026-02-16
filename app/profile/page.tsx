@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
 import ProfileClient from '@/components/auth/ProfileClient';
+import { getGameDrivers } from '@/lib/api/game';
 
 export default async function ProfilePage() {
     const supabase = createClient();
@@ -32,5 +33,7 @@ export default async function ProfilePage() {
         profile = newProfile;
     }
 
-    return <ProfileClient user={user} initialProfile={profile} />;
+    const drivers = await getGameDrivers();
+
+    return <ProfileClient user={user} initialProfile={profile} drivers={drivers} />;
 }

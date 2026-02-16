@@ -18,12 +18,15 @@ interface Profile {
     is_active: boolean;
 }
 
+import { GameDriver } from '@/lib/types/f1';
+
 interface ProfileClientProps {
     user: User;
     initialProfile: Profile | null;
+    drivers: GameDriver[];
 }
 
-export default function ProfileClient({ user, initialProfile }: ProfileClientProps) {
+export default function ProfileClient({ user, initialProfile, drivers }: ProfileClientProps) {
     const [profile, setProfile] = useState<Profile | null>(initialProfile);
     const [firstName, setFirstName] = useState(initialProfile?.first_name || '');
     const [lastName, setLastName] = useState(initialProfile?.last_name || '');
@@ -211,7 +214,7 @@ export default function ProfileClient({ user, initialProfile }: ProfileClientPro
 
             {/* Default Game Predictions */}
             <div className="glass-card p-6 w-full border border-f1-border">
-                <DefaultDriverSettings drivers={[]} />
+                <DefaultDriverSettings drivers={drivers} />
             </div>
 
             {/* Actions */}
