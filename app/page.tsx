@@ -113,16 +113,16 @@ export default async function HomePage() {
         </div>
 
         {/* Right: Circuit Info Card */}
-        <div className="lg:col-span-5 relative min-h-[250px] md:min-h-[300px] flex items-center justify-center z-10">
+        <div className="lg:col-span-5 relative flex items-center justify-center z-10">
           <div className="absolute inset-0 bg-f1-red/5 blur-3xl rounded-full" />
-          <div className="relative w-full h-full p-6 md:p-8 glass-card hover:border-f1-red/30 transition-colors duration-500 flex flex-col justify-between min-h-[250px]">
+          <div className="relative w-full p-5 glass-card hover:border-f1-red/30 transition-colors duration-500 flex flex-col gap-4">
             {/* Circuit Name */}
             <div className="flex justify-between items-start">
               <div>
                 <span className="text-[10px] font-mono text-f1-text-muted uppercase tracking-widest">
                   Circuit
                 </span>
-                <p className="text-lg font-bold mt-1">
+                <p className="text-lg font-bold mt-1 leading-tight">
                   {nextRace?.Circuit.circuitName || 'TBA'}
                 </p>
               </div>
@@ -131,67 +131,74 @@ export default async function HomePage() {
                   <span className="text-[10px] font-mono text-f1-text-muted">
                     ROUND
                   </span>
-                  <p className="text-2xl font-bold text-f1-red font-mono">
+                  <p className="text-xl font-bold text-f1-red font-mono">
                     {nextRace.round}
                   </p>
                 </div>
               )}
             </div>
 
-            {/* Circuit SVG — real track layout */}
-            <div className="flex-1 flex items-center justify-center my-4 opacity-40 group-hover:opacity-60 transition-opacity duration-500">
-              {nextRace && getCircuitSvgPath(nextRace.Circuit.circuitId) ? (
-                /* eslint-disable-next-line @next/next/no-img-element */
-                <img
-                  src={getCircuitSvgPath(nextRace.Circuit.circuitId)}
-                  alt={`${nextRace.Circuit.circuitName} layout`}
-                  className="w-full max-w-[280px] h-auto drop-shadow-[0_0_12px_rgba(225,6,0,0.3)]"
-                />
-              ) : (
-                <div className="text-f1-text-muted text-sm font-mono uppercase tracking-widest">
-                  Circuit Layout
-                </div>
-              )}
-            </div>
-
-            {/* Circuit Details - Added per user request */}
-            {circuitDetails && (
-              <div className="grid grid-cols-2 gap-y-4 gap-x-2 my-4 pt-4 border-t border-f1-border/50">
-                <div>
-                  <span className="text-[9px] font-mono text-f1-text-muted block uppercase tracking-wider mb-0.5">Circuit Length</span>
-                  <span className="text-sm font-bold">{circuitDetails.length}</span>
-                </div>
-                <div>
-                  <span className="text-[9px] font-mono text-f1-text-muted block uppercase tracking-wider mb-0.5">First Grand Prix</span>
-                  <span className="text-sm font-bold">{circuitDetails.firstGrandPrix}</span>
-                </div>
-                <div>
-                  <span className="text-[9px] font-mono text-f1-text-muted block uppercase tracking-wider mb-0.5">Number of Laps</span>
-                  <span className="text-sm font-bold">{circuitDetails.laps}</span>
-                </div>
-                <div>
-                  <span className="text-[9px] font-mono text-f1-text-muted block uppercase tracking-wider mb-0.5">Race Distance</span>
-                  <span className="text-sm font-bold">{circuitDetails.raceDistance}</span>
-                </div>
-                <div className="col-span-2">
-                  <span className="text-[9px] font-mono text-f1-text-muted block uppercase tracking-wider mb-0.5">Fastest Lap</span>
-                  <div className="flex flex-col">
-                    <span className="text-sm font-bold">{circuitDetails.lapRecord.time}</span>
-                    <span className="text-[10px] text-f1-text-secondary">
-                      {circuitDetails.lapRecord.driver} ({circuitDetails.lapRecord.year})
-                    </span>
+            {/* Middle Section: Details (Left) + Map (Right) */}
+            <div className="flex items-center gap-4">
+              {/* Circuit Details - Left Side */}
+              {circuitDetails ? (
+                <div className="flex-1 grid grid-cols-1 gap-3">
+                  <div>
+                    <span className="text-[9px] font-mono text-f1-text-muted block uppercase tracking-wider mb-0.5">Circuit Length</span>
+                    <span className="text-sm font-bold">{circuitDetails.length}</span>
+                  </div>
+                  <div>
+                    <span className="text-[9px] font-mono text-f1-text-muted block uppercase tracking-wider mb-0.5">First Grand Prix</span>
+                    <span className="text-sm font-bold">{circuitDetails.firstGrandPrix}</span>
+                  </div>
+                  <div>
+                    <span className="text-[9px] font-mono text-f1-text-muted block uppercase tracking-wider mb-0.5">Number of Laps</span>
+                    <span className="text-sm font-bold">{circuitDetails.laps}</span>
+                  </div>
+                  <div>
+                    <span className="text-[9px] font-mono text-f1-text-muted block uppercase tracking-wider mb-0.5">Race Distance</span>
+                    <span className="text-sm font-bold">{circuitDetails.raceDistance}</span>
+                  </div>
+                  <div>
+                    <span className="text-[9px] font-mono text-f1-text-muted block uppercase tracking-wider mb-0.5">Fastest Lap</span>
+                    <div className="flex flex-col">
+                      <span className="text-sm font-bold">{circuitDetails.lapRecord.time}</span>
+                      <span className="text-[9px] text-f1-text-secondary leading-tight">
+                        {circuitDetails.lapRecord.driver} ({circuitDetails.lapRecord.year})
+                      </span>
+                    </div>
                   </div>
                 </div>
+              ) : (
+                <div className="flex-1 text-f1-text-muted text-sm">
+                  Details loading...
+                </div>
+              )}
+
+              {/* Circuit SVG - Right Side */}
+              <div className="flex-1 flex items-center justify-center opacity-80">
+                {nextRace && getCircuitSvgPath(nextRace.Circuit.circuitId) ? (
+                  /* eslint-disable-next-line @next/next/no-img-element */
+                  <img
+                    src={getCircuitSvgPath(nextRace.Circuit.circuitId)}
+                    alt={`${nextRace.Circuit.circuitName} layout`}
+                    className="w-full max-w-[140px] h-auto drop-shadow-[0_0_12px_rgba(225,6,0,0.3)]"
+                  />
+                ) : (
+                  <div className="text-f1-text-muted text-xs font-mono uppercase tracking-widest text-center">
+                    Layout
+                  </div>
+                )}
               </div>
-            )}
+            </div>
 
             {/* Session Schedule */}
             {nextRace && (
-              <div className="grid grid-cols-3 gap-2 border-t border-f1-border/50 pt-4">
+              <div className="grid grid-cols-3 gap-2 border-t border-f1-border/50 pt-3">
                 {nextRace.FirstPractice && (
                   <div className="text-center">
                     <span className="text-[9px] font-mono text-f1-text-muted block">FP1</span>
-                    <span className="text-xs font-medium">
+                    <span className="text-[10px] font-medium">
                       {new Date(`${nextRace.FirstPractice.date}T${nextRace.FirstPractice.time}`).toLocaleString('en-GB', {
                         timeZone: 'Europe/Amsterdam',
                         weekday: 'short',
@@ -204,7 +211,7 @@ export default async function HomePage() {
                 {nextRace.Qualifying && (
                   <div className="text-center">
                     <span className="text-[9px] font-mono text-f1-text-muted block">QUALI</span>
-                    <span className="text-xs font-medium">
+                    <span className="text-[10px] font-medium">
                       {new Date(`${nextRace.Qualifying.date}T${nextRace.Qualifying.time}`).toLocaleString('en-GB', {
                         timeZone: 'Europe/Amsterdam',
                         weekday: 'short',
@@ -216,7 +223,7 @@ export default async function HomePage() {
                 )}
                 <div className="text-center">
                   <span className="text-[9px] font-mono text-f1-red block">RACE</span>
-                  <span className="text-xs font-bold text-f1-red">
+                  <span className="text-[10px] font-bold text-f1-red">
                     {raceDateTime?.toLocaleString('en-GB', {
                       timeZone: 'Europe/Amsterdam',
                       weekday: 'short',
