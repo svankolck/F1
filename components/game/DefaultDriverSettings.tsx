@@ -57,25 +57,32 @@ export default function DefaultDriverSettings({ drivers }: DefaultDriverSettings
         }
         loadDefaults();
     }, [user, supabase]);
-
     const handleSave = async () => {
         if (!user) return;
         setSaving(true);
         try {
-            // Prepare update payload
-            const updates = {
+            // Prepare upsert payload with safe defaults for required fields
+            const username = user.user_metadata?.username || user.email?.split('@')[0] || 'user';
+            const firstName = user.user_metadata?.first_name || '';
+            const lastName = user.user_metadata?.last_name || '';
+
+            const payload = {
+                id: user.id,
+                username, // Ensure username is present for new rows
+                first_name: firstName,
+                last_name: lastName,
                 default_pole_driver: defaults.default_pole_driver || null,
                 default_p1_driver: defaults.default_p1_driver || null,
                 default_p2_driver: defaults.default_p2_driver || null,
                 default_p3_driver: defaults.default_p3_driver || null,
+                updated_at: new Date().toISOString(),
             };
 
-            console.log('Attempting to save profile defaults:', updates);
+            console.log('Attempting to save (upsert) profile defaults:', payload);
 
             const { data, error } = await supabase
                 .from('profiles')
-                .update(updates)
-                .eq('id', user.id)
+                .upsert(payload, { onConflict: 'id' })
                 .select();
 
             if (error) {
