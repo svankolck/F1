@@ -16,6 +16,7 @@
 
 html {
   scroll-behavior: smooth;
+  overflow-y: scroll;
 }
 
 body {
@@ -97,7 +98,7 @@ body {
 
 /* Bottom nav safe area */
 .pb-nav {
-  padding-bottom: 88px;
+  padding-bottom: 70px;
 }
 
 /* Gradient overlay for images */
