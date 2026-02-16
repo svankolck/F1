@@ -251,8 +251,8 @@ export default function GameClient({ initialSchedule, initialDrivers, initialRac
             {/* Header */}
             <div>
                 <div className="mb-6">
-                    <h2 className="text-f1-red font-bold tracking-widest uppercase text-xs mb-1">GAME CENTER</h2>
-                    <h1 className="text-3xl md:text-4xl font-bold uppercase italic tracking-tighter">
+                    <h2 className="text-f1-red font-mono tracking-widest uppercase text-xs mb-1">GAME CENTER</h2>
+                    <h1 className="text-3xl md:text-4xl font-bold uppercase tracking-tight">
                         {schedule.season} PREDICTION
                     </h1>
                 </div>
@@ -267,8 +267,9 @@ export default function GameClient({ initialSchedule, initialDrivers, initialRac
                 </div>
 
                 {/* Active Race Info */}
-                <div className="bg-f1-surface/30 border border-f1-border/30 rounded-xl p-4 flex flex-col md:flex-row md:items-center gap-4">
-                    <div className="w-12 h-8 rounded overflow-hidden flex-shrink-0">
+                {/* Active Race Info */}
+                <div className="glass-card px-4 py-3 flex items-center gap-4">
+                    <div className="w-10 h-6 rounded-sm overflow-hidden flex-shrink-0 border border-white/10">
                         {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img
                             src={countryFlags[schedule.country]}
@@ -276,15 +277,20 @@ export default function GameClient({ initialSchedule, initialDrivers, initialRac
                             className="w-full h-full object-cover"
                         />
                     </div>
-                    <div>
-                        <h2 className="text-lg font-bold uppercase tracking-tight">{schedule.raceName}</h2>
-                        <p className="text-sm text-f1-text-muted">
-                            {schedule.circuitName} — {schedule.country}
+
+                    <div className="h-6 w-px bg-f1-border" />
+
+                    <div className="flex-1">
+                        <div className="flex items-center gap-2">
+                            <h2 className="text-sm font-bold uppercase tracking-wide">{schedule.raceName}</h2>
                             {schedule.isSprint && (
-                                <span className="ml-2 px-2 py-0.5 rounded-full bg-orange-500/20 border border-orange-500/30 text-orange-400 text-[10px] font-bold uppercase">
-                                    Sprint Weekend
+                                <span className="px-1.5 py-0.5 rounded text-[9px] font-bold uppercase bg-orange-500/20 text-orange-400 border border-orange-500/30">
+                                    Sprint
                                 </span>
                             )}
+                        </div>
+                        <p className="text-[11px] text-f1-text-muted">
+                            {schedule.circuitName} — {schedule.country}
                         </p>
                     </div>
                 </div>
