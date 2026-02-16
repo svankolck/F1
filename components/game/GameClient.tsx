@@ -4,7 +4,6 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '@/components/auth/AuthProvider';
 import { createClient } from '@/lib/supabase/client';
 import { GameDriver, WeekendSchedule, Prediction, SessionSchedule, GameSessionType } from '@/lib/types/f1';
-import WeekendProgressBar from './WeekendProgressBar';
 import WeekendPredictionBoard from './WeekendPredictionBoard';
 import PredictionLockTimer from './PredictionLockTimer';
 import GameLeaderboard from './GameLeaderboard';
@@ -240,12 +239,7 @@ export default function GameClient({ initialSchedule, initialDrivers }: GameClie
                 </p>
             </div>
 
-            {/* Weekend Progress Bar */}
-            <WeekendProgressBar
-                sessions={schedule.sessions}
-                activeSession={activeSession || undefined}
-                onSessionClick={handleSessionClick}
-            />
+
 
             {/* Tab toggle */}
             <div className="flex gap-1 p-1 rounded-xl bg-f1-surface/30 border border-f1-border/20">
