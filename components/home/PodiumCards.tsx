@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { RaceResult, QualifyingResult, getTeamColor, getDriverImageUrl } from '@/lib/types/f1';
+import { RaceResult, QualifyingResult, getTeamColor, getDriverImageUrl, getTeamLogoUrl } from '@/lib/types/f1';
 
 interface PodiumCardsProps {
     results: RaceResult[];
@@ -47,6 +47,7 @@ export default function PodiumCards({ results, season, round, polePosition }: Po
             <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                 {podium.map((result, idx) => {
                     const teamColor = getTeamColor(result.Constructor.constructorId);
+                    const teamLogo = getTeamLogoUrl(result.Constructor.constructorId);
                     const pos = positions[idx];
                     const driverImg = getDriverImageUrl(result.Driver.driverId);
 
@@ -98,6 +99,14 @@ export default function PodiumCards({ results, season, round, polePosition }: Po
                                         className="w-1 h-4 rounded-full"
                                         style={{ backgroundColor: teamColor }}
                                     />
+                                    {teamLogo && (
+                                        /* eslint-disable-next-line @next/next/no-img-element */
+                                        <img
+                                            src={teamLogo}
+                                            alt={result.Constructor.name}
+                                            className="h-3 md:h-4 w-auto object-contain"
+                                        />
+                                    )}
                                     <span className="text-[10px] text-f1-text-muted uppercase font-bold tracking-widest">
                                         {result.Constructor.name}
                                     </span>

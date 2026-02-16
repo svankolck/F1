@@ -343,6 +343,26 @@ export const DRIVER_IMAGE_MAP: Record<string, string> = {
     bortoleto: 'GABBOT01_Gabriel_Bortoleto/gabbot01',
 };
 
+export const TEAM_LOGO_MAP: Record<string, string> = {
+    red_bull: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/1d/Oracle_Red_Bull_Racing.png/440px-Oracle_Red_Bull_Racing.png',
+    mercedes: 'https://seeklogo.com/images/M/mercedes-amg-petronas-f1-team-logo-2665F04EF5-seeklogo.com.png',
+    ferrari: 'https://upload.wikimedia.org/wikipedia/commons/thumb/d/d7/Scuderia_Ferrari_HP.png/800px-Scuderia_Ferrari_HP.png',
+    mclaren: 'https://seeklogo.com/images/M/mclaren-formula-1-team-logo-D371E27419-seeklogo.com.png',
+    aston_martin: 'https://brandfetch.com/images/assets/3321588d9294e33917173b22b101659a.png',
+    alpine: 'https://seeklogo.com/images/B/bwt-alpine-f1-team-logo-303C08FB9E-seeklogo.com.png',
+    williams: 'https://logodownload.org/wp-content/uploads/2022/01/williams-racing-logo.png',
+    sauber: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/47/Logo_of_Stake_F1_Team_Kick_Sauber.png/685px-Logo_of_Stake_F1_Team_Kick_Sauber.png',
+    rb: 'https://seeklogo.com/images/V/visa-cash-app-rb-formula-one-team-logo-00366D1B36-seeklogo.com.png',
+    haas: 'https://seeklogo.com/images/M/moneygram-haas-f1-team-logo-2A5F1DA06F-seeklogo.com.png',
+    // Aliases
+    alphatauri: 'https://seeklogo.com/images/V/visa-cash-app-rb-formula-one-team-logo-00366D1B36-seeklogo.com.png',
+    alfa: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/47/Logo_of_Stake_F1_Team_Kick_Sauber.png/685px-Logo_of_Stake_F1_Team_Kick_Sauber.png',
+};
+
+export function getTeamLogoUrl(constructorId: string): string {
+    return TEAM_LOGO_MAP[constructorId] || '';
+}
+
 export function getDriverImageUrl(driverId: string): string {
     const path = DRIVER_IMAGE_MAP[driverId];
     if (!path) return '';
