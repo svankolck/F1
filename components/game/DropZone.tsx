@@ -106,7 +106,8 @@ export default function DropZone({ label, points, driver, isLocked, isPole, onDr
             className={`relative rounded-xl border-2 bg-f1-surface/40 backdrop-blur-sm
                 ${isPole ? 'p-5 min-h-[120px]' : 'p-4 min-h-[100px]'}
                 flex flex-col items-center justify-center gap-2 cursor-pointer
-                hover:bg-f1-surface/60 transition-all duration-300 group`}
+                hover:bg-f1-surface/60 transition-all duration-300 group
+                ${highlight && !driver && !isLocked ? 'animate-pulse border-f1-red/50 ring-1 ring-f1-red/30' : ''}`}
             style={{ borderColor: driver.teamColor + '80' }}
             onDragOver={handleDragOver}
             onDragLeave={handleDragLeave}

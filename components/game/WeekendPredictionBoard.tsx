@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { GameDriver, GameSessionType, Prediction, RACE_SCORING, SPRINT_SCORING } from '@/lib/types/f1';
+import { GameDriver, GameSessionType, Prediction, RACE_SCORING } from '@/lib/types/f1';
 import { useAuth } from '@/components/auth/AuthProvider';
 import DriverList from './DriverList';
 import DropZone from './DropZone';
@@ -164,7 +164,7 @@ export default function WeekendPredictionBoard({
         }
     };
 
-    const changesPending = !saved;
+
 
     return (
         <div className="space-y-6">
