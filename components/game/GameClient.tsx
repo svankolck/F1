@@ -5,7 +5,7 @@ import { useAuth } from '@/components/auth/AuthProvider';
 import { createClient } from '@/lib/supabase/client';
 import { GameDriver, WeekendSchedule, Prediction, SessionSchedule, GameSessionType } from '@/lib/types/f1';
 import WeekendProgressBar from './WeekendProgressBar';
-import PredictionBoard from './PredictionBoard';
+import WeekendPredictionBoard from './WeekendPredictionBoard';
 import PredictionLockTimer from './PredictionLockTimer';
 import GameLeaderboard from './GameLeaderboard';
 import GamePointsChart from './GamePointsChart';
@@ -276,54 +276,51 @@ export default function GameClient({ initialSchedule, initialDrivers }: GameClie
             {/* Content */}
             {activeTab === 'prediction' ? (
                 <div className="space-y-8">
-                    {/* Unified Prediction Board */}
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
-                        {/* Qualifying Section */}
-                        <div className="space-y-4">
-                            {schedule.sessions.filter(s => s.type === 'qualifying' || s.type === 'sprint_qualifying').map(session => (
-                                <div key={session.type} className="space-y-4">
-                                    {!session.isLocked && (
-                                        <PredictionLockTimer
-                                            sessionStartTime={session.startTime}
-                                            sessionLabel={session.label}
-                                        />
-                                    )}
-                                    <PredictionBoard
-                                        drivers={drivers}
-                                        sessionType={session.type}
-                                        sessionLabel={session.label}
-                                        isLocked={session.isLocked}
-                                        season={schedule.season}
-                                        round={schedule.round}
-                                        existingPrediction={predictions[session.type]}
-                                    />
-                                </div>
-                            ))}
-                        </div>
+                    {(() => {
+                        // Identify sessions
+                        const quali = schedule.sessions.find(s => s.type === 'qualifying' || s.type === 'sprint_qualifying');
+                        const race = schedule.sessions.find(s => s.type === 'race'); // Assuming standard race for now, handle sprints later if needed
 
-                        {/* Race Section */}
-                        <div className="space-y-4">
-                            {schedule.sessions.filter(s => s.type === 'race' || s.type === 'sprint').map(session => (
-                                <div key={session.type} className="space-y-4">
-                                    {!session.isLocked && (
+                        if (!quali || !race) return <div>Invalid schedule configuration</div>;
+
+                        return (
+                            <div className="space-y-4">
+                                {/* Lock Timers */}
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    {!quali.isLocked && (
                                         <PredictionLockTimer
-                                            sessionStartTime={session.startTime}
-                                            sessionLabel={session.label}
+                                            sessionStartTime={quali.startTime}
+                                            sessionLabel={quali.label}
                                         />
                                     )}
-                                    <PredictionBoard
-                                        drivers={drivers}
-                                        sessionType={session.type}
-                                        sessionLabel={session.label}
-                                        isLocked={session.isLocked}
-                                        season={schedule.season}
-                                        round={schedule.round}
-                                        existingPrediction={predictions[session.type]}
-                                    />
+                                    {!race.isLocked && (
+                                        <PredictionLockTimer
+                                            sessionStartTime={race.startTime}
+                                            sessionLabel={race.label}
+                                        />
+                                    )}
                                 </div>
-                            ))}
-                        </div>
-                    </div>
+
+                                <WeekendPredictionBoard
+                                    drivers={drivers}
+                                    season={schedule.season}
+                                    round={schedule.round}
+                                    qualiSession={{
+                                        type: quali.type,
+                                        label: quali.label,
+                                        isLocked: quali.isLocked,
+                                        prediction: predictions[quali.type]
+                                    }}
+                                    raceSession={{
+                                        type: race.type,
+                                        label: race.label,
+                                        isLocked: race.isLocked,
+                                        prediction: predictions[race.type]
+                                    }}
+                                />
+                            </div>
+                        );
+                    })()}
                 </div>
             ) : (
                 <div className="space-y-8">

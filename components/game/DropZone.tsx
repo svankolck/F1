@@ -12,9 +12,11 @@ interface DropZoneProps {
     isPole?: boolean;
     onDrop: (driver: GameDriver) => void;
     onRemove: () => void;
+    onClick?: () => void;
+    highlight?: boolean;
 }
 
-export default function DropZone({ label, points, driver, isLocked, isPole, onDrop, onRemove }: DropZoneProps) {
+export default function DropZone({ label, points, driver, isLocked, isPole, onDrop, onRemove, onClick, highlight }: DropZoneProps) {
     const [isDragOver, setIsDragOver] = useState(false);
 
     const handleDragOver = useCallback((e: React.DragEvent) => {
@@ -83,6 +85,7 @@ export default function DropZone({ label, points, driver, isLocked, isPole, onDr
                 onDragOver={handleDragOver}
                 onDragLeave={handleDragLeave}
                 onDrop={handleDrop}
+                onClick={onClick}
             >
                 <div className="flex flex-col items-center gap-1">
                     <span className={`material-icons ${isDragOver ? 'text-f1-red' : 'text-f1-text-muted'} ${isPole ? 'text-2xl' : 'text-lg'}`}>

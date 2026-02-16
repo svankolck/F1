@@ -8,9 +8,10 @@ interface DriverCardProps {
     isPlaced?: boolean;
     onSelect?: (driver: GameDriver) => void;
     compact?: boolean;
+    isSelected?: boolean;
 }
 
-export default function DriverCard({ driver, isPlaced, onSelect, compact }: DriverCardProps) {
+export default function DriverCard({ driver, isPlaced, onSelect, compact, isSelected }: DriverCardProps) {
     const handleDragStart = (e: React.DragEvent) => {
         e.dataTransfer.setData('application/json', JSON.stringify(driver));
         e.dataTransfer.effectAllowed = 'move';
@@ -54,7 +55,8 @@ export default function DriverCard({ driver, isPlaced, onSelect, compact }: Driv
             className={`relative flex flex-col items-center gap-1 p-3 rounded-xl glass-card cursor-grab
                 active:cursor-grabbing transition-all duration-200 group
                 hover:scale-[1.05] hover:shadow-lg hover:shadow-black/30 hover:border-white/20
-                ${isPlaced ? 'opacity-30 pointer-events-none scale-95' : ''}`}
+                ${isPlaced ? 'opacity-50 grayscale-[0.5]' : ''}
+                ${isSelected ? 'ring-2 ring-f1-red border-f1-red' : ''}`}
             style={{ borderLeft: `4px solid ${driver.teamColor}` }}
             draggable={!isPlaced}
             onDragStart={handleDragStart}
