@@ -1,6 +1,6 @@
 import Countdown from '@/components/home/Countdown';
 import PodiumCards from '@/components/home/PodiumCards';
-import { getNextRace, getCircuitResults } from '@/lib/api/jolpica';
+import { getNextRace, getCircuitResults, getQualifyingResults } from '@/lib/api/jolpica';
 import { getFlagUrl, getCircuitSvgPath } from '@/lib/types/f1';
 
 export const revalidate = 300; // Revalidate every 5 minutes
@@ -10,9 +10,22 @@ export default async function HomePage() {
 
   // Try to get previous year's results for this circuit
   let prevResults = null;
+  let polePosition = null;
+
   if (nextRace) {
     const prevSeason = (parseInt(nextRace.season) - 1).toString();
-    prevResults = await getCircuitResults(nextRace.Circuit.circuitId, prevSeason);
+    const results = await getCircuitResults(nextRace.Circuit.circuitId, prevSeason);
+
+    if (results) {
+      prevResults = results;
+      // Fetch qualifying results for that specific race to get actual pole position
+      try {
+        const qualifying = await getQualifyingResults(prevSeason, results.race.round);
+        polePosition = qualifying.find(q => q.position === "1") || null;
+      } catch (e) {
+        console.error('Failed to fetch qualifying results for home page', e);
+      }
+    }
   }
 
   // Format race time in Amsterdam timezone
@@ -193,6 +206,7 @@ export default async function HomePage() {
           results={prevResults.results}
           season={(parseInt(nextRace!.season) - 1).toString()}
           round={prevResults.race.round}
+          polePosition={polePosition || undefined}
         />
       )}
 

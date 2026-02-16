@@ -1,21 +1,16 @@
-import Link from 'next/link';
-import { RaceResult, getTeamColor, getDriverImageUrl } from '@/lib/types/f1';
-
 interface PodiumCardsProps {
     results: RaceResult[];
     season: string;
     round: string;
+    polePosition?: QualifyingResult;
 }
 
-export default function PodiumCards({ results, season, round }: PodiumCardsProps) {
+export default function PodiumCards({ results, season, round, polePosition }: PodiumCardsProps) {
     if (!results || results.length < 3) return null;
 
     const podium = [results[1], results[0], results[2]]; // P2, P1, P3 order for visual
     const heights = ['h-56 md:h-60 mt-0 md:mt-8', 'h-64 md:h-80', 'h-52 md:h-56 mt-0 md:mt-12'];
     const positions = [2, 1, 3];
-
-    // Pole position
-    const pole = results[0];
 
     return (
         <section className="flex flex-col gap-5 w-full relative">
@@ -28,19 +23,19 @@ export default function PodiumCards({ results, season, round }: PodiumCardsProps
                         {season} Podium Results
                     </h3>
                 </div>
-                {pole && (
+                {polePosition && (
                     <div className="flex items-center gap-3 glass-card px-4 py-2">
                         <div className="text-right">
                             <p className="text-[10px] text-f1-text-muted uppercase tracking-widest">
                                 Pole Position
                             </p>
                             <p className="text-sm font-bold">
-                                {pole.Driver.code}
+                                {polePosition.Driver.code}
                             </p>
                         </div>
                         <div className="h-8 w-px bg-f1-border" />
                         <span className="text-f1-red font-mono font-bold text-base">
-                            {pole.FastestLap?.Time?.time || '—'}
+                            {polePosition.Q3 || polePosition.Q2 || polePosition.Q1 || '—'}
                         </span>
                     </div>
                 )}
