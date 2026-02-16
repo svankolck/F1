@@ -2,6 +2,7 @@ import Countdown from '@/components/home/Countdown';
 import PodiumCards from '@/components/home/PodiumCards';
 import { getNextRace, getCircuitResults, getQualifyingResults } from '@/lib/api/jolpica';
 import { getFlagUrl, getCircuitSvgPath } from '@/lib/types/f1';
+import { CIRCUIT_DETAILS } from '@/lib/data/circuits';
 
 export const revalidate = 300; // Revalidate every 5 minutes
 
@@ -27,6 +28,8 @@ export default async function HomePage() {
       }
     }
   }
+
+  const circuitDetails = nextRace ? CIRCUIT_DETAILS[nextRace.Circuit.circuitId] : null;
 
   // Format race time in Amsterdam timezone
   const raceDateTime = nextRace
@@ -151,9 +154,40 @@ export default async function HomePage() {
               )}
             </div>
 
+            {/* Circuit Details - Added per user request */}
+            {circuitDetails && (
+              <div className="grid grid-cols-2 gap-y-4 gap-x-2 my-4 pt-4 border-t border-f1-border/50">
+                <div>
+                  <span className="text-[9px] font-mono text-f1-text-muted block uppercase tracking-wider mb-0.5">Circuit Length</span>
+                  <span className="text-sm font-bold">{circuitDetails.length}</span>
+                </div>
+                <div>
+                  <span className="text-[9px] font-mono text-f1-text-muted block uppercase tracking-wider mb-0.5">First Grand Prix</span>
+                  <span className="text-sm font-bold">{circuitDetails.firstGrandPrix}</span>
+                </div>
+                <div>
+                  <span className="text-[9px] font-mono text-f1-text-muted block uppercase tracking-wider mb-0.5">Number of Laps</span>
+                  <span className="text-sm font-bold">{circuitDetails.laps}</span>
+                </div>
+                <div>
+                  <span className="text-[9px] font-mono text-f1-text-muted block uppercase tracking-wider mb-0.5">Race Distance</span>
+                  <span className="text-sm font-bold">{circuitDetails.raceDistance}</span>
+                </div>
+                <div className="col-span-2">
+                  <span className="text-[9px] font-mono text-f1-text-muted block uppercase tracking-wider mb-0.5">Fastest Lap</span>
+                  <div className="flex flex-col">
+                    <span className="text-sm font-bold">{circuitDetails.lapRecord.time}</span>
+                    <span className="text-[10px] text-f1-text-secondary">
+                      {circuitDetails.lapRecord.driver} ({circuitDetails.lapRecord.year})
+                    </span>
+                  </div>
+                </div>
+              </div>
+            )}
+
             {/* Session Schedule */}
             {nextRace && (
-              <div className="grid grid-cols-3 gap-2">
+              <div className="grid grid-cols-3 gap-2 border-t border-f1-border/50 pt-4">
                 {nextRace.FirstPractice && (
                   <div className="text-center">
                     <span className="text-[9px] font-mono text-f1-text-muted block">FP1</span>

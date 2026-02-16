@@ -39,6 +39,19 @@ export interface Circuit {
     };
 }
 
+export interface CircuitDetails {
+    circuitId: string;
+    length: string;
+    firstGrandPrix: string;
+    laps: number;
+    raceDistance: string;
+    lapRecord: {
+        time: string;
+        driver: string;
+        year: string;
+    };
+}
+
 export interface SessionTime {
     date: string;
     time: string;
