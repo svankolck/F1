@@ -28,8 +28,8 @@ export default function BottomNav() {
 
     return (
         <nav className="fixed bottom-0 left-0 w-full bg-f1-bg/95 backdrop-blur-md border-t border-f1-border z-50">
-            <div className="max-w-md mx-auto px-2">
-                <div className="grid grid-cols-5 h-[60px] items-center">
+            <div className={`max-w-md mx-auto px-2 transition-all duration-300 ${visibleItems.length === 6 ? 'max-w-lg' : 'max-w-md'}`}>
+                <div className={`grid h-[60px] items-center ${visibleItems.length === 6 ? 'grid-cols-6' : 'grid-cols-5'}`}>
                     {visibleItems.map((item) => {
                         const isActive =
                             item.href === '/' ? pathname === '/' : pathname.startsWith(item.href);
