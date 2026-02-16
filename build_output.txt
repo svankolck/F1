@@ -1,0 +1,54 @@
+
+> f1-app@0.1.0 build
+> next build
+
+  ▲ Next.js 14.2.35
+  - Environments: .env.local
+
+   Creating an optimized production build ...
+ ✓ Compiled successfully
+   Linting and checking validity of types ...
+   Collecting page data ...
+⚠️  Node.js 18 and below are deprecated and will no longer be supported in future versions of @supabase/supabase-js. Please upgrade to Node.js 20 or later. For more information, visit: https://github.com/orgs/supabase/discussions/37217
+⚠️  Node.js 18 and below are deprecated and will no longer be supported in future versions of @supabase/supabase-js. Please upgrade to Node.js 20 or later. For more information, visit: https://github.com/orgs/supabase/discussions/37217
+⚠️  Node.js 18 and below are deprecated and will no longer be supported in future versions of @supabase/supabase-js. Please upgrade to Node.js 20 or later. For more information, visit: https://github.com/orgs/supabase/discussions/37217
+   Generating static pages (0/21) ...
+   Generating static pages (5/21) 
+   Generating static pages (10/21) 
+⚠️  Node.js 18 and below are deprecated and will no longer be supported in future versions of @supabase/supabase-js. Please upgrade to Node.js 20 or later. For more information, visit: https://github.com/orgs/supabase/discussions/37217
+⚠️  Node.js 18 and below are deprecated and will no longer be supported in future versions of @supabase/supabase-js. Please upgrade to Node.js 20 or later. For more information, visit: https://github.com/orgs/supabase/discussions/37217
+⚠️  Node.js 18 and below are deprecated and will no longer be supported in future versions of @supabase/supabase-js. Please upgrade to Node.js 20 or later. For more information, visit: https://github.com/orgs/supabase/discussions/37217
+   Generating static pages (15/21) 
+ ✓ Generating static pages (21/21)
+   Finalizing page optimization ...
+   Collecting build traces ...
+
+Route (app)                              Size     First Load JS
+┌ ○ /                                    1.02 kB          97 kB
+├ ○ /_not-found                          873 B          88.2 kB
+├ ○ /api/drivers                         0 B                0 B
+├ ƒ /api/game/calculate                  0 B                0 B
+├ ƒ /api/game/predictions                0 B                0 B
+├ ○ /api/game/schedule                   0 B                0 B
+├ ƒ /api/results                         0 B                0 B
+├ ƒ /api/standings                       0 B                0 B
+├ ƒ /api/standings/battle                0 B                0 B
+├ ƒ /api/timing                          0 B                0 B
+├ ƒ /auth/callback                       0 B                0 B
+├ ƒ /game                                8.31 kB         254 kB
+├ ○ /login                               2.44 kB         144 kB
+├ ƒ /profile                             3.88 kB         150 kB
+├ ○ /results                             6 kB           93.3 kB
+├ ○ /standings                           5.51 kB         102 kB
+├ ƒ /standings/[driverId]                175 B          96.2 kB
+├ ○ /standings/battle                    3.01 kB         206 kB
+└ ○ /timing                              3.15 kB        90.5 kB
++ First Load JS shared by all            87.3 kB
+  ├ chunks/117-26dd2f378355e16e.js       31.7 kB
+  ├ chunks/fd9d1056-8e6e5948b34abff3.js  53.6 kB
+  └ other shared chunks (total)          1.96 kB
+
+
+○  (Static)   prerendered as static content
+ƒ  (Dynamic)  server-rendered on demand
+

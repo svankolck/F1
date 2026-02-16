@@ -4,9 +4,10 @@ import { RaceResult, getTeamColor, getDriverImageUrl } from '@/lib/types/f1';
 interface PodiumCardsProps {
     results: RaceResult[];
     season: string;
+    round: string;
 }
 
-export default function PodiumCards({ results, season }: PodiumCardsProps) {
+export default function PodiumCards({ results, season, round }: PodiumCardsProps) {
     if (!results || results.length < 3) return null;
 
     const podium = [results[1], results[0], results[2]]; // P2, P1, P3 order for visual
@@ -119,7 +120,7 @@ export default function PodiumCards({ results, season }: PodiumCardsProps) {
             {/* Full Race Results Button */}
             <div className="flex justify-center mt-2">
                 <Link
-                    href="/results"
+                    href={`/results?season=${season}&round=${round}`}
                     className="group/btn flex items-center gap-2 px-6 py-3 glass-card hover:border-f1-red/40 hover:bg-f1-red/5 transition-all duration-300 rounded-lg"
                 >
                     <span className="text-sm font-bold uppercase tracking-widest text-f1-text-secondary group-hover/btn:text-white transition-colors">

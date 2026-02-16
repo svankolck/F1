@@ -192,6 +192,7 @@ export default async function HomePage() {
         <PodiumCards
           results={prevResults.results}
           season={(parseInt(nextRace!.season) - 1).toString()}
+          round={prevResults.race.round}
         />
       )}
 
