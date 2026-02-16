@@ -92,7 +92,7 @@ export default function DefaultDriverSettings({ drivers }: DefaultDriverSettings
                     .from('profiles')
                     .upsert(payload, { onConflict: 'id' }), // Removed .select() to prevent RLS read hangs
                 timeoutPromise
-            ]) as any;
+            ]) as { error: unknown };
 
             if (error) {
                 console.error('Supabase update error:', error);
