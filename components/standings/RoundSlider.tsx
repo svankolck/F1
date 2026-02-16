@@ -106,7 +106,7 @@ export default function RoundSlider({ races, selectedRound, onSelectRound, count
             {/* Scrollable container */}
             <div
                 ref={scrollRef}
-                className="round-slider flex gap-1.5 pb-2 px-8"
+                className="round-slider flex gap-1.5 pb-2 pr-8"
             >
                 {races.map((race) => {
                     const isActive = race.round === selectedRound;
