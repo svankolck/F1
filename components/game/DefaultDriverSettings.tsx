@@ -79,9 +79,10 @@ export default function DefaultDriverSettings({ drivers }: DefaultDriverSettings
 
             setSaved(true);
             setTimeout(() => setSaved(false), 2000);
-        } catch (err: any) { // key fix: catch any error
+        } catch (err: unknown) {
             console.error('Failed to save defaults:', err);
-            alert(`Failed to save: ${err.message || 'Unknown error'}`); // User feedback
+            const message = err instanceof Error ? err.message : 'Unknown error';
+            alert(`Failed to save: ${message}`);
         } finally {
             setSaving(false);
         }
