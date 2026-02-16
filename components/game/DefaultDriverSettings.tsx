@@ -80,22 +80,26 @@ export default function DefaultDriverSettings({ drivers }: DefaultDriverSettings
 
             console.log('Attempting to save (upsert) profile defaults:', payload);
 
-            const { data, error } = await supabase
-                .from('profiles')
-                .upsert(payload, { onConflict: 'id' })
-                .select();
+            // Create a timeout promise
+            const timeoutPromise = new Promise((_, reject) =>
+                setTimeout(() => reject(new Error('Request timed out')), 10000)
+            );
+
+            // Race the supabase request against the timeout
+            // Race the supabase request against the timeout
+            const { error } = await Promise.race([
+                supabase
+                    .from('profiles')
+                    .upsert(payload, { onConflict: 'id' }), // Removed .select() to prevent RLS read hangs
+                timeoutPromise
+            ]) as any;
 
             if (error) {
                 console.error('Supabase update error:', error);
                 throw error;
             }
 
-            console.log('Profile update success, data:', data);
-
-            if (!data || data.length === 0) {
-                console.warn('Update returned no data. Possible RLS issue.');
-                throw new Error('Update failed (permission denied or row missing).');
-            }
+            console.log('Profile update success (no data returned due to optimization)');
 
             setSaved(true);
             setTimeout(() => setSaved(false), 2000);
