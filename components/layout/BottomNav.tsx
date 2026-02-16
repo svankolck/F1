@@ -38,16 +38,18 @@ export default function BottomNav() {
                             <Link
                                 key={item.href}
                                 href={item.href}
-                                className={`flex flex-col items-center justify-center gap-1 w-16 relative transition-colors ${isActive
+                                className={`flex flex-col items-center justify-end w-16 h-full py-2 relative transition-colors ${isActive
                                     ? 'text-f1-red'
                                     : 'text-f1-text-muted hover:text-white'
                                     }`}
                             >
                                 {isActive && (
-                                    <div className="absolute -top-[1px] w-10 h-[3px] bg-f1-red rounded-b-full shadow-[0_0_10px_var(--f1-red)]" />
+                                    <div className="absolute top-0 w-10 h-[3px] bg-f1-red rounded-b-full shadow-[0_0_10px_var(--f1-red)]" />
                                 )}
-                                <span className="material-icons text-[22px]">{item.icon}</span>
-                                <span className="text-[9px] font-bold uppercase tracking-wider">
+                                <div className="h-6 flex items-center justify-center mb-1">
+                                    <span className="material-icons text-[24px] leading-none">{item.icon}</span>
+                                </div>
+                                <span className="text-[9px] font-bold uppercase tracking-wider leading-none">
                                     {item.label}
                                 </span>
                             </Link>
