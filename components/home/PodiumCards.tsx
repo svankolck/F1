@@ -1,3 +1,6 @@
+import Link from 'next/link';
+import { RaceResult, QualifyingResult, getTeamColor, getDriverImageUrl } from '@/lib/types/f1';
+
 interface PodiumCardsProps {
     results: RaceResult[];
     season: string;
