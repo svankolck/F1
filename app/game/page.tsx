@@ -5,6 +5,7 @@ import GameClient from '@/components/game/GameClient';
 // Removed unused type imports
 
 import { getGameDrivers, getGameSchedule } from '@/lib/api/game';
+import { getRaceCalendar } from '@/lib/api/jolpica';
 
 // Removed internal fetch functions to avoid build-time localhost dependency
 
@@ -17,9 +18,10 @@ export default async function GamePage() {
         redirect('/login?redirect=/game');
     }
 
-    const [schedule, drivers] = await Promise.all([
+    const [schedule, drivers, races] = await Promise.all([
         getGameSchedule(),
         getGameDrivers(),
+        getRaceCalendar('current').catch(() => []),
     ]);
 
     return (
@@ -31,6 +33,7 @@ export default async function GamePage() {
             <GameClient
                 initialSchedule={schedule}
                 initialDrivers={drivers}
+                initialRaces={races}
             />
         </Suspense>
     );

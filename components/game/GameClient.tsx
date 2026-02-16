@@ -3,8 +3,9 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/components/auth/AuthProvider';
 import { createClient } from '@/lib/supabase/client';
-import { GameDriver, WeekendSchedule, Prediction, GameSessionType } from '@/lib/types/f1';
+import { GameDriver, WeekendSchedule, Prediction, GameSessionType, Race, getFlagUrl } from '@/lib/types/f1';
 import WeekendPredictionBoard from './WeekendPredictionBoard';
+import RoundSlider from '@/components/standings/RoundSlider';
 import PredictionLockTimer from './PredictionLockTimer';
 import GameLeaderboard from './GameLeaderboard';
 import GamePointsChart from './GamePointsChart';
@@ -12,16 +13,26 @@ import GamePointsChart from './GamePointsChart';
 interface GameClientProps {
     initialSchedule: WeekendSchedule | null;
     initialDrivers: GameDriver[];
+    initialRaces: Race[];
 }
 
 type TabType = 'prediction' | 'stand';
 
-export default function GameClient({ initialSchedule, initialDrivers }: GameClientProps) {
+export default function GameClient({ initialSchedule, initialDrivers, initialRaces }: GameClientProps) {
     const { user } = useAuth();
     const supabase = createClient();
     const [activeTab, setActiveTab] = useState<TabType>('prediction');
-    const [schedule] = useState<WeekendSchedule | null>(initialSchedule);
+    const [schedule, setSchedule] = useState<WeekendSchedule | null>(initialSchedule);
     const [drivers] = useState<GameDriver[]>(initialDrivers);
+    const [activeRound, setActiveRound] = useState<string>(initialSchedule?.round.toString() || '1');
+    const [isLoading, setIsLoading] = useState(false);
+
+    // Build country flag map
+    const countryFlags: Record<string, string> = {};
+    initialRaces.forEach((race) => {
+        countryFlags[race.Circuit.Location.country] = getFlagUrl(race.Circuit.Location.country);
+    });
+
     const [predictions, setPredictions] = useState<Record<GameSessionType, Prediction | null>>({
         qualifying: null,
         race: null,
@@ -200,6 +211,31 @@ export default function GameClient({ initialSchedule, initialDrivers }: GameClie
 
 
 
+    const handleRoundSelect = async (round: string) => {
+        if (round === activeRound || isLoading) return;
+        setIsLoading(true);
+        setActiveRound(round);
+
+        try {
+            // Assume current season for now (2026 as per user request context "2026 PREDICTION" implies we are looking at 2026, 
+            // but the app dynamic. `initialRaces` has the season. 
+            // Actually `initialSchedule.season` or `initialRaces[0].season`.
+            const season = initialSchedule?.season || new Date().getFullYear();
+
+            const res = await fetch(`/api/game/schedule?season=${season}&round=${round}`);
+            if (res.ok) {
+                const newSchedule = await res.json();
+                setSchedule(newSchedule);
+            } else {
+                console.error('Failed to load schedule for round', round);
+            }
+        } catch (error) {
+            console.error('Error switching round:', error);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
     if (!schedule) {
         return (
             <div className="flex flex-col items-center justify-center min-h-[40vh] gap-4">
@@ -212,19 +248,46 @@ export default function GameClient({ initialSchedule, initialDrivers }: GameClie
 
     return (
         <div className="space-y-6">
-            {/* Race header */}
-            <div className="text-center">
-                <h1 className="text-2xl font-bold uppercase tracking-tight">
-                    {schedule.raceName}
-                </h1>
-                <p className="text-sm text-f1-text-muted mt-1">
-                    {schedule.circuitName} — {schedule.country}
-                    {schedule.isSprint && (
-                        <span className="ml-2 px-2 py-0.5 rounded-full bg-orange-500/20 border border-orange-500/30 text-orange-400 text-[10px] font-bold uppercase">
-                            Sprint Weekend
-                        </span>
-                    )}
-                </p>
+            {/* Header */}
+            <div>
+                <div className="mb-6">
+                    <h2 className="text-f1-red font-bold tracking-widest uppercase text-xs mb-1">GAME CENTER</h2>
+                    <h1 className="text-3xl md:text-4xl font-bold uppercase italic tracking-tighter">
+                        {schedule.season} PREDICTION
+                    </h1>
+                </div>
+
+                <div className="mb-6">
+                    <RoundSlider
+                        races={initialRaces}
+                        selectedRound={activeRound}
+                        onSelectRound={handleRoundSelect}
+                        countryFlags={countryFlags}
+                    />
+                </div>
+
+                {/* Active Race Info */}
+                <div className="bg-f1-surface/30 border border-f1-border/30 rounded-xl p-4 flex flex-col md:flex-row md:items-center gap-4">
+                    <div className="w-12 h-8 rounded overflow-hidden flex-shrink-0">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                            src={countryFlags[schedule.country]}
+                            alt={schedule.country}
+                            className="w-full h-full object-cover"
+                        />
+                    </div>
+                    <div>
+                        <h2 className="text-lg font-bold uppercase tracking-tight">{schedule.raceName}</h2>
+                        <p className="text-sm text-f1-text-muted">
+                            {schedule.circuitName} — {schedule.country}
+                            {schedule.isSprint && (
+                                <span className="ml-2 px-2 py-0.5 rounded-full bg-orange-500/20 border border-orange-500/30 text-orange-400 text-[10px] font-bold uppercase">
+                                    Sprint Weekend
+                                </span>
+                            )}
+                        </p>
+                    </div>
+                </div>
             </div>
 
 
@@ -258,7 +321,11 @@ export default function GameClient({ initialSchedule, initialDrivers }: GameClie
             {/* Content */}
             {activeTab === 'prediction' ? (
                 <div className="space-y-8">
-                    {(() => {
+                    {isLoading ? (
+                        <div className="flex justify-center py-12">
+                            <div className="w-8 h-8 border-2 border-f1-red/30 border-t-f1-red rounded-full animate-spin" />
+                        </div>
+                    ) : (() => {
                         // Identify sessions
                         const quali = schedule.sessions.find(s => s.type === 'qualifying' || s.type === 'sprint_qualifying');
                         const race = schedule.sessions.find(s => s.type === 'race'); // Assuming standard race for now, handle sprints later if needed

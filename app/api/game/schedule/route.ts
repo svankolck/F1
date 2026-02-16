@@ -1,9 +1,17 @@
-import { NextResponse } from 'next/server';
-import { getGameSchedule } from '@/lib/api/game';
+import { NextRequest, NextResponse } from 'next/server';
+import { getWeekendSchedule } from '@/lib/api/game';
 
-export async function GET() {
+export async function GET(request: NextRequest) {
     try {
-        const schedule = await getGameSchedule();
+        const searchParams = request.nextUrl.searchParams;
+        const season = searchParams.get('season');
+        const round = searchParams.get('round');
+
+        const schedule = await getWeekendSchedule(
+            season ? parseInt(season) : undefined,
+            round ? parseInt(round) : undefined
+        );
+
         if (!schedule) {
             return NextResponse.json({ error: 'No race data available' }, { status: 404 });
         }

@@ -1,4 +1,4 @@
-import { getDriverStandings, getNextRace, getRaceCalendar } from './jolpica';
+import { getDriverStandings, getNextRace, getRaceCalendar, getRace } from './jolpica';
 import { GameDriver, getTeamColor, getDriverImageUrl, Race, WeekendSchedule, SessionSchedule, GameSessionType } from '../types/f1';
 
 export const FALLBACK_2026_DRIVERS: GameDriver[] = [
@@ -111,18 +111,33 @@ export function buildWeekendSchedule(race: Race): WeekendSchedule {
     };
 }
 
-export async function getGameSchedule(): Promise<WeekendSchedule | null> {
+
+
+// ... (existing code)
+
+export async function getWeekendSchedule(season?: number | string, round?: number | string): Promise<WeekendSchedule | null> {
     try {
-        const race = await getNextRace();
-        if (!race) {
-            const calendar = await getRaceCalendar('current');
-            const lastRace = calendar[calendar.length - 1];
-            if (!lastRace) return null;
-            return buildWeekendSchedule(lastRace);
+        let race: Race | null = null;
+
+        if (season && round) {
+            race = await getRace(season.toString(), round.toString());
+        } else {
+            race = await getNextRace();
+            if (!race) {
+                const calendar = await getRaceCalendar('current');
+                const lastRace = calendar[calendar.length - 1];
+                if (lastRace) race = lastRace;
+            }
         }
+
+        if (!race) return null;
         return buildWeekendSchedule(race);
     } catch (error) {
-        console.error('Failed to get game schedule:', error);
+        console.error('Failed to get weekend schedule:', error);
         return null;
     }
+}
+
+export async function getGameSchedule(): Promise<WeekendSchedule | null> {
+    return getWeekendSchedule();
 }

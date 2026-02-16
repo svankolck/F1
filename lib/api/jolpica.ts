@@ -38,6 +38,16 @@ export async function getLastRace(): Promise<Race | null> {
     }
 }
 
+// Get specific race
+export async function getRace(season: string, round: string): Promise<Race | null> {
+    try {
+        const data = await fetchJolpica<{ RaceTable: { Races: Race[] } }>(`/${season}/${round}`);
+        return data.RaceTable.Races[0] || null;
+    } catch {
+        return null;
+    }
+}
+
 // Get race results
 export async function getRaceResults(season: string, round: string): Promise<{ race: Race; results: RaceResult[] }> {
     const data = await fetchJolpica<{ RaceTable: { Races: Array<Race & { Results: RaceResult[] }> } }>(
