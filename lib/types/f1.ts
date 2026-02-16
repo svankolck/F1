@@ -41,6 +41,7 @@ export interface Circuit {
 
 export interface CircuitDetails {
     circuitId: string;
+    imageUrl?: string;
     length: string;
     firstGrandPrix: string;
     laps: number;

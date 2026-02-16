@@ -115,125 +115,141 @@ export default async function HomePage() {
         {/* Right: Circuit Info Card */}
         <div className="lg:col-span-5 relative flex items-center justify-center z-10">
           <div className="absolute inset-0 bg-f1-red/5 blur-3xl rounded-full" />
-          <div className="relative w-full p-5 glass-card hover:border-f1-red/30 transition-colors duration-500 flex flex-col gap-4">
-            {/* Circuit Name */}
-            <div className="flex justify-between items-start">
-              <div>
-                <span className="text-[10px] font-mono text-f1-text-muted uppercase tracking-widest">
-                  Circuit
-                </span>
-                <p className="text-lg font-bold mt-1 leading-tight">
-                  {nextRace?.Circuit.circuitName || 'TBA'}
-                </p>
-              </div>
-              {nextRace && (
-                <div className="text-right">
-                  <span className="text-[10px] font-mono text-f1-text-muted">
-                    ROUND
+          <div className="relative w-full p-5 glass-card hover:border-f1-red/30 transition-colors duration-500 overflow-hidden group">
+            {/* Background Image */}
+            {circuitDetails?.imageUrl && (
+              <>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={circuitDetails.imageUrl}
+                  alt={nextRace?.Circuit.circuitName || 'Circuit'}
+                  className="absolute inset-0 w-full h-full object-cover object-center opacity-30 group-hover:opacity-40 transition-opacity duration-500 z-0"
+                />
+                <div className="absolute inset-0 bg-gradient-to-br from-black/80 via-black/50 to-black/80 z-0" />
+              </>
+            )}
+
+            {/* Content Container */}
+            <div className="relative z-10 flex flex-col gap-4">
+              {/* Circuit Name */}
+              <div className="flex justify-between items-start">
+                <div>
+                  <span className="text-[10px] font-mono text-f1-text-muted uppercase tracking-widest">
+                    Circuit
                   </span>
-                  <p className="text-xl font-bold text-f1-red font-mono">
-                    {nextRace.round}
+                  <p className="text-lg font-bold mt-1 leading-tight">
+                    {nextRace?.Circuit.circuitName || 'TBA'}
                   </p>
                 </div>
-              )}
-            </div>
+                {nextRace && (
+                  <div className="text-right">
+                    <span className="text-[10px] font-mono text-f1-text-muted">
+                      ROUND
+                    </span>
+                    <p className="text-xl font-bold text-f1-red font-mono">
+                      {nextRace.round}
+                    </p>
+                  </div>
+                )}
+              </div>
 
-            {/* Middle Section: Details (Left) + Map (Right) */}
-            <div className="flex items-center gap-4">
-              {/* Circuit Details - Left Side */}
-              {circuitDetails ? (
-                <div className="flex-1 grid grid-cols-1 gap-3">
-                  <div>
-                    <span className="text-[9px] font-mono text-f1-text-muted block uppercase tracking-wider mb-0.5">Circuit Length</span>
-                    <span className="text-sm font-bold">{circuitDetails.length}</span>
-                  </div>
-                  <div>
-                    <span className="text-[9px] font-mono text-f1-text-muted block uppercase tracking-wider mb-0.5">First Grand Prix</span>
-                    <span className="text-sm font-bold">{circuitDetails.firstGrandPrix}</span>
-                  </div>
-                  <div>
-                    <span className="text-[9px] font-mono text-f1-text-muted block uppercase tracking-wider mb-0.5">Number of Laps</span>
-                    <span className="text-sm font-bold">{circuitDetails.laps}</span>
-                  </div>
-                  <div>
-                    <span className="text-[9px] font-mono text-f1-text-muted block uppercase tracking-wider mb-0.5">Race Distance</span>
-                    <span className="text-sm font-bold">{circuitDetails.raceDistance}</span>
-                  </div>
-                  <div>
-                    <span className="text-[9px] font-mono text-f1-text-muted block uppercase tracking-wider mb-0.5">Fastest Lap</span>
-                    <div className="flex flex-col">
-                      <span className="text-sm font-bold">{circuitDetails.lapRecord.time}</span>
-                      <span className="text-[9px] text-f1-text-secondary leading-tight">
-                        {circuitDetails.lapRecord.driver} ({circuitDetails.lapRecord.year})
-                      </span>
+              {/* Middle Section: Details (Left) + Map (Right) */}
+              <div className="flex items-center gap-4">
+                {/* Circuit Details - Left Side */}
+                {circuitDetails ? (
+                  <div className="flex-1 grid grid-cols-1 gap-3">
+                    <div>
+                      <span className="text-[9px] font-mono text-f1-text-muted block uppercase tracking-wider mb-0.5">Circuit Length</span>
+                      <span className="text-sm font-bold">{circuitDetails.length}</span>
+                    </div>
+                    <div>
+                      <span className="text-[9px] font-mono text-f1-text-muted block uppercase tracking-wider mb-0.5">First Grand Prix</span>
+                      <span className="text-sm font-bold">{circuitDetails.firstGrandPrix}</span>
+                    </div>
+                    <div>
+                      <span className="text-[9px] font-mono text-f1-text-muted block uppercase tracking-wider mb-0.5">Number of Laps</span>
+                      <span className="text-sm font-bold">{circuitDetails.laps}</span>
+                    </div>
+                    <div>
+                      <span className="text-[9px] font-mono text-f1-text-muted block uppercase tracking-wider mb-0.5">Race Distance</span>
+                      <span className="text-sm font-bold">{circuitDetails.raceDistance}</span>
+                    </div>
+                    <div>
+                      <span className="text-[9px] font-mono text-f1-text-muted block uppercase tracking-wider mb-0.5">Fastest Lap</span>
+                      <div className="flex flex-col">
+                        <span className="text-sm font-bold">{circuitDetails.lapRecord.time}</span>
+                        <span className="text-[9px] text-f1-text-secondary leading-tight">
+                          {circuitDetails.lapRecord.driver} ({circuitDetails.lapRecord.year})
+                        </span>
+                      </div>
                     </div>
                   </div>
+                ) : (
+                  <div className="flex-1 text-f1-text-muted text-sm">
+                    Details loading...
+                  </div>
+                )}
+
+                {/* Circuit SVG - Right Side */}
+                <div className="flex-1 flex items-center justify-center opacity-90">
+                  {nextRace && getCircuitSvgPath(nextRace.Circuit.circuitId) ? (
+                    /* eslint-disable-next-line @next/next/no-img-element */
+                    <img
+                      src={getCircuitSvgPath(nextRace.Circuit.circuitId)}
+                      alt={`${nextRace.Circuit.circuitName} layout`}
+                      className="w-full max-w-[140px] h-auto drop-shadow-[0_0_12px_rgba(225,6,0,0.5)]"
+                    />
+                  ) : (
+                    <div className="text-f1-text-muted text-xs font-mono uppercase tracking-widest text-center">
+                      Layout
+                    </div>
+                  )}
                 </div>
-              ) : (
-                <div className="flex-1 text-f1-text-muted text-sm">
-                  Details loading...
+              </div>
+
+              {/* Session Schedule */}
+              {nextRace && (
+                <div className="grid grid-cols-3 gap-2 border-t border-f1-border/50 pt-3">
+                  {nextRace.FirstPractice && (
+                    <div className="text-center">
+                      <span className="text-[9px] font-mono text-f1-text-muted block">FP1</span>
+                      <span className="text-[10px] font-medium">
+                        {new Date(`${nextRace.FirstPractice.date}T${nextRace.FirstPractice.time}`).toLocaleString('en-GB', {
+                          timeZone: 'Europe/Amsterdam',
+                          weekday: 'short',
+                          hour: '2-digit',
+                          minute: '2-digit',
+                        })}
+                      </span>
+                    </div>
+                  )}
+                  {nextRace.Qualifying && (
+                    <div className="text-center">
+                      <span className="text-[9px] font-mono text-f1-text-muted block">QUALI</span>
+                      <span className="text-[10px] font-medium">
+                        {new Date(`${nextRace.Qualifying.date}T${nextRace.Qualifying.time}`).toLocaleString('en-GB', {
+                          timeZone: 'Europe/Amsterdam',
+                          weekday: 'short',
+                          hour: '2-digit',
+                          minute: '2-digit',
+                        })}
+                      </span>
+                    </div>
+                  )}
+                  <div className="text-center">
+                    <span className="text-[9px] font-mono text-f1-red block">RACE</span>
+                    <span className="text-[10px] font-bold text-f1-red">
+                      {raceDateTime?.toLocaleString('en-GB', {
+                        timeZone: 'Europe/Amsterdam',
+                        weekday: 'short',
+                        hour: '2-digit',
+                        minute: '2-digit',
+                      })}
+                    </span>
+                  </div>
                 </div>
               )}
-
-              {/* Circuit SVG - Right Side */}
-              <div className="flex-1 flex items-center justify-center opacity-80">
-                {nextRace && getCircuitSvgPath(nextRace.Circuit.circuitId) ? (
-                  /* eslint-disable-next-line @next/next/no-img-element */
-                  <img
-                    src={getCircuitSvgPath(nextRace.Circuit.circuitId)}
-                    alt={`${nextRace.Circuit.circuitName} layout`}
-                    className="w-full max-w-[140px] h-auto drop-shadow-[0_0_12px_rgba(225,6,0,0.3)]"
-                  />
-                ) : (
-                  <div className="text-f1-text-muted text-xs font-mono uppercase tracking-widest text-center">
-                    Layout
-                  </div>
-                )}
-              </div>
             </div>
-
-            {/* Session Schedule */}
-            {nextRace && (
-              <div className="grid grid-cols-3 gap-2 border-t border-f1-border/50 pt-3">
-                {nextRace.FirstPractice && (
-                  <div className="text-center">
-                    <span className="text-[9px] font-mono text-f1-text-muted block">FP1</span>
-                    <span className="text-[10px] font-medium">
-                      {new Date(`${nextRace.FirstPractice.date}T${nextRace.FirstPractice.time}`).toLocaleString('en-GB', {
-                        timeZone: 'Europe/Amsterdam',
-                        weekday: 'short',
-                        hour: '2-digit',
-                        minute: '2-digit',
-                      })}
-                    </span>
-                  </div>
-                )}
-                {nextRace.Qualifying && (
-                  <div className="text-center">
-                    <span className="text-[9px] font-mono text-f1-text-muted block">QUALI</span>
-                    <span className="text-[10px] font-medium">
-                      {new Date(`${nextRace.Qualifying.date}T${nextRace.Qualifying.time}`).toLocaleString('en-GB', {
-                        timeZone: 'Europe/Amsterdam',
-                        weekday: 'short',
-                        hour: '2-digit',
-                        minute: '2-digit',
-                      })}
-                    </span>
-                  </div>
-                )}
-                <div className="text-center">
-                  <span className="text-[9px] font-mono text-f1-red block">RACE</span>
-                  <span className="text-[10px] font-bold text-f1-red">
-                    {raceDateTime?.toLocaleString('en-GB', {
-                      timeZone: 'Europe/Amsterdam',
-                      weekday: 'short',
-                      hour: '2-digit',
-                      minute: '2-digit',
-                    })}
-                  </span>
-                </div>
-              </div>
-            )}
           </div>
         </div>
       </section>
