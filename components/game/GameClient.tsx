@@ -108,7 +108,7 @@ export default function GameClient({ initialSchedule, initialDrivers, initialRac
             // Fetch profiles
             const userIds = Array.from(userMap.keys());
             const { data: profiles } = await supabase
-                .from('profiles')
+                .from('public_profiles')
                 .select('id, username, avatar_url')
                 .in('id', userIds);
 
