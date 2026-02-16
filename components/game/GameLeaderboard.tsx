@@ -32,8 +32,8 @@ export default function GameLeaderboard({ entries, currentUserId }: GameLeaderbo
         return (
             <div className="flex flex-col items-center justify-center py-12 gap-3">
                 <span className="material-icons text-4xl text-f1-text-muted">leaderboard</span>
-                <p className="text-f1-text-muted text-sm">Nog geen scores beschikbaar</p>
-                <p className="text-f1-text-muted text-xs">Scores verschijnen na de eerste race</p>
+                <p className="text-f1-text-muted text-sm">No scores available yet</p>
+                <p className="text-f1-text-muted text-xs">Scores will appear after the first race</p>
             </div>
         );
     }
@@ -41,7 +41,7 @@ export default function GameLeaderboard({ entries, currentUserId }: GameLeaderbo
     return (
         <div className="space-y-2">
             <h3 className="text-sm font-bold uppercase tracking-widest text-f1-text-muted mb-3">
-                Seizoensranking
+                Season Standings
             </h3>
 
             {sorted.map((entry, i) => {
@@ -86,7 +86,7 @@ export default function GameLeaderboard({ entries, currentUserId }: GameLeaderbo
                         <div className="flex-grow min-w-0">
                             <span className={`text-sm font-bold truncate block ${isCurrentUser ? 'text-f1-red' : ''}`}>
                                 {entry.username}
-                                {isCurrentUser && <span className="text-[10px] text-f1-text-muted ml-1">(jij)</span>}
+                                {isCurrentUser && <span className="text-[10px] text-f1-text-muted ml-1">(you)</span>}
                             </span>
                             <span className="text-[10px] text-f1-text-muted">
                                 {entry.raceCount} {entry.raceCount === 1 ? 'race' : 'races'}
@@ -98,7 +98,7 @@ export default function GameLeaderboard({ entries, currentUserId }: GameLeaderbo
                             <span className={`text-lg font-bold font-mono ${i < 3 ? 'text-white' : 'text-f1-text-secondary'}`}>
                                 {entry.totalPoints}
                             </span>
-                            <span className="text-[10px] text-f1-text-muted block">punten</span>
+                            <span className="text-[10px] text-f1-text-muted block">points</span>
                         </div>
                     </div>
                 );

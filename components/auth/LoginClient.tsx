@@ -34,17 +34,17 @@ export default function LoginClient() {
     const validate = useCallback((): boolean => {
         const newErrors: FormErrors = {};
 
-        if (!email.trim()) newErrors.email = 'Email is verplicht';
-        else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) newErrors.email = 'Ongeldig emailadres';
+        if (!email.trim()) newErrors.email = 'Email is required';
+        else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) newErrors.email = 'Invalid email address';
 
-        if (!password) newErrors.password = 'Wachtwoord is verplicht';
-        else if (password.length < 8) newErrors.password = 'Minimaal 8 tekens';
+        if (!password) newErrors.password = 'Password is required';
+        else if (password.length < 8) newErrors.password = 'Minimum 8 characters';
 
         if (mode === 'register') {
-            if (password !== confirmPassword) newErrors.confirmPassword = 'Wachtwoorden komen niet overeen';
-            if (!username.trim()) newErrors.username = 'Username is verplicht';
-            else if (username.length < 3) newErrors.username = 'Minimaal 3 tekens';
-            else if (!/^[a-zA-Z0-9_]+$/.test(username)) newErrors.username = 'Alleen letters, cijfers en underscores';
+            if (password !== confirmPassword) newErrors.confirmPassword = 'Passwords do not match';
+            if (!username.trim()) newErrors.username = 'Username is required';
+            else if (username.length < 3) newErrors.username = 'Minimum 3 characters';
+            else if (!/^[a-zA-Z0-9_]+$/.test(username)) newErrors.username = 'Only letters, numbers, and underscores';
         }
 
         setErrors(newErrors);
@@ -57,7 +57,7 @@ export default function LoginClient() {
 
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) {
-            setErrors({ general: error.message === 'Invalid login credentials' ? 'Onjuist email of wachtwoord' : error.message });
+            setErrors({ general: error.message === 'Invalid login credentials' ? 'Incorrect email or password' : error.message });
             setLoading(false);
             return;
         }
@@ -78,7 +78,7 @@ export default function LoginClient() {
             .single();
 
         if (existingUser) {
-            setErrors({ username: 'Username is al in gebruik' });
+            setErrors({ username: 'Username is already taken' });
             setLoading(false);
             return;
         }
@@ -101,7 +101,7 @@ export default function LoginClient() {
             return;
         }
 
-        setSuccessMessage('Bevestigingsmail verzonden! Check je inbox om je account te activeren.');
+        setSuccessMessage('Confirmation email sent! Check your inbox to activate your account.');
         setLoading(false);
     }, [email, password, firstName, lastName, username, supabase]);
 
@@ -121,13 +121,13 @@ export default function LoginClient() {
             <div className="flex flex-col items-center justify-center min-h-[60vh] gap-6">
                 <div className="glass-card p-8 max-w-md w-full text-center border border-green-500/30">
                     <span className="material-icons text-5xl text-green-400 mb-4 block">check_circle</span>
-                    <h2 className="text-xl font-bold mb-2">Registratie Geslaagd</h2>
+                    <h2 className="text-xl font-bold mb-2">Registration Successful</h2>
                     <p className="text-f1-text-secondary text-sm">{successMessage}</p>
                     <button
                         onClick={() => { setSuccessMessage(''); setMode('login'); }}
                         className="mt-6 px-6 py-2 bg-f1-red text-white font-bold uppercase text-xs tracking-widest rounded-lg hover:bg-red-700 transition-colors"
                     >
-                        Naar Login
+                        Go to Login
                     </button>
                 </div>
             </div>
@@ -138,10 +138,10 @@ export default function LoginClient() {
         <div className="flex flex-col items-center justify-center min-h-[60vh] gap-6">
             <div className="glass-card p-8 max-w-md w-full border border-f1-border">
                 <h1 className="text-2xl font-bold uppercase tracking-tight text-center mb-1">
-                    {mode === 'login' ? 'Inloggen' : 'Account Aanmaken'}
+                    {mode === 'login' ? 'Sign In' : 'Create Account'}
                 </h1>
                 <p className="text-f1-text-muted text-xs text-center mb-6">
-                    {mode === 'login' ? 'Log in om mee te doen met het voorspellingsspel' : 'Maak een account aan om te beginnen'}
+                    {mode === 'login' ? 'Sign in to join the prediction game' : 'Create an account to get started'}
                 </p>
 
                 {errors.general && (
@@ -154,7 +154,7 @@ export default function LoginClient() {
                     {mode === 'register' && (
                         <div className="grid grid-cols-2 gap-3">
                             <div>
-                                <label className="text-[10px] font-mono uppercase tracking-widest text-f1-text-muted mb-1 block">Voornaam</label>
+                                <label className="text-[10px] font-mono uppercase tracking-widest text-f1-text-muted mb-1 block">First Name</label>
                                 <input
                                     type="text"
                                     value={firstName}
@@ -164,7 +164,7 @@ export default function LoginClient() {
                                 />
                             </div>
                             <div>
-                                <label className="text-[10px] font-mono uppercase tracking-widest text-f1-text-muted mb-1 block">Achternaam</label>
+                                <label className="text-[10px] font-mono uppercase tracking-widest text-f1-text-muted mb-1 block">Last Name</label>
                                 <input
                                     type="text"
                                     value={lastName}
@@ -203,26 +203,26 @@ export default function LoginClient() {
                     </div>
 
                     <div>
-                        <label className="text-[10px] font-mono uppercase tracking-widest text-f1-text-muted mb-1 block">Wachtwoord</label>
+                        <label className="text-[10px] font-mono uppercase tracking-widest text-f1-text-muted mb-1 block">Password</label>
                         <input
                             type="password"
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
                             className={`w-full px-3 py-2.5 bg-white/5 border rounded-lg text-sm text-white placeholder:text-f1-text-muted focus:outline-none transition-colors ${errors.password ? 'border-red-500 focus:border-red-500' : 'border-f1-border focus:border-f1-red'}`}
-                            placeholder="Minimaal 8 tekens"
+                            placeholder="Minimum 8 characters"
                         />
                         {errors.password && <p className="text-red-400 text-[10px] mt-1">{errors.password}</p>}
                     </div>
 
                     {mode === 'register' && (
                         <div>
-                            <label className="text-[10px] font-mono uppercase tracking-widest text-f1-text-muted mb-1 block">Bevestig Wachtwoord</label>
+                            <label className="text-[10px] font-mono uppercase tracking-widest text-f1-text-muted mb-1 block">Confirm Password</label>
                             <input
                                 type="password"
                                 value={confirmPassword}
                                 onChange={(e) => setConfirmPassword(e.target.value)}
                                 className={`w-full px-3 py-2.5 bg-white/5 border rounded-lg text-sm text-white placeholder:text-f1-text-muted focus:outline-none transition-colors ${errors.confirmPassword ? 'border-red-500 focus:border-red-500' : 'border-f1-border focus:border-f1-red'}`}
-                                placeholder="Herhaal wachtwoord"
+                                placeholder="Repeat password"
                             />
                             {errors.confirmPassword && <p className="text-red-400 text-[10px] mt-1">{errors.confirmPassword}</p>}
                         </div>
@@ -236,9 +236,9 @@ export default function LoginClient() {
                         {loading ? (
                             <span className="flex items-center justify-center gap-2">
                                 <span className="animate-spin material-icons text-sm">autorenew</span>
-                                Laden...
+                                Loading...
                             </span>
-                        ) : mode === 'login' ? 'Inloggen' : 'Registreren'}
+                        ) : mode === 'login' ? 'Sign In' : 'Register'}
                     </button>
                 </form>
 
@@ -247,7 +247,7 @@ export default function LoginClient() {
                         onClick={() => { setMode(mode === 'login' ? 'register' : 'login'); setErrors({}); setSuccessMessage(''); }}
                         className="text-f1-text-secondary text-xs hover:text-white transition-colors"
                     >
-                        {mode === 'login' ? 'Nog geen account? Registreer hier' : 'Al een account? Log hier in'}
+                        {mode === 'login' ? "Don't have an account? Register here" : 'Already have an account? Sign in here'}
                     </button>
                 </div>
             </div>

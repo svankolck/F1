@@ -64,7 +64,7 @@ export default function WeekendProgressBar({ sessions, activeSession, onSessionC
                             {/* Time (if not completed) */}
                             {!isCompleted && (
                                 <span className="text-[9px] font-mono text-f1-text-muted">
-                                    {new Date(session.startTime).toLocaleDateString('nl-NL', {
+                                    {new Date(session.startTime).toLocaleDateString('en-GB', {
                                         weekday: 'short',
                                         hour: '2-digit',
                                         minute: '2-digit',

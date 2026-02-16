@@ -2,33 +2,12 @@ import { Suspense } from 'react';
 import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
 import GameClient from '@/components/game/GameClient';
-import { GameDriver, WeekendSchedule } from '@/lib/types/f1';
+// Removed unused type imports
 
-async function fetchSchedule(): Promise<WeekendSchedule | null> {
-    try {
-        const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
-        const res = await fetch(`${baseUrl}/api/game/schedule`, {
-            next: { revalidate: 300 },
-        });
-        if (!res.ok) return null;
-        return res.json();
-    } catch {
-        return null;
-    }
-}
+import { getGameDrivers, getGameSchedule } from '@/lib/api/game';
 
-async function fetchDrivers(): Promise<GameDriver[]> {
-    try {
-        const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
-        const res = await fetch(`${baseUrl}/api/drivers`, {
-            next: { revalidate: 86400 },
-        });
-        if (!res.ok) return [];
-        return res.json();
-    } catch {
-        return [];
-    }
-}
+// Removed internal fetch functions to avoid build-time localhost dependency
+
 
 export default async function GamePage() {
     const supabase = await createClient();
@@ -39,8 +18,8 @@ export default async function GamePage() {
     }
 
     const [schedule, drivers] = await Promise.all([
-        fetchSchedule(),
-        fetchDrivers(),
+        getGameSchedule(),
+        getGameDrivers(),
     ]);
 
     return (

@@ -44,7 +44,7 @@ export default function PredictionLockTimer({ sessionStartTime, sessionLabel }: 
             <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-f1-red/10 border border-f1-red/20">
                 <span className="material-icons text-f1-red text-sm">lock</span>
                 <span className="text-xs font-bold text-f1-red uppercase tracking-wider">
-                    {sessionLabel} gestart — predictions gesloten
+                    {sessionLabel} started — predictions closed
                 </span>
             </div>
         );
@@ -67,7 +67,7 @@ export default function PredictionLockTimer({ sessionStartTime, sessionLabel }: 
                 {String(timeLeft.seconds).padStart(2, '0')}
             </span>
             <span className="text-[10px] text-f1-text-muted uppercase tracking-wider">
-                tot {sessionLabel}
+                until {sessionLabel}
             </span>
         </div>
     );

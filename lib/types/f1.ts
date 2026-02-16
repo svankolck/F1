@@ -376,7 +376,8 @@ export interface Prediction {
     p2_driver_id: string | null;
     p3_driver_id: string | null;
     is_default: boolean;
-    submitted_at?: string;
+    created_at?: string;
+    updated_at?: string;
 }
 
 export interface GameScore {
@@ -391,7 +392,7 @@ export interface GameScore {
     p3_points: number;
     bonus_points: number;
     total_points: number;
-    calculated_at?: string;
+    created_at?: string;
 }
 
 export interface SessionSchedule {

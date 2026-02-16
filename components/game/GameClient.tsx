@@ -29,6 +29,7 @@ export default function GameClient({ initialSchedule, initialDrivers }: GameClie
         sprint_qualifying: null,
         sprint: null,
     });
+    const [predictionsLoaded, setPredictionsLoaded] = useState(false);
     const [activeSession, setActiveSession] = useState<GameSessionType | null>(null);
     const [leaderboardData, setLeaderboardData] = useState<Array<{
         userId: string;
@@ -62,6 +63,7 @@ export default function GameClient({ initialSchedule, initialDrivers }: GameClie
     useEffect(() => {
         if (!user || !schedule) return;
         async function loadPredictions() {
+            setPredictionsLoaded(false);
             const { data } = await supabase
                 .from('predictions')
                 .select('*')
@@ -78,6 +80,7 @@ export default function GameClient({ initialSchedule, initialDrivers }: GameClie
                 }
                 setPredictions(preds);
             }
+            setPredictionsLoaded(true);
         }
         loadPredictions();
     }, [user, schedule, supabase]);
@@ -113,7 +116,7 @@ export default function GameClient({ initialSchedule, initialDrivers }: GameClie
                 const profile = profiles?.find(p => p.id === userId);
                 return {
                     userId,
-                    username: profile?.username || 'Onbekend',
+                    username: profile?.username || 'Unknown',
                     avatarUrl: profile?.avatar_url || undefined,
                     totalPoints: data.total,
                     raceCount: data.rounds.size,
@@ -147,7 +150,9 @@ export default function GameClient({ initialSchedule, initialDrivers }: GameClie
 
     // Apply default drivers if no prediction exists
     useEffect(() => {
-        if (!user || !schedule) return;
+        if (!user || !schedule || !predictionsLoaded) return;
+        const activeSchedule = schedule;
+
         async function applyDefaults() {
             const { data: profile } = await supabase
                 .from('profiles')
@@ -158,7 +163,7 @@ export default function GameClient({ initialSchedule, initialDrivers }: GameClie
             if (!profile) return;
 
             // For each session without a prediction, create one from defaults
-            for (const session of schedule!.sessions) {
+            for (const session of activeSchedule.sessions) {
                 if (predictions[session.type]) continue; // already has prediction
                 if (session.isLocked) continue; // can't create anymore
 
@@ -166,8 +171,8 @@ export default function GameClient({ initialSchedule, initialDrivers }: GameClie
 
                 const defaultPred: Partial<Prediction> = {
                     user_id: user!.id,
-                    season: schedule!.season,
-                    round: schedule!.round,
+                    season: activeSchedule.season,
+                    round: activeSchedule.round,
                     session_type: session.type,
                     pole_driver_id: hasPole ? profile.default_pole_driver : null,
                     p1_driver_id: profile.default_p1_driver,
@@ -178,16 +183,31 @@ export default function GameClient({ initialSchedule, initialDrivers }: GameClie
 
                 // Only if there are any defaults set
                 if (defaultPred.p1_driver_id || defaultPred.pole_driver_id) {
-                    setPredictions(prev => ({
-                        ...prev,
-                        [session.type]: defaultPred as Prediction,
-                    }));
+                    const res = await fetch('/api/game/predictions', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            season: activeSchedule.season,
+                            round: activeSchedule.round,
+                            sessionType: session.type,
+                            pole_driver_id: defaultPred.pole_driver_id || null,
+                            p1_driver_id: defaultPred.p1_driver_id || null,
+                            p2_driver_id: defaultPred.p2_driver_id || null,
+                            p3_driver_id: defaultPred.p3_driver_id || null,
+                            is_default: true,
+                        }),
+                    });
+
+                    if (!res.ok) continue;
+
+                    const saved = await res.json() as Prediction;
+                    setPredictions(prev => ({ ...prev, [session.type]: saved }));
                 }
             }
         }
         applyDefaults();
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [user, schedule]);
+    }, [user, schedule, predictionsLoaded, predictions, supabase]);
 
     const handleSessionClick = (session: SessionSchedule) => {
         setActiveSession(session.type);
@@ -197,7 +217,7 @@ export default function GameClient({ initialSchedule, initialDrivers }: GameClie
         return (
             <div className="flex flex-col items-center justify-center min-h-[40vh] gap-4">
                 <span className="material-icons text-5xl text-f1-text-muted animate-pulse">sports_motorsports</span>
-                <p className="text-f1-text-muted text-center">Geen raceweekend beschikbaar</p>
+                <p className="text-f1-text-muted text-center">No race weekend available</p>
             </div>
         );
     }
@@ -250,45 +270,61 @@ export default function GameClient({ initialSchedule, initialDrivers }: GameClie
                         }`}
                 >
                     <span className="material-icons text-sm mr-1 align-middle">leaderboard</span>
-                    Stand
+                    Standings
                 </button>
             </div>
 
             {/* Content */}
             {activeTab === 'prediction' ? (
                 <div className="space-y-8">
-                    {/* Lock timer for active session */}
-                    {currentSession && !currentSession.isLocked && (
-                        <PredictionLockTimer
-                            sessionStartTime={currentSession.startTime}
-                            sessionLabel={currentSession.label}
-                        />
-                    )}
-
-                    {/* Scores being calculated message */}
-                    {currentSession?.isCompleted && currentSession.points === undefined && (
-                        <div className="flex items-center gap-3 p-4 rounded-xl glass-card border-yellow-500/30 bg-yellow-500/5">
-                            <span className="material-icons text-yellow-500 animate-spin">hourglass_top</span>
-                            <div>
-                                <p className="text-sm font-bold text-yellow-400">Even geduld...</p>
-                                <p className="text-xs text-f1-text-muted">Scores worden berekend zodra de officiële uitslag beschikbaar is.</p>
-                            </div>
+                    {/* Unified Prediction Board */}
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+                        {/* Qualifying Section */}
+                        <div className="space-y-4">
+                            {schedule.sessions.filter(s => s.type === 'qualifying' || s.type === 'sprint_qualifying').map(session => (
+                                <div key={session.type} className="space-y-4">
+                                    {!session.isLocked && (
+                                        <PredictionLockTimer
+                                            sessionStartTime={session.startTime}
+                                            sessionLabel={session.label}
+                                        />
+                                    )}
+                                    <PredictionBoard
+                                        drivers={drivers}
+                                        sessionType={session.type}
+                                        sessionLabel={session.label}
+                                        isLocked={session.isLocked}
+                                        season={schedule.season}
+                                        round={schedule.round}
+                                        existingPrediction={predictions[session.type]}
+                                    />
+                                </div>
+                            ))}
                         </div>
-                    )}
 
-                    {/* Prediction board for active session */}
-                    {activeSession && (
-                        <PredictionBoard
-                            key={activeSession}
-                            drivers={drivers}
-                            sessionType={activeSession}
-                            sessionLabel={currentSession?.label || activeSession}
-                            isLocked={currentSession?.isLocked || false}
-                            season={schedule.season}
-                            round={schedule.round}
-                            existingPrediction={predictions[activeSession]}
-                        />
-                    )}
+                        {/* Race Section */}
+                        <div className="space-y-4">
+                            {schedule.sessions.filter(s => s.type === 'race' || s.type === 'sprint').map(session => (
+                                <div key={session.type} className="space-y-4">
+                                    {!session.isLocked && (
+                                        <PredictionLockTimer
+                                            sessionStartTime={session.startTime}
+                                            sessionLabel={session.label}
+                                        />
+                                    )}
+                                    <PredictionBoard
+                                        drivers={drivers}
+                                        sessionType={session.type}
+                                        sessionLabel={session.label}
+                                        isLocked={session.isLocked}
+                                        season={schedule.season}
+                                        round={schedule.round}
+                                        existingPrediction={predictions[session.type]}
+                                    />
+                                </div>
+                            ))}
+                        </div>
+                    </div>
                 </div>
             ) : (
                 <div className="space-y-8">

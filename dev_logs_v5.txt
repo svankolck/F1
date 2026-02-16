@@ -1,0 +1,174 @@
+
+> f1-app@0.1.0 dev
+> next dev -p 3000
+
+  ▲ Next.js 14.2.35
+  - Local:        http://localhost:3000
+  - Environments: .env.local
+
+ ✓ Starting...
+ ✓ Ready in 13.5s
+ ✓ Compiled /middleware in 659ms
+ ✓ Compiled (158 modules)
+ ○ Compiling / ...
+<w> [webpack.cache.PackFileCacheStrategy] Serializing big strings (122kiB) impacts deserialization performance (consider using Buffer instead and decode when needed)
+ ✓ Compiled / in 9.4s (732 modules)
+⚠️  Node.js 18 and below are deprecated and will no longer be supported in future versions of @supabase/supabase-js. Please upgrade to Node.js 20 or later. For more information, visit: https://github.com/orgs/supabase/discussions/37217
+ ✓ Compiled in 1706ms (350 modules)
+ HEAD / 200 in 11322ms
+ GET / 200 in 475ms
+ ○ Compiling /favicon.ico ...
+ ✓ Compiled /favicon.ico in 3.2s (414 modules)
+ GET /favicon.ico 200 in 3803ms
+ ○ Compiling /timing ...
+ ✓ Compiled /timing in 3.8s (771 modules)
+ GET /favicon.ico 200 in 81ms
+ ○ Compiling /standings ...
+ ✓ Compiled /standings in 1162ms (784 modules)
+ GET /favicon.ico 200 in 32ms
+ ○ Compiling /api/standings ...
+ ✓ Compiled /api/standings in 1519ms (460 modules)
+ GET /api/standings?season=2025&round=24&type=constructors 200 in 3022ms
+ GET /api/standings?season=2025&round=24&type=drivers 200 in 3041ms
+ GET /favicon.ico 200 in 205ms
+ GET /api/standings?season=2025&round=23&type=constructors 200 in 453ms
+ GET /api/standings?season=2025&round=23&type=drivers 200 in 511ms
+ ○ Compiling /results ...
+ ✓ Compiled /results in 2.3s (826 modules)
+ GET /favicon.ico 200 in 65ms
+ ○ Compiling /login ...
+ ✓ Compiled /login in 1405ms (833 modules)
+ GET /favicon.ico 200 in 44ms
+ GET /favicon.ico 200 in 24ms
+ ○ Compiling /game ...
+ ✓ Compiled /game in 15.6s (1886 modules)
+⚠️  Node.js 18 and below are deprecated and will no longer be supported in future versions of @supabase/supabase-js. Please upgrade to Node.js 20 or later. For more information, visit: https://github.com/orgs/supabase/discussions/37217
+ GET /favicon.ico 200 in 50ms
+ ○ Compiling /api/game/predictions ...
+ ✓ Compiled /api/game/predictions in 704ms (1033 modules)
+⚠️  Node.js 18 and below are deprecated and will no longer be supported in future versions of @supabase/supabase-js. Please upgrade to Node.js 20 or later. For more information, visit: https://github.com/orgs/supabase/discussions/37217
+ POST /api/game/predictions 200 in 1365ms
+ ○ Compiling /profile ...
+ ✓ Compiled /profile in 7.8s (1906 modules)
+⚠️  Node.js 18 and below are deprecated and will no longer be supported in future versions of @supabase/supabase-js. Please upgrade to Node.js 20 or later. For more information, visit: https://github.com/orgs/supabase/discussions/37217
+ GET /favicon.ico 200 in 157ms
+ ○ Compiling /api/drivers ...
+ ✓ Compiled /api/drivers in 1188ms (1058 modules)
+ GET /api/drivers 200 in 1658ms
+ GET /api/drivers 200 in 55ms
+⚠️  Node.js 18 and below are deprecated and will no longer be supported in future versions of @supabase/supabase-js. Please upgrade to Node.js 20 or later. For more information, visit: https://github.com/orgs/supabase/discussions/37217
+ GET /favicon.ico 200 in 56ms
+ GET /favicon.ico 200 in 115ms
+ GET /favicon.ico 200 in 47ms
+ GET /api/drivers 200 in 167ms
+ GET /favicon.ico 200 in 46ms
+ GET /api/drivers 200 in 47ms
+ GET /api/drivers 200 in 59ms
+ GET /api/drivers 200 in 72ms
+ GET /favicon.ico 200 in 40ms
+ ✓ Compiled in 5.1s (1864 modules)
+⚠️  Node.js 18 and below are deprecated and will no longer be supported in future versions of @supabase/supabase-js. Please upgrade to Node.js 20 or later. For more information, visit: https://github.com/orgs/supabase/discussions/37217
+ ✓ Compiled in 8.6s (1864 modules)
+⚠️  Node.js 18 and below are deprecated and will no longer be supported in future versions of @supabase/supabase-js. Please upgrade to Node.js 20 or later. For more information, visit: https://github.com/orgs/supabase/discussions/37217
+ ✓ Compiled in 6.1s (1864 modules)
+⚠️  Node.js 18 and below are deprecated and will no longer be supported in future versions of @supabase/supabase-js. Please upgrade to Node.js 20 or later. For more information, visit: https://github.com/orgs/supabase/discussions/37217
+ ✓ Compiled in 4.4s (1864 modules)
+⚠️  Node.js 18 and below are deprecated and will no longer be supported in future versions of @supabase/supabase-js. Please upgrade to Node.js 20 or later. For more information, visit: https://github.com/orgs/supabase/discussions/37217
+ ✓ Compiled in 8.9s (1864 modules)
+⚠️  Node.js 18 and below are deprecated and will no longer be supported in future versions of @supabase/supabase-js. Please upgrade to Node.js 20 or later. For more information, visit: https://github.com/orgs/supabase/discussions/37217
+ ✓ Compiled in 2.6s (1864 modules)
+⚠️  Node.js 18 and below are deprecated and will no longer be supported in future versions of @supabase/supabase-js. Please upgrade to Node.js 20 or later. For more information, visit: https://github.com/orgs/supabase/discussions/37217
+ ✓ Compiled in 7.1s (1864 modules)
+⚠️  Node.js 18 and below are deprecated and will no longer be supported in future versions of @supabase/supabase-js. Please upgrade to Node.js 20 or later. For more information, visit: https://github.com/orgs/supabase/discussions/37217
+ ✓ Compiled in 7.2s (1864 modules)
+⚠️  Node.js 18 and below are deprecated and will no longer be supported in future versions of @supabase/supabase-js. Please upgrade to Node.js 20 or later. For more information, visit: https://github.com/orgs/supabase/discussions/37217
+⚠️  Node.js 18 and below are deprecated and will no longer be supported in future versions of @supabase/supabase-js. Please upgrade to Node.js 20 or later. For more information, visit: https://github.com/orgs/supabase/discussions/37217
+ GET /login?redirect=%2Fgame 200 in 396ms
+ ○ Compiling /results ...
+ ✓ Compiled /results in 2.2s (1010 modules)
+ ○ Compiling /timing ...
+ ✓ Compiled /timing in 10.9s (1887 modules)
+⚠️  Node.js 18 and below are deprecated and will no longer be supported in future versions of @supabase/supabase-js. Please upgrade to Node.js 20 or later. For more information, visit: https://github.com/orgs/supabase/discussions/37217
+ ○ Compiling /api/timing ...
+ ✓ Compiled /api/timing in 1346ms (1043 modules)
+ GET /api/timing?sessionKey=9839 200 in 3660ms
+ GET /api/timing?sessionKey=9839 200 in 1983ms
+ ○ Compiling /api/game/predictions ...
+ ✓ Compiled /api/game/predictions in 961ms (1041 modules)
+⚠️  Node.js 18 and below are deprecated and will no longer be supported in future versions of @supabase/supabase-js. Please upgrade to Node.js 20 or later. For more information, visit: https://github.com/orgs/supabase/discussions/37217
+ POST /api/game/predictions 200 in 1948ms
+ POST /api/game/predictions 200 in 467ms
+ GET /api/timing?sessionKey=9839 200 in 1884ms
+ GET /api/timing?sessionKey=9839 200 in 1894ms
+ ○ Compiling /api/drivers ...
+ ✓ Compiled /api/drivers in 790ms (1070 modules)
+ ✓ Compiled (1072 modules)
+ GET /api/drivers 200 in 1530ms
+ GET /favicon.ico 200 in 1715ms
+ GET /api/drivers 200 in 35ms
+ GET /api/timing?sessionKey=9839 200 in 2045ms
+ GET /api/timing?sessionKey=9839 200 in 1903ms
+ GET /favicon.ico 200 in 33ms
+ GET /api/timing?sessionKey=9839 200 in 1962ms
+⚠️  Node.js 18 and below are deprecated and will no longer be supported in future versions of @supabase/supabase-js. Please upgrade to Node.js 20 or later. For more information, visit: https://github.com/orgs/supabase/discussions/37217
+ GET /favicon.ico 200 in 84ms
+ GET /api/drivers 200 in 192ms
+ GET /api/drivers 200 in 47ms
+ GET /api/timing?sessionKey=9839 200 in 1971ms
+ GET /api/timing?sessionKey=9839 200 in 2003ms
+ GET /api/timing?sessionKey=9839 200 in 2074ms
+ GET /api/timing?sessionKey=9839 200 in 2095ms
+ GET /api/timing?sessionKey=9839 200 in 2088ms
+ GET /api/timing?sessionKey=9839 200 in 2088ms
+ GET /api/timing?sessionKey=9839 200 in 2265ms
+ GET /api/timing?sessionKey=9839 200 in 2003ms
+ GET /api/timing?sessionKey=9839 200 in 2068ms
+ GET /api/timing?sessionKey=9839 200 in 2005ms
+ GET /api/timing?sessionKey=9839 200 in 2063ms
+ GET /api/timing?sessionKey=9839 200 in 2018ms
+ GET /api/timing?sessionKey=9839 200 in 2074ms
+ GET /api/timing?sessionKey=9839 200 in 1999ms
+ GET /api/timing?sessionKey=9839 200 in 1979ms
+ GET /api/timing?sessionKey=9839 200 in 2009ms
+ GET /api/timing?sessionKey=9839 200 in 2196ms
+ GET /api/timing?sessionKey=9839 200 in 2037ms
+ GET /api/timing?sessionKey=9839 200 in 2009ms
+ GET /api/timing?sessionKey=9839 200 in 2053ms
+ GET /api/timing?sessionKey=9839 200 in 1983ms
+ GET /api/timing?sessionKey=9839 200 in 2055ms
+ GET /api/timing?sessionKey=9839 200 in 2058ms
+ GET /api/timing?sessionKey=9839 200 in 2044ms
+ GET /api/timing?sessionKey=9839 200 in 1986ms
+ GET /api/timing?sessionKey=9839 200 in 2027ms
+ GET /api/timing?sessionKey=9839 200 in 2069ms
+ GET /api/timing?sessionKey=9839 200 in 1983ms
+ GET /api/timing?sessionKey=9839 200 in 2068ms
+ GET /api/timing?sessionKey=9839 200 in 2073ms
+ GET /api/timing?sessionKey=9839 200 in 2064ms
+ GET /api/timing?sessionKey=9839 200 in 2051ms
+ GET /api/timing?sessionKey=9839 200 in 1989ms
+ GET /api/timing?sessionKey=9839 200 in 2070ms
+ GET /api/timing?sessionKey=9839 200 in 1975ms
+ GET /api/timing?sessionKey=9839 200 in 2052ms
+ GET /api/timing?sessionKey=9839 200 in 2065ms
+ GET /api/timing?sessionKey=9839 200 in 1958ms
+ GET /api/timing?sessionKey=9839 200 in 2003ms
+ GET /api/timing?sessionKey=9839 200 in 2013ms
+ GET /api/timing?sessionKey=9839 200 in 2061ms
+ GET /api/timing?sessionKey=9839 200 in 2042ms
+ GET /api/timing?sessionKey=9839 200 in 2109ms
+ GET /api/timing?sessionKey=9839 200 in 2010ms
+ GET /api/timing?sessionKey=9839 200 in 2048ms
+ GET /api/timing?sessionKey=9839 200 in 2053ms
+ GET /api/timing?sessionKey=9839 200 in 1973ms
+ GET /api/timing?sessionKey=9839 200 in 1991ms
+ GET /api/timing?sessionKey=9839 200 in 2269ms
+ GET /api/timing?sessionKey=9839 200 in 2409ms
+ GET /api/timing?sessionKey=9839 200 in 1983ms
+ GET /api/timing?sessionKey=9839 200 in 2056ms
+ GET /api/timing?sessionKey=9839 200 in 1966ms
+ GET /api/timing?sessionKey=9839 200 in 2025ms
+ GET /api/timing?sessionKey=9839 200 in 2054ms
+ GET /api/timing?sessionKey=9839 200 in 1995ms
+ GET /api/timing?sessionKey=9839 200 in 1988ms
+ GET /api/timing?sessionKey=9839 200 in 2073ms

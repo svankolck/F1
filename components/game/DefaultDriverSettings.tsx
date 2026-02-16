@@ -99,7 +99,7 @@ export default function DefaultDriverSettings({ drivers }: DefaultDriverSettings
                         focus:outline-none focus:border-f1-red/50 transition-colors"
                     style={selectedDriver ? { borderLeftColor: selectedDriver.teamColor, borderLeftWidth: '3px' } : {}}
                 >
-                    <option value="">— Niet ingesteld —</option>
+                    <option value="">— Not set —</option>
                     {driverOptions.map(d => (
                         <option key={d.driverId} value={d.driverId}>
                             {d.code} — {d.firstName} {d.lastName} ({d.teamName})
@@ -114,16 +114,16 @@ export default function DefaultDriverSettings({ drivers }: DefaultDriverSettings
         <div className="space-y-4">
             <div className="flex items-center justify-between">
                 <div>
-                    <h3 className="text-sm font-bold uppercase tracking-widest">Default Voorspellingen</h3>
+                    <h3 className="text-sm font-bold uppercase tracking-widest">Default Predictions</h3>
                     <p className="text-[10px] text-f1-text-muted mt-0.5">
-                        Worden automatisch ingevuld als je geen handmatige keuze maakt
+                        These will be used automatically if you don't make a manual choice
                     </p>
                 </div>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {renderSelect('Pole Position', 'default_pole_driver', 'emoji_events')}
-                {renderSelect('P1 (Winnaar)', 'default_p1_driver', 'looks_one')}
+                {renderSelect('P1 (Winner)', 'default_p1_driver', 'looks_one')}
                 {renderSelect('P2', 'default_p2_driver', 'looks_two')}
                 {renderSelect('P3', 'default_p3_driver', 'looks_3')}
             </div>
@@ -137,7 +137,7 @@ export default function DefaultDriverSettings({ drivers }: DefaultDriverSettings
                         : 'bg-f1-red hover:bg-f1-red/80 text-white'
                     }`}
             >
-                {saving ? 'Opslaan...' : saved ? '✓ Opgeslagen' : 'Opslaan'}
+                {saving ? 'Saving...' : saved ? '✓ Saved' : 'Save Defaults'}
             </button>
         </div>
     );

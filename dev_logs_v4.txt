@@ -1,0 +1,75 @@
+
+> f1-app@0.1.0 dev
+> next dev -p 3000
+
+  ▲ Next.js 14.2.35
+  - Local:        http://localhost:3000
+  - Environments: .env.local
+
+ ✓ Starting...
+ ✓ Ready in 6.5s
+ ○ Compiling /middleware ...
+ ✓ Compiled /middleware in 6.6s (158 modules)
+ ○ Compiling / ...
+ ⨯ ./app/globals.css.webpack[javascript/auto]!=!./node_modules/next/dist/build/webpack/loaders/css-loader/src/index.js??ruleSet[1].rules[14].oneOf[12].use[2]!./node_modules/next/dist/build/webpack/loaders/postcss-loader/src/index.js??ruleSet[1].rules[14].oneOf[12].use[3]!./app/globals.css
+Error: Cannot find module 'autoprefixer'
+Require stack:
+- /root/f1-app/node_modules/next/dist/build/webpack/config/blocks/css/plugins.js
+- /root/f1-app/node_modules/next/dist/build/webpack/config/blocks/css/index.js
+- /root/f1-app/node_modules/next/dist/build/webpack/config/index.js
+- /root/f1-app/node_modules/next/dist/build/webpack-config.js
+- /root/f1-app/node_modules/next/dist/server/dev/hot-reloader-webpack.js
+- /root/f1-app/node_modules/next/dist/server/lib/router-utils/setup-dev-bundler.js
+- /root/f1-app/node_modules/next/dist/server/lib/router-server.js
+- /root/f1-app/node_modules/next/dist/server/lib/start-server.js
+    at Array.map (<anonymous>)
+Import trace for requested module:
+./app/globals.css.webpack[javascript/auto]!=!./node_modules/next/dist/build/webpack/loaders/css-loader/src/index.js??ruleSet[1].rules[14].oneOf[12].use[2]!./node_modules/next/dist/build/webpack/loaders/postcss-loader/src/index.js??ruleSet[1].rules[14].oneOf[12].use[3]!./app/globals.css
+./app/globals.css
+<w> [webpack.cache.PackFileCacheStrategy] Serializing big strings (122kiB) impacts deserialization performance (consider using Buffer instead and decode when needed)
+ ⨯ ./app/globals.css.webpack[javascript/auto]!=!./node_modules/next/dist/build/webpack/loaders/css-loader/src/index.js??ruleSet[1].rules[14].oneOf[12].use[2]!./node_modules/next/dist/build/webpack/loaders/postcss-loader/src/index.js??ruleSet[1].rules[14].oneOf[12].use[3]!./app/globals.css
+Error: Cannot find module 'autoprefixer'
+Require stack:
+- /root/f1-app/node_modules/next/dist/build/webpack/config/blocks/css/plugins.js
+- /root/f1-app/node_modules/next/dist/build/webpack/config/blocks/css/index.js
+- /root/f1-app/node_modules/next/dist/build/webpack/config/index.js
+- /root/f1-app/node_modules/next/dist/build/webpack-config.js
+- /root/f1-app/node_modules/next/dist/server/dev/hot-reloader-webpack.js
+- /root/f1-app/node_modules/next/dist/server/lib/router-utils/setup-dev-bundler.js
+- /root/f1-app/node_modules/next/dist/server/lib/router-server.js
+- /root/f1-app/node_modules/next/dist/server/lib/start-server.js
+    at Array.map (<anonymous>)
+Import trace for requested module:
+./app/globals.css.webpack[javascript/auto]!=!./node_modules/next/dist/build/webpack/loaders/css-loader/src/index.js??ruleSet[1].rules[14].oneOf[12].use[2]!./node_modules/next/dist/build/webpack/loaders/postcss-loader/src/index.js??ruleSet[1].rules[14].oneOf[12].use[3]!./app/globals.css
+./app/globals.css
+ HEAD / 500 in 64776ms
+ ⨯ ./app/globals.css.webpack[javascript/auto]!=!./node_modules/next/dist/build/webpack/loaders/css-loader/src/index.js??ruleSet[1].rules[14].oneOf[12].use[2]!./node_modules/next/dist/build/webpack/loaders/postcss-loader/src/index.js??ruleSet[1].rules[14].oneOf[12].use[3]!./app/globals.css
+Error: Cannot find module 'autoprefixer'
+Require stack:
+- /root/f1-app/node_modules/next/dist/build/webpack/config/blocks/css/plugins.js
+- /root/f1-app/node_modules/next/dist/build/webpack/config/blocks/css/index.js
+- /root/f1-app/node_modules/next/dist/build/webpack/config/index.js
+- /root/f1-app/node_modules/next/dist/build/webpack-config.js
+- /root/f1-app/node_modules/next/dist/server/dev/hot-reloader-webpack.js
+- /root/f1-app/node_modules/next/dist/server/lib/router-utils/setup-dev-bundler.js
+- /root/f1-app/node_modules/next/dist/server/lib/router-server.js
+- /root/f1-app/node_modules/next/dist/server/lib/start-server.js
+    at Array.map (<anonymous>)
+Import trace for requested module:
+./app/globals.css.webpack[javascript/auto]!=!./node_modules/next/dist/build/webpack/loaders/css-loader/src/index.js??ruleSet[1].rules[14].oneOf[12].use[2]!./node_modules/next/dist/build/webpack/loaders/postcss-loader/src/index.js??ruleSet[1].rules[14].oneOf[12].use[3]!./app/globals.css
+./app/globals.css
+ ⨯ ./app/globals.css.webpack[javascript/auto]!=!./node_modules/next/dist/build/webpack/loaders/css-loader/src/index.js??ruleSet[1].rules[14].oneOf[12].use[2]!./node_modules/next/dist/build/webpack/loaders/postcss-loader/src/index.js??ruleSet[1].rules[14].oneOf[12].use[3]!./app/globals.css
+Error: Cannot find module 'autoprefixer'
+Require stack:
+- /root/f1-app/node_modules/next/dist/build/webpack/config/blocks/css/plugins.js
+- /root/f1-app/node_modules/next/dist/build/webpack/config/blocks/css/index.js
+- /root/f1-app/node_modules/next/dist/build/webpack/config/index.js
+- /root/f1-app/node_modules/next/dist/build/webpack-config.js
+- /root/f1-app/node_modules/next/dist/server/dev/hot-reloader-webpack.js
+- /root/f1-app/node_modules/next/dist/server/lib/router-utils/setup-dev-bundler.js
+- /root/f1-app/node_modules/next/dist/server/lib/router-server.js
+- /root/f1-app/node_modules/next/dist/server/lib/start-server.js
+    at Array.map (<anonymous>)
+Import trace for requested module:
+./app/globals.css.webpack[javascript/auto]!=!./node_modules/next/dist/build/webpack/loaders/css-loader/src/index.js??ruleSet[1].rules[14].oneOf[12].use[2]!./node_modules/next/dist/build/webpack/loaders/postcss-loader/src/index.js??ruleSet[1].rules[14].oneOf[12].use[3]!./app/globals.css
+./app/globals.css

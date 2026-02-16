@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { GameDriver, GameSessionType, Prediction, RACE_SCORING, SPRINT_SCORING } from '@/lib/types/f1';
-import { createClient } from '@/lib/supabase/client';
 import { useAuth } from '@/components/auth/AuthProvider';
 import DriverCard from './DriverCard';
 import DropZone from './DropZone';
@@ -29,7 +28,6 @@ export default function PredictionBoard({
     existingPrediction,
 }: PredictionBoardProps) {
     const { user } = useAuth();
-    const supabase = createClient();
     const [saving, setSaving] = useState(false);
     const [saved, setSaved] = useState(false);
     const [selectedDriver, setSelectedDriver] = useState<GameDriver | null>(null);
@@ -109,11 +107,10 @@ export default function PredictionBoard({
         if (!user || isLocked) return;
         setSaving(true);
         try {
-            const prediction = {
-                user_id: user.id,
+            const payload = {
                 season,
                 round,
-                session_type: sessionType,
+                sessionType,
                 pole_driver_id: slots.pole?.driverId || null,
                 p1_driver_id: slots.p1?.driverId || null,
                 p2_driver_id: slots.p2?.driverId || null,
@@ -121,13 +118,16 @@ export default function PredictionBoard({
                 is_default: false,
             };
 
-            const { error } = await supabase
-                .from('predictions')
-                .upsert(prediction, {
-                    onConflict: 'user_id,season,round,session_type',
-                });
+            const res = await fetch('/api/game/predictions', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload),
+            });
 
-            if (error) throw error;
+            if (!res.ok) {
+                throw new Error('Failed to save prediction');
+            }
+
             setSaved(true);
             setTimeout(() => setSaved(false), 2000);
         } catch (err) {
@@ -149,7 +149,7 @@ export default function PredictionBoard({
                     {isLocked && (
                         <span className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-f1-red/10 border border-f1-red/20">
                             <span className="material-icons text-f1-red text-xs">lock</span>
-                            <span className="text-[10px] text-f1-red font-bold">Gesloten</span>
+                            <span className="text-[10px] text-f1-red font-bold">Locked</span>
                         </span>
                     )}
                 </div>
@@ -163,7 +163,7 @@ export default function PredictionBoard({
                                 : 'bg-f1-red hover:bg-f1-red/80 text-white'
                             }`}
                     >
-                        {saving ? 'Opslaan...' : saved ? '✓ Opgeslagen' : 'Opslaan'}
+                        {saving ? 'Saving...' : saved ? '✓ Saved' : 'Save'}
                     </button>
                 )}
             </div>
@@ -183,40 +183,42 @@ export default function PredictionBoard({
                     />
                 )}
 
-                {/* Top 3 grid */}
-                <div className="grid grid-cols-3 gap-3">
-                    <DropZone
-                        label="P1"
-                        points={scoring.p1}
-                        driver={slots.p1}
-                        isLocked={isLocked}
-                        onDrop={(d) => handleDrop('p1', d)}
-                        onRemove={() => handleRemove('p1')}
-                    />
-                    <DropZone
-                        label="P2"
-                        points={scoring.p2}
-                        driver={slots.p2}
-                        isLocked={isLocked}
-                        onDrop={(d) => handleDrop('p2', d)}
-                        onRemove={() => handleRemove('p2')}
-                    />
-                    <DropZone
-                        label="P3"
-                        points={scoring.p3}
-                        driver={slots.p3}
-                        isLocked={isLocked}
-                        onDrop={(d) => handleDrop('p3', d)}
-                        onRemove={() => handleRemove('p3')}
-                    />
-                </div>
+                {/* P1, P2, P3 grid (only for non-qualifying sessions) */}
+                {!hasPole && (
+                    <div className="grid grid-cols-3 gap-3">
+                        <DropZone
+                            label="P1"
+                            points={scoring.p1}
+                            driver={slots.p1}
+                            isLocked={isLocked}
+                            onDrop={(d) => handleDrop('p1', d)}
+                            onRemove={() => handleRemove('p1')}
+                        />
+                        <DropZone
+                            label="P2"
+                            points={scoring.p2}
+                            driver={slots.p2}
+                            isLocked={isLocked}
+                            onDrop={(d) => handleDrop('p2', d)}
+                            onRemove={() => handleRemove('p2')}
+                        />
+                        <DropZone
+                            label="P3"
+                            points={scoring.p3}
+                            driver={slots.p3}
+                            isLocked={isLocked}
+                            onDrop={(d) => handleDrop('p3', d)}
+                            onRemove={() => handleRemove('p3')}
+                        />
+                    </div>
+                )}
             </div>
 
             {/* Driver pool */}
             {!isLocked && (
                 <div>
                     <p className="text-[10px] text-f1-text-muted uppercase tracking-widest mb-2 font-bold">
-                        {selectedDriver ? `Tik op een positie voor ${selectedDriver.code}` : 'Sleep of tik een coureur'}
+                        {selectedDriver ? `Tap a position for ${selectedDriver.code}` : 'Drag or tap a driver'}
                     </p>
                     <div className="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-10 gap-2 max-h-[300px] overflow-y-auto p-1">
                         {drivers.map(driver => (

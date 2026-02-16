@@ -60,7 +60,7 @@ export default function DropZone({ label, points, driver, isLocked, isPole, onDr
                         <span className="text-[10px] text-f1-text-muted">{driver.firstName} {driver.lastName}</span>
                     </>
                 ) : (
-                    <span className="text-xs text-f1-text-muted">Niet ingevuld</span>
+                    <span className="text-xs text-f1-text-muted">Not set</span>
                 )}
                 <div className="absolute top-2 right-2">
                     <span className="text-[9px] font-mono text-f1-text-muted uppercase">{label}</span>

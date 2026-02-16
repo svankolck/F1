@@ -95,7 +95,7 @@ export default function ProfileClient({ user, initialProfile }: ProfileClientPro
 
     return (
         <div className="flex flex-col items-center gap-6 max-w-lg mx-auto w-full">
-            <h1 className="text-2xl font-bold uppercase tracking-tight">Profiel</h1>
+            <h1 className="text-2xl font-bold uppercase tracking-tight">Profile</h1>
 
             {/* Avatar */}
             <div className="relative group">
@@ -139,7 +139,7 @@ export default function ProfileClient({ user, initialProfile }: ProfileClientPro
                     {/* Names (editable) */}
                     <div className="grid grid-cols-2 gap-3">
                         <div>
-                            <label className="text-[10px] font-mono uppercase tracking-widest text-f1-text-muted mb-1 block">Voornaam</label>
+                            <label className="text-[10px] font-mono uppercase tracking-widest text-f1-text-muted mb-1 block">First Name</label>
                             <input
                                 type="text"
                                 value={firstName}
@@ -148,7 +148,7 @@ export default function ProfileClient({ user, initialProfile }: ProfileClientPro
                             />
                         </div>
                         <div>
-                            <label className="text-[10px] font-mono uppercase tracking-widest text-f1-text-muted mb-1 block">Achternaam</label>
+                            <label className="text-[10px] font-mono uppercase tracking-widest text-f1-text-muted mb-1 block">Last Name</label>
                             <input
                                 type="text"
                                 value={lastName}
@@ -163,7 +163,7 @@ export default function ProfileClient({ user, initialProfile }: ProfileClientPro
                         disabled={saving}
                         className="w-full py-2.5 bg-f1-red text-white font-bold uppercase text-xs tracking-widest rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50"
                     >
-                        {saving ? 'Opslaan...' : saved ? '✓ Opgeslagen' : 'Opslaan'}
+                        {saving ? 'Saving...' : saved ? '✓ Saved' : 'Save Profile'}
                     </button>
                 </div>
             </div>
@@ -174,7 +174,7 @@ export default function ProfileClient({ user, initialProfile }: ProfileClientPro
                     onClick={() => setShowPasswordSection(!showPasswordSection)}
                     className="flex items-center justify-between w-full text-sm font-bold uppercase tracking-wider text-f1-text-secondary hover:text-white transition-colors"
                 >
-                    Wachtwoord Wijzigen
+                    Change Password
                     <span className="material-icons text-sm">{showPasswordSection ? 'expand_less' : 'expand_more'}</span>
                 </button>
 
@@ -191,19 +191,19 @@ export default function ProfileClient({ user, initialProfile }: ProfileClientPro
                             type="password"
                             value={confirmPassword}
                             onChange={(e) => setConfirmPassword(e.target.value)}
-                            placeholder="Bevestig wachtwoord"
+                            placeholder="Confirm password"
                             className="w-full px-3 py-2.5 bg-white/5 border border-f1-border rounded-lg text-sm text-white placeholder:text-f1-text-muted focus:border-f1-red focus:outline-none transition-colors"
                         />
                         {passwordMessage && (
-                            <p className={`text-xs ${passwordMessage.includes('gewijzigd') ? 'text-green-400' : 'text-red-400'}`}>
-                                {passwordMessage}
+                            <p className={`text-xs ${passwordMessage.includes('changed') ? 'text-green-400' : 'text-red-400'}`}>
+                                {passwordMessage.includes('changed') ? 'Password changed!' : passwordMessage}
                             </p>
                         )}
                         <button
                             onClick={handleChangePassword}
                             className="w-full py-2.5 bg-white/10 text-white font-bold uppercase text-xs tracking-widest rounded-lg hover:bg-white/20 transition-colors"
                         >
-                            Wachtwoord Opslaan
+                            Save Password
                         </button>
                     </div>
                 )}
@@ -220,7 +220,7 @@ export default function ProfileClient({ user, initialProfile }: ProfileClientPro
                     onClick={handleSignOut}
                     className="w-full py-3 bg-white/10 text-white font-bold uppercase text-xs tracking-widest rounded-lg hover:bg-white/20 transition-colors"
                 >
-                    Uitloggen
+                    Sign Out
                 </button>
 
                 {!showDeleteConfirm ? (
@@ -228,19 +228,19 @@ export default function ProfileClient({ user, initialProfile }: ProfileClientPro
                         onClick={() => setShowDeleteConfirm(true)}
                         className="w-full py-3 text-red-400 text-xs font-mono uppercase tracking-widest hover:text-red-300 transition-colors"
                     >
-                        Account Verwijderen
+                        Delete Account
                     </button>
                 ) : (
                     <div className="glass-card p-4 border border-red-500/30">
                         <p className="text-red-400 text-xs mb-3">
-                            Weet je zeker dat je je account wilt verwijderen? Dit kan niet ongedaan worden gemaakt.
+                            Are you sure you want to delete your account? This action cannot be undone.
                         </p>
                         <div className="flex gap-2">
                             <button
                                 onClick={() => setShowDeleteConfirm(false)}
                                 className="flex-1 py-2 bg-white/10 text-white text-xs font-bold uppercase rounded-lg hover:bg-white/20 transition-colors"
                             >
-                                Annuleren
+                                Cancel
                             </button>
                             <button
                                 onClick={async () => {
@@ -250,7 +250,7 @@ export default function ProfileClient({ user, initialProfile }: ProfileClientPro
                                 }}
                                 className="flex-1 py-2 bg-red-600 text-white text-xs font-bold uppercase rounded-lg hover:bg-red-700 transition-colors"
                             >
-                                Verwijderen
+                                Delete
                             </button>
                         </div>
                     </div>
