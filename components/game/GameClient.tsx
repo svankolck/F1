@@ -29,7 +29,7 @@ export default function GameClient({ initialSchedule, initialDrivers }: GameClie
         sprint: null,
     });
     const [predictionsLoaded, setPredictionsLoaded] = useState(false);
-    const [activeSession, setActiveSession] = useState<GameSessionType | null>(null);
+
     const [leaderboardData, setLeaderboardData] = useState<Array<{
         userId: string;
         username: string;
@@ -46,17 +46,7 @@ export default function GameClient({ initialSchedule, initialDrivers }: GameClie
     }>>([]);
 
     // Determine active session from schedule
-    useEffect(() => {
-        if (!schedule) return;
-        // Find first non-locked session, or last completed session
-        const openSession = schedule.sessions.find(s => !s.isLocked);
-        if (openSession) {
-            setActiveSession(openSession.type);
-        } else {
-            const lastCompleted = [...schedule.sessions].reverse().find(s => s.isCompleted);
-            setActiveSession(lastCompleted?.type || schedule.sessions[0]?.type || null);
-        }
-    }, [schedule]);
+
 
     // Load user predictions
     useEffect(() => {
@@ -208,9 +198,7 @@ export default function GameClient({ initialSchedule, initialDrivers }: GameClie
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [user, schedule, predictionsLoaded, predictions, supabase]);
 
-    const handleSessionClick = (session: SessionSchedule) => {
-        setActiveSession(session.type);
-    };
+
 
     if (!schedule) {
         return (
