@@ -6,52 +6,69 @@ export async function middleware(request: NextRequest) {
         request: { headers: request.headers },
     });
 
-    const supabase = createServerClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-        {
-            cookies: {
-                get(name: string) {
-                    return request.cookies.get(name)?.value;
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+    // 1. Check for missing environment variables
+    if (!supabaseUrl || !supabaseAnonKey) {
+        console.error('Middleware: Missing Supabase environment variables');
+        return response; // Fail open - allow request to proceed without session
+    }
+
+    try {
+        const supabase = createServerClient(
+            supabaseUrl,
+            supabaseAnonKey,
+            {
+                cookies: {
+                    get(name: string) {
+                        return request.cookies.get(name)?.value;
+                    },
+                    set(name: string, value: string, options: CookieOptions) {
+                        request.cookies.set({ name, value, ...options });
+                        response = NextResponse.next({
+                            request: { headers: request.headers },
+                        });
+                        response.cookies.set({ name, value, ...options });
+                    },
+                    remove(name: string, options: CookieOptions) {
+                        request.cookies.set({ name, value: '', ...options });
+                        response = NextResponse.next({
+                            request: { headers: request.headers },
+                        });
+                        response.cookies.set({ name, value: '', ...options });
+                    },
                 },
-                set(name: string, value: string, options: CookieOptions) {
-                    request.cookies.set({ name, value, ...options });
-                    response = NextResponse.next({
-                        request: { headers: request.headers },
-                    });
-                    response.cookies.set({ name, value, ...options });
-                },
-                remove(name: string, options: CookieOptions) {
-                    request.cookies.set({ name, value: '', ...options });
-                    response = NextResponse.next({
-                        request: { headers: request.headers },
-                    });
-                    response.cookies.set({ name, value: '', ...options });
-                },
-            },
+            }
+        );
+
+        // 2. Refresh session logic
+        const protectedPaths = ['/profile', '/game', '/admin'];
+        const authPaths = ['/login'];
+        const isProtected = protectedPaths.some((path) => request.nextUrl.pathname.startsWith(path));
+        const isAuth = authPaths.some((path) => request.nextUrl.pathname.startsWith(path));
+
+        if (isProtected || isAuth) {
+            const { data, error } = await supabase.auth.getUser();
+            const user = data?.user;
+
+            if (error) {
+                console.warn('Middleware: Supabase auth error', error.message);
+            }
+
+            if (isProtected && !user) {
+                const loginUrl = new URL('/login', request.url);
+                loginUrl.searchParams.set('redirect', request.nextUrl.pathname);
+                return NextResponse.redirect(loginUrl);
+            }
+
+            if (isAuth && user) {
+                return NextResponse.redirect(new URL('/', request.url));
+            }
         }
-    );
-
-    // IMPORTANT: Only refresh the session for specific protected routes or when visiting login
-    // This reduces Edge Function execution time and avoids issues on non-auth routes
-    const protectedPaths = ['/profile', '/game', '/admin'];
-    const authPaths = ['/login'];
-    const isProtected = protectedPaths.some((path) => request.nextUrl.pathname.startsWith(path));
-    const isAuth = authPaths.some((path) => request.nextUrl.pathname.startsWith(path));
-
-    if (isProtected || isAuth) {
-        // Refresh session
-        const { data: { user } } = await supabase.auth.getUser();
-
-        if (isProtected && !user) {
-            const loginUrl = new URL('/login', request.url);
-            loginUrl.searchParams.set('redirect', request.nextUrl.pathname);
-            return NextResponse.redirect(loginUrl);
-        }
-
-        if (isAuth && user) {
-            return NextResponse.redirect(new URL('/', request.url));
-        }
+    } catch (err) {
+        // 3. Prevent 500 errors by catching all exceptions
+        console.error('Middleware execution failed:', err);
     }
 
     return response;
