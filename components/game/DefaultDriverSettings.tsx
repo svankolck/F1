@@ -62,7 +62,7 @@ export default function DefaultDriverSettings({ drivers }: DefaultDriverSettings
         if (!user) return;
         setSaving(true);
         try {
-            // Prepare update payload, converting empty strings to null
+            // Prepare update payload
             const updates = {
                 default_pole_driver: defaults.default_pole_driver || null,
                 default_p1_driver: defaults.default_p1_driver || null,
@@ -70,12 +70,25 @@ export default function DefaultDriverSettings({ drivers }: DefaultDriverSettings
                 default_p3_driver: defaults.default_p3_driver || null,
             };
 
-            const { error } = await supabase
+            console.log('Attempting to save profile defaults:', updates);
+
+            const { data, error } = await supabase
                 .from('profiles')
                 .update(updates)
-                .eq('id', user.id);
+                .eq('id', user.id)
+                .select();
 
-            if (error) throw error;
+            if (error) {
+                console.error('Supabase update error:', error);
+                throw error;
+            }
+
+            console.log('Profile update success, data:', data);
+
+            if (!data || data.length === 0) {
+                console.warn('Update returned no data. Possible RLS issue.');
+                throw new Error('Update failed (permission denied or row missing).');
+            }
 
             setSaved(true);
             setTimeout(() => setSaved(false), 2000);
