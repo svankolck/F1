@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/components/auth/AuthProvider';
 import { createClient } from '@/lib/supabase/client';
-import { GameDriver, WeekendSchedule, Prediction, SessionSchedule, GameSessionType } from '@/lib/types/f1';
+import { GameDriver, WeekendSchedule, Prediction, GameSessionType } from '@/lib/types/f1';
 import WeekendPredictionBoard from './WeekendPredictionBoard';
 import PredictionLockTimer from './PredictionLockTimer';
 import GameLeaderboard from './GameLeaderboard';
