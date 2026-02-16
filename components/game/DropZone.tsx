@@ -2,6 +2,7 @@
 
 import { useState, useCallback } from 'react';
 import { GameDriver } from '@/lib/types/f1';
+import Image from 'next/image';
 
 interface DropZoneProps {
     label: string;
@@ -127,7 +128,7 @@ export default function DropZone({ label, points, driver, isLocked, isPole, onDr
             {/* Driver info */}
             <div className="w-10 h-10 rounded-full overflow-hidden bg-f1-bg border-2" style={{ borderColor: driver.teamColor }}>
                 {driver.headshotUrl ? (
-                    <img src={driver.headshotUrl} alt={driver.code} className="w-full h-full object-cover object-top" loading="lazy" />
+                    <Image src={driver.headshotUrl} alt={driver.code} width={40} height={40} className="w-full h-full object-cover object-top" />
                 ) : (
                     <div className="w-full h-full flex items-center justify-center text-xs font-bold" style={{ color: driver.teamColor }}>
                         {driver.code}

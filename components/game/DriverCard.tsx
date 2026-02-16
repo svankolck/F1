@@ -1,6 +1,7 @@
 'use client';
 
 import { GameDriver } from '@/lib/types/f1';
+import Image from 'next/image';
 
 interface DriverCardProps {
     driver: GameDriver;
@@ -63,11 +64,12 @@ export default function DriverCard({ driver, isPlaced, onSelect, compact }: Driv
             {/* Driver photo */}
             <div className="w-12 h-12 rounded-full overflow-hidden bg-f1-surface border border-f1-border">
                 {driver.headshotUrl ? (
-                    <img
+                    <Image
                         src={driver.headshotUrl}
                         alt={driver.code}
+                        width={48}
+                        height={48}
                         className="w-full h-full object-cover object-top"
-                        loading="lazy"
                     />
                 ) : (
                     <div className="w-full h-full flex items-center justify-center text-f1-text-muted text-xs font-bold">

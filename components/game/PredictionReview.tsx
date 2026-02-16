@@ -1,6 +1,7 @@
 'use client';
 
 import { Prediction, GameDriver, GameScore, RACE_SCORING, SPRINT_SCORING } from '@/lib/types/f1';
+import Image from 'next/image';
 
 interface PredictionReviewProps {
     prediction: Prediction;
@@ -55,7 +56,7 @@ export default function PredictionReview({ prediction, drivers, score, actualRes
                             <div className="flex items-center gap-2 flex-grow">
                                 <div className="w-6 h-6 rounded-full overflow-hidden bg-f1-surface border" style={{ borderColor: predictedDriver.teamColor }}>
                                     {predictedDriver.headshotUrl ? (
-                                        <img src={predictedDriver.headshotUrl} alt="" className="w-full h-full object-cover object-top" />
+                                        <Image src={predictedDriver.headshotUrl} alt="" width={24} height={24} className="w-full h-full object-cover object-top" />
                                     ) : (
                                         <div className="w-full h-full flex items-center justify-center text-[8px] font-bold">{predictedDriver.code}</div>
                                     )}

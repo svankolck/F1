@@ -1,6 +1,7 @@
 'use client';
 
 import { GameScore } from '@/lib/types/f1';
+import Image from 'next/image';
 
 interface LeaderboardEntry {
     userId: string;
@@ -74,7 +75,7 @@ export default function GameLeaderboard({ entries, currentUserId }: GameLeaderbo
                         {/* Avatar */}
                         <div className="w-8 h-8 rounded-full overflow-hidden bg-f1-surface border border-f1-border">
                             {entry.avatarUrl ? (
-                                <img src={entry.avatarUrl} alt="" className="w-full h-full object-cover" />
+                                <Image src={entry.avatarUrl} alt="" width={32} height={32} className="w-full h-full object-cover" />
                             ) : (
                                 <div className="w-full h-full flex items-center justify-center text-xs font-bold text-f1-text-muted">
                                     {entry.username.charAt(0).toUpperCase()}

@@ -222,7 +222,6 @@ export default function GameClient({ initialSchedule, initialDrivers }: GameClie
         );
     }
 
-    const currentSession = schedule.sessions.find(s => s.type === activeSession);
 
     return (
         <div className="space-y-6">

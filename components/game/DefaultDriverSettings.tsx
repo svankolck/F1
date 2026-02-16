@@ -116,7 +116,7 @@ export default function DefaultDriverSettings({ drivers }: DefaultDriverSettings
                 <div>
                     <h3 className="text-sm font-bold uppercase tracking-widest">Default Predictions</h3>
                     <p className="text-[10px] text-f1-text-muted mt-0.5">
-                        These will be used automatically if you don't make a manual choice
+                        These will be used automatically if you don&apos;t make a manual choice
                     </p>
                 </div>
             </div>
