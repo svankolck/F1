@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { GameDriver } from '@/lib/types/f1';
 import { createClient } from '@/lib/supabase/client';
 import { useAuth } from '@/components/auth/AuthProvider';
@@ -11,7 +11,7 @@ interface DefaultDriverSettingsProps {
 
 export default function DefaultDriverSettings({ drivers }: DefaultDriverSettingsProps) {
     const { user } = useAuth();
-    const supabase = createClient();
+    const supabase = useMemo(() => createClient(), []);
     const [defaults, setDefaults] = useState({
         default_pole_driver: '',
         default_p1_driver: '',
@@ -39,13 +39,21 @@ export default function DefaultDriverSettings({ drivers }: DefaultDriverSettings
 
     // Load existing defaults
     useEffect(() => {
-        if (!user) return;
+        const userId = user?.id;
+        if (!userId) return;
+
         async function loadDefaults() {
-            const { data } = await supabase
+            const { data, error } = await supabase
                 .from('profiles')
                 .select('default_pole_driver, default_p1_driver, default_p2_driver, default_p3_driver')
-                .eq('id', user!.id)
-                .single();
+                .eq('id', userId)
+                .maybeSingle();
+
+            if (error) {
+                console.error('Failed to load default drivers:', error);
+                return;
+            }
+
             if (data) {
                 setDefaults({
                     default_pole_driver: data.default_pole_driver || '',
@@ -55,51 +63,31 @@ export default function DefaultDriverSettings({ drivers }: DefaultDriverSettings
                 });
             }
         }
-        loadDefaults();
-    }, [user, supabase]);
-    const handleSave = async () => {
-        if (!user) return;
-        setSaving(true);
-        try {
-            // Prepare upsert payload with safe defaults for required fields
-            const username = user.user_metadata?.username || user.email?.split('@')[0] || 'user';
-            const firstName = user.user_metadata?.first_name || '';
-            const lastName = user.user_metadata?.last_name || '';
 
-            const payload = {
-                id: user.id,
-                username, // Ensure username is present for new rows
-                first_name: firstName,
-                last_name: lastName,
+        loadDefaults();
+    }, [user?.id, supabase]);
+
+    const handleSave = async () => {
+        if (!user?.id) return;
+        setSaving(true);
+
+        try {
+            const updates = {
                 default_pole_driver: defaults.default_pole_driver || null,
                 default_p1_driver: defaults.default_p1_driver || null,
                 default_p2_driver: defaults.default_p2_driver || null,
                 default_p3_driver: defaults.default_p3_driver || null,
-                updated_at: new Date().toISOString(),
             };
 
-            console.log('Attempting to save (upsert) profile defaults:', payload);
-
-            // Create a timeout promise
-            const timeoutPromise = new Promise((_, reject) =>
-                setTimeout(() => reject(new Error('Request timed out')), 10000)
-            );
-
-            // Race the supabase request against the timeout
-            // Race the supabase request against the timeout
-            const { error } = await Promise.race([
-                supabase
-                    .from('profiles')
-                    .upsert(payload, { onConflict: 'id' }), // Removed .select() to prevent RLS read hangs
-                timeoutPromise
-            ]) as { error: unknown };
+            const { error } = await supabase
+                .from('profiles')
+                .update(updates)
+                .eq('id', user.id);
 
             if (error) {
                 console.error('Supabase update error:', error);
                 throw error;
             }
-
-            console.log('Profile update success (no data returned due to optimization)');
 
             setSaved(true);
             setTimeout(() => setSaved(false), 2000);
