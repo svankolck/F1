@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { GameDriver } from '@/lib/types/f1';
 import { createClient } from '@/lib/supabase/client';
 import { useAuth } from '@/components/auth/AuthProvider';
+import { FALLBACK_2026_DRIVERS } from '@/lib/api/game';
 
 interface DefaultDriverSettingsProps {
     drivers: GameDriver[];
@@ -22,6 +23,13 @@ export default function DefaultDriverSettings({ drivers }: DefaultDriverSettings
     const [saved, setSaved] = useState(false);
     const [loadedDrivers, setLoadedDrivers] = useState<GameDriver[]>(drivers);
 
+    // Keep local options in sync with server-provided drivers.
+    useEffect(() => {
+        if (drivers.length > 0) {
+            setLoadedDrivers(drivers);
+        }
+    }, [drivers]);
+
     // Load drivers if not provided
     useEffect(() => {
         if (drivers.length > 0) return;
@@ -30,9 +38,17 @@ export default function DefaultDriverSettings({ drivers }: DefaultDriverSettings
                 const res = await fetch('/api/drivers');
                 if (res.ok) {
                     const data = await res.json();
-                    setLoadedDrivers(data);
+                    if (Array.isArray(data) && data.length > 0) {
+                        setLoadedDrivers(data);
+                    } else {
+                        setLoadedDrivers(FALLBACK_2026_DRIVERS);
+                    }
+                } else {
+                    setLoadedDrivers(FALLBACK_2026_DRIVERS);
                 }
-            } catch { /* ignore */ }
+            } catch {
+                setLoadedDrivers(FALLBACK_2026_DRIVERS);
+            }
         }
         load();
     }, [drivers]);
@@ -79,10 +95,17 @@ export default function DefaultDriverSettings({ drivers }: DefaultDriverSettings
                 default_p3_driver: defaults.default_p3_driver || null,
             };
 
-            const { error } = await supabase
+            const updatePromise = supabase
                 .from('profiles')
                 .update(updates)
                 .eq('id', user.id);
+
+            const timeoutPromise = new Promise<never>((_, reject) => {
+                setTimeout(() => reject(new Error('Save request timed out after 10 seconds')), 10000);
+            });
+
+            const result = await Promise.race([updatePromise, timeoutPromise]);
+            const { error } = result as { error: unknown };
 
             if (error) {
                 console.error('Supabase update error:', error);
