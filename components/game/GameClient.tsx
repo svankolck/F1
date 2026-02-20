@@ -14,11 +14,12 @@ interface GameClientProps {
     initialSchedule: WeekendSchedule | null;
     initialDrivers: GameDriver[];
     initialRaces: Race[];
+    initialPredictions?: Record<GameSessionType, Prediction | null>;
 }
 
 type TabType = 'prediction' | 'stand';
 
-export default function GameClient({ initialSchedule, initialDrivers, initialRaces }: GameClientProps) {
+export default function GameClient({ initialSchedule, initialDrivers, initialRaces, initialPredictions }: GameClientProps) {
     const { user } = useAuth();
     const supabase = createClient();
     const [activeTab, setActiveTab] = useState<TabType>('prediction');
@@ -33,13 +34,13 @@ export default function GameClient({ initialSchedule, initialDrivers, initialRac
         countryFlags[race.Circuit.Location.country] = getFlagUrl(race.Circuit.Location.country);
     });
 
-    const [predictions, setPredictions] = useState<Record<GameSessionType, Prediction | null>>({
+    const [predictions, setPredictions] = useState<Record<GameSessionType, Prediction | null>>(initialPredictions || {
         qualifying: null,
         race: null,
         sprint_qualifying: null,
         sprint: null,
     });
-    const [predictionsLoaded, setPredictionsLoaded] = useState(false);
+    const [predictionsLoaded, setPredictionsLoaded] = useState(!!initialPredictions);
 
     const [leaderboardData, setLeaderboardData] = useState<Array<{
         userId: string;
@@ -59,9 +60,13 @@ export default function GameClient({ initialSchedule, initialDrivers, initialRac
     // Determine active session from schedule
 
 
-    // Load user predictions
+    // Load user predictions (only when switching rounds, initial data comes from server)
     useEffect(() => {
         if (!user || !schedule) return;
+        // Skip client-side fetch for initial round — server already provided the data
+        if (schedule.round.toString() === (initialSchedule?.round.toString() || '') && initialPredictions) {
+            return;
+        }
         async function loadPredictions() {
             setPredictionsLoaded(false);
             const { data } = await supabase
@@ -83,6 +88,7 @@ export default function GameClient({ initialSchedule, initialDrivers, initialRac
             setPredictionsLoaded(true);
         }
         loadPredictions();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [user, schedule, supabase]);
 
     // Load leaderboard
