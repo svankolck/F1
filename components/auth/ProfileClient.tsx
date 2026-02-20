@@ -16,6 +16,10 @@ interface Profile {
     last_name: string | null;
     avatar_url: string | null;
     is_active: boolean;
+    default_pole_driver: string | null;
+    default_p1_driver: string | null;
+    default_p2_driver: string | null;
+    default_p3_driver: string | null;
 }
 
 import { GameDriver } from '@/lib/types/f1';
@@ -214,7 +218,12 @@ export default function ProfileClient({ user, initialProfile, drivers }: Profile
 
             {/* Default Game Predictions */}
             <div className="glass-card p-6 w-full border border-f1-border">
-                <DefaultDriverSettings drivers={drivers} />
+                <DefaultDriverSettings drivers={drivers} initialDefaults={initialProfile ? {
+                    default_pole_driver: initialProfile.default_pole_driver || '',
+                    default_p1_driver: initialProfile.default_p1_driver || '',
+                    default_p2_driver: initialProfile.default_p2_driver || '',
+                    default_p3_driver: initialProfile.default_p3_driver || '',
+                } : undefined} />
             </div>
 
             {/* Actions */}

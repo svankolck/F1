@@ -1,24 +1,29 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { GameDriver } from '@/lib/types/f1';
-import { createClient } from '@/lib/supabase/client';
 import { useAuth } from '@/components/auth/AuthProvider';
 import { FALLBACK_2026_DRIVERS } from '@/lib/api/game';
 
-interface DefaultDriverSettingsProps {
-    drivers: GameDriver[];
+interface DriverDefaults {
+    default_pole_driver: string;
+    default_p1_driver: string;
+    default_p2_driver: string;
+    default_p3_driver: string;
 }
 
-export default function DefaultDriverSettings({ drivers }: DefaultDriverSettingsProps) {
+interface DefaultDriverSettingsProps {
+    drivers: GameDriver[];
+    initialDefaults?: Partial<DriverDefaults>;
+}
+
+export default function DefaultDriverSettings({ drivers, initialDefaults }: DefaultDriverSettingsProps) {
     const { user } = useAuth();
-    // Supabase client is only used for READING defaults (SELECT is safe client-side with RLS)
-    const supabase = useMemo(() => createClient(), []);
-    const [defaults, setDefaults] = useState({
-        default_pole_driver: '',
-        default_p1_driver: '',
-        default_p2_driver: '',
-        default_p3_driver: '',
+    const [defaults, setDefaults] = useState<DriverDefaults>({
+        default_pole_driver: initialDefaults?.default_pole_driver || '',
+        default_p1_driver: initialDefaults?.default_p1_driver || '',
+        default_p2_driver: initialDefaults?.default_p2_driver || '',
+        default_p3_driver: initialDefaults?.default_p3_driver || '',
     });
     const [saving, setSaving] = useState(false);
     const [saved, setSaved] = useState(false);
@@ -54,35 +59,7 @@ export default function DefaultDriverSettings({ drivers }: DefaultDriverSettings
         load();
     }, [drivers]);
 
-    // Load existing defaults via Supabase (SELECT is fine client-side — RLS allows owner reads)
-    useEffect(() => {
-        const userId = user?.id;
-        if (!userId) return;
 
-        async function loadDefaults() {
-            const { data, error } = await supabase
-                .from('profiles')
-                .select('default_pole_driver, default_p1_driver, default_p2_driver, default_p3_driver')
-                .eq('id', userId)
-                .maybeSingle();
-
-            if (error) {
-                console.error('Failed to load default drivers:', error);
-                return;
-            }
-
-            if (data) {
-                setDefaults({
-                    default_pole_driver: data.default_pole_driver || '',
-                    default_p1_driver: data.default_p1_driver || '',
-                    default_p2_driver: data.default_p2_driver || '',
-                    default_p3_driver: data.default_p3_driver || '',
-                });
-            }
-        }
-
-        loadDefaults();
-    }, [user?.id, supabase]);
 
     // Save via server-side API route — session is validated on the server,
     // which avoids client-side RLS cookie issues and is more secure.
