@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { DriverStanding, ConstructorStanding, getTeamColor, getDriverImageUrl } from '@/lib/types/f1';
+import { DriverStanding, ConstructorStanding, getTeamColor, getDriverImageUrl, getTeamLogoUrl } from '@/lib/types/f1';
 
 interface DriverStandingsTableProps {
     type: 'drivers';
@@ -192,14 +192,16 @@ export default function StandingsTable(props: StandingsTableProps) {
                             ) : null}
                         </div>
 
-                        {/* Team color block */}
+                        {/* Team logo */}
                         <div
-                            className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
+                            className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 p-1"
                             style={{ backgroundColor: `${teamColor}20`, border: `1px solid ${teamColor}40` }}
                         >
-                            <div
-                                className="w-3 h-3 rounded-full"
-                                style={{ backgroundColor: teamColor }}
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img
+                                src={getTeamLogoUrl(standing.Constructor.constructorId)}
+                                alt={standing.Constructor.name}
+                                className="w-full h-full object-contain"
                             />
                         </div>
 
