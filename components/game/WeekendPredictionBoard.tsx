@@ -102,9 +102,11 @@ export default function WeekendPredictionBoard({
         if (!user || saving) return;
         setSaving(true);
         try {
+            const errors: string[] = [];
+
             // Save Qualifying Prediction
             if (!qualiSession.isLocked) {
-                await fetch('/api/game/predictions', {
+                const res = await fetch('/api/game/predictions', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
@@ -112,18 +114,22 @@ export default function WeekendPredictionBoard({
                         round,
                         sessionType: qualiSession.type,
                         pole_driver_id: slots.pole?.driverId || null,
-                        // P1-P3 are ignored for Quali session type by backend usually, but we send nulls to be safe
                         p1_driver_id: null,
                         p2_driver_id: null,
                         p3_driver_id: null,
                         is_default: false,
                     }),
                 });
+                if (!res.ok) {
+                    const err = await res.json().catch(() => ({ error: `HTTP ${res.status}` }));
+                    errors.push(`Qualifying: ${err.error || 'Failed'}`);
+                    console.error('Qualifying save failed:', err);
+                }
             }
 
             // Save Race Prediction
             if (!raceSession.isLocked) {
-                await fetch('/api/game/predictions', {
+                const res = await fetch('/api/game/predictions', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
@@ -137,12 +143,22 @@ export default function WeekendPredictionBoard({
                         is_default: false,
                     }),
                 });
+                if (!res.ok) {
+                    const err = await res.json().catch(() => ({ error: `HTTP ${res.status}` }));
+                    errors.push(`Race: ${err.error || 'Failed'}`);
+                    console.error('Race save failed:', err);
+                }
             }
 
-            setSaved(true);
-            setTimeout(() => setSaved(false), 2000);
+            if (errors.length > 0) {
+                alert(`Save failed:\n${errors.join('\n')}`);
+            } else {
+                setSaved(true);
+                setTimeout(() => setSaved(false), 2000);
+            }
         } catch (err) {
             console.error('Failed to save', err);
+            alert('Failed to save predictions');
         } finally {
             setSaving(false);
         }
