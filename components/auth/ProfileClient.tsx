@@ -71,7 +71,7 @@ export default function ProfileClient({ user, initialProfile, drivers }: Profile
             return;
         }
         if (newPassword !== confirmPassword) {
-            setPasswordMessage('Wachtwoorden komen niet overeen');
+            setPasswordMessage('Passwords do not match');
             return;
         }
 
@@ -79,7 +79,7 @@ export default function ProfileClient({ user, initialProfile, drivers }: Profile
         if (error) {
             setPasswordMessage(error.message);
         } else {
-            setPasswordMessage('Wachtwoord gewijzigd!');
+            setPasswordMessage('Password changed!');
             setNewPassword('');
             setConfirmPassword('');
             setShowPasswordSection(false);
@@ -191,7 +191,7 @@ export default function ProfileClient({ user, initialProfile, drivers }: Profile
                             type="password"
                             value={newPassword}
                             onChange={(e) => setNewPassword(e.target.value)}
-                            placeholder="Nieuw wachtwoord (min. 8 tekens)"
+                            placeholder="New password (min. 8 characters)"
                             className="w-full px-3 py-2.5 bg-white/5 border border-f1-border rounded-lg text-sm text-white placeholder:text-f1-text-muted focus:border-f1-red focus:outline-none transition-colors"
                         />
                         <input

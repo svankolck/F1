@@ -19,7 +19,7 @@ export default function GamePointsChart({ data, userName }: GamePointsChartProps
         return (
             <div className="flex flex-col items-center justify-center py-12 gap-3">
                 <span className="material-icons text-4xl text-f1-text-muted">show_chart</span>
-                <p className="text-f1-text-muted text-sm">Nog geen puntendata</p>
+                <p className="text-f1-text-muted text-sm">No points data yet</p>
             </div>
         );
     }
@@ -27,7 +27,7 @@ export default function GamePointsChart({ data, userName }: GamePointsChartProps
     return (
         <div className="space-y-3">
             <h3 className="text-sm font-bold uppercase tracking-widest text-f1-text-muted">
-                Puntenverloop {userName && `— ${userName}`}
+                Points Progression {userName && `— ${userName}`}
             </h3>
 
             <div className="w-full h-[250px] glass-card p-4 rounded-xl">
@@ -55,7 +55,7 @@ export default function GamePointsChart({ data, userName }: GamePointsChartProps
                             }}
                             labelFormatter={(round) => {
                                 const d = data.find(d => d.round === round);
-                                return d?.raceName || `Ronde ${round}`;
+                                return d?.raceName || `Round ${round}`;
                             }}
                         />
                         <Line

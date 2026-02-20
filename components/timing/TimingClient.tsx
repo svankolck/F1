@@ -108,13 +108,13 @@ export default function TimingClient({ initialData }: TimingClientProps) {
 
                 {data.mode === 'replay' && data.replaySession && (
                     <p className="text-xs text-f1-text-muted">
-                        Geen live weekend actief. Standaard replay op laatste race: {data.replaySession.country_name} ({new Date(data.replaySession.date_start).toLocaleDateString('en-GB')}).
+                        No live weekend active. Default replay on last race: {data.replaySession.country_name} ({new Date(data.replaySession.date_start).toLocaleDateString('en-GB')}).
                     </p>
                 )}
 
                 {!data.liveSession && data.nextSession && (
                     <p className="text-xs text-f1-text-muted">
-                        Volgende sessie: {data.nextSession.country_name} {data.nextSession.session_name} over {countdown}.
+                        Next session: {data.nextSession.country_name} {data.nextSession.session_name} in {countdown}.
                     </p>
                 )}
             </div>
@@ -140,7 +140,7 @@ export default function TimingClient({ initialData }: TimingClientProps) {
                             <h3 className="text-xs font-mono text-f1-red uppercase tracking-widest mb-2">Race Control</h3>
                             <div className="space-y-2 max-h-[280px] overflow-y-auto pr-1">
                                 {raceControlLines.length === 0 && (
-                                    <p className="text-xs text-f1-text-muted">Geen berichten.</p>
+                                    <p className="text-xs text-f1-text-muted">No messages.</p>
                                 )}
                                 {raceControlLines.map((line, idx) => (
                                     <div key={`${line.date}-${idx}`} className="text-xs border-l-2 border-f1-border pl-2">
@@ -157,7 +157,7 @@ export default function TimingClient({ initialData }: TimingClientProps) {
             {!snapshot && (
                 <div className="glass-card p-8 text-center border border-f1-border">
                     <span className="material-icons text-3xl text-f1-text-muted mb-2 block">timer_off</span>
-                    <p className="text-f1-text-secondary">Timing data momenteel niet beschikbaar.</p>
+                    <p className="text-f1-text-secondary">Timing data currently not available.</p>
                 </div>
             )}
         </div>

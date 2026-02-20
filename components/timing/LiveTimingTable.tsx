@@ -10,7 +10,7 @@ export default function LiveTimingTable({ rows }: LiveTimingTableProps) {
         return (
             <div className="glass-card p-8 text-center border border-f1-border">
                 <span className="material-icons text-3xl text-f1-text-muted mb-2 block">timer_off</span>
-                <p className="text-f1-text-secondary">Geen timing data beschikbaar voor deze sessie.</p>
+                <p className="text-f1-text-secondary">No timing data available for this session.</p>
             </div>
         );
     }

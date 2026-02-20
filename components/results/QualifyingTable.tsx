@@ -19,7 +19,7 @@ export default function QualifyingTable({ qualifying }: QualifyingTableProps) {
         return (
             <div className="glass-card p-8 text-center">
                 <span className="material-icons text-3xl text-f1-text-muted mb-2 block">timer_off</span>
-                <p className="text-f1-text-secondary">Geen kwalificatiedata beschikbaar voor deze ronde.</p>
+                <p className="text-f1-text-secondary">No qualifying data available for this round.</p>
             </div>
         );
     }

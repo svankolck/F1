@@ -9,7 +9,7 @@ export default function PodiumShowcase({ results }: PodiumShowcaseProps) {
         return (
             <div className="glass-card p-8 text-center">
                 <span className="material-icons text-3xl text-f1-text-muted mb-2 block">emoji_events</span>
-                <p className="text-f1-text-secondary">Podium data is nog niet beschikbaar.</p>
+                <p className="text-f1-text-secondary">Podium data is not yet available.</p>
             </div>
         );
     }

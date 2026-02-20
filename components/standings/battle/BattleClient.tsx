@@ -114,7 +114,7 @@ export default function BattleClient({
                 <div>
                     <h2 className="text-xs font-mono text-f1-red mb-1 uppercase tracking-widest">Analytics</h2>
                     <h1 className="text-2xl md:text-4xl font-bold uppercase tracking-tight">Driver Battle</h1>
-                    <p className="text-sm text-f1-text-secondary mt-1">Puntenverloop per ronde met teamkleur-lijnen.</p>
+                    <p className="text-sm text-f1-text-secondary mt-1">Points progression per round with team color lines.</p>
                 </div>
 
                 <div className="flex items-center gap-3">

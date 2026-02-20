@@ -18,7 +18,7 @@ export default function BottomNav() {
 
     // Determine login/profile item based on auth state
     const authItem = user
-        ? { href: '/profile', icon: 'account_circle', label: 'Profiel' }
+        ? { href: '/profile', icon: 'account_circle', label: 'Profile' }
         : { href: '/login', icon: 'person', label: 'Login' };
 
     const visibleItems = [

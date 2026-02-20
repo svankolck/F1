@@ -10,7 +10,7 @@ export default function ClassificationTable({ results }: ClassificationTableProp
         return (
             <div className="glass-card p-8 text-center">
                 <span className="material-icons text-3xl text-f1-text-muted mb-2 block">event_busy</span>
-                <p className="text-f1-text-secondary">Geen raceuitslag beschikbaar voor deze ronde.</p>
+                <p className="text-f1-text-secondary">No race results available for this round.</p>
             </div>
         );
     }

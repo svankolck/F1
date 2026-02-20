@@ -78,7 +78,7 @@ export function buildWeekendSchedule(race: Race): WeekendSchedule {
         const startTime = `${race.Qualifying.date}T${race.Qualifying.time}`;
         sessions.push({
             type: 'qualifying' as GameSessionType,
-            label: 'Kwalificatie',
+            label: 'Qualifying',
             startTime,
             isLocked: now >= new Date(startTime),
             isCompleted: now >= new Date(new Date(startTime).getTime() + 2 * 60 * 60 * 1000),
@@ -90,7 +90,7 @@ export function buildWeekendSchedule(race: Race): WeekendSchedule {
         const startTime = `${race.SprintQualifying.date}T${race.SprintQualifying.time}`;
         sessions.push({
             type: 'sprint_qualifying' as GameSessionType,
-            label: 'Sprint Kwalificatie',
+            label: 'Sprint Qualifying',
             startTime,
             isLocked: now >= new Date(startTime),
             isCompleted: now >= new Date(new Date(startTime).getTime() + 1.5 * 60 * 60 * 1000),

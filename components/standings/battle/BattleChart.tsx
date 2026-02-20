@@ -17,7 +17,7 @@ export default function BattleChart({ data, drivers, selectedDriverIds }: Battle
         return (
             <div className="glass-card p-8 text-center border border-f1-border">
                 <span className="material-icons text-3xl text-f1-text-muted mb-2 block">show_chart</span>
-                <p className="text-f1-text-secondary">Geen battle data beschikbaar voor dit seizoen.</p>
+                <p className="text-f1-text-secondary">No battle data available for this season.</p>
             </div>
         );
     }
