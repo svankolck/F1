@@ -242,8 +242,11 @@ export const TEAM_COLORS: Record<string, string> = {
     alpine: '#FF87BC',
     williams: '#64C4FF',
     rb: '#6692FF',
+    racing_bulls: '#6692FF',
     sauber: '#52E252',
+    audi: '#52E252',
     haas: '#B6BABD',
+    cadillac: '#C0C0C0',
     // Aliases
     alphatauri: '#6692FF',
     alfa: '#52E252',
@@ -355,6 +358,7 @@ export const DRIVER_IMAGE_MAP: Record<string, string> = {
     hadjar: 'ISAHAD01_Isack_Hadjar/isahad01',
     antonelli: 'ANDANT01_Andrea_Kimi_Antonelli/andant01',
     bortoleto: 'GABBOT01_Gabriel_Bortoleto/gabbot01',
+    lindblad: 'ARVLIN01_Arvid_Lindblad/arvlin01',
 };
 
 export const TEAM_LOGO_MAP: Record<string, string> = {
@@ -366,8 +370,11 @@ export const TEAM_LOGO_MAP: Record<string, string> = {
     alpine: 'https://media.formula1.com/image/upload/c_lfill,w_40/q_auto/v1740000000/common/f1/2025/alpine/2025alpinelogowhite.webp',
     williams: 'https://media.formula1.com/image/upload/c_lfill,w_40/q_auto/v1740000000/common/f1/2025/williams/2025williamslogowhite.webp',
     sauber: 'https://media.formula1.com/image/upload/c_lfill,w_40/q_auto/v1740000000/common/f1/2025/kicksauber/2025kicksauberlogowhite.webp',
+    audi: 'https://media.formula1.com/image/upload/c_lfill,w_40/q_auto/v1740000000/common/f1/2025/kicksauber/2025kicksauberlogowhite.webp',
     rb: 'https://media.formula1.com/image/upload/c_lfill,w_40/q_auto/v1740000000/common/f1/2025/rb/2025rblogowhite.webp',
+    racing_bulls: 'https://media.formula1.com/image/upload/c_lfill,w_40/q_auto/v1740000000/common/f1/2025/rb/2025rblogowhite.webp',
     haas: 'https://media.formula1.com/image/upload/c_lfill,w_40/q_auto/v1740000000/common/f1/2025/haas/2025haaslogowhite.webp',
+    cadillac: '',
     // Aliases
     alphatauri: 'https://media.formula1.com/image/upload/c_lfill,w_40/q_auto/v1740000000/common/f1/2025/rb/2025rblogowhite.webp',
     alfa: 'https://media.formula1.com/image/upload/c_lfill,w_40/q_auto/v1740000000/common/f1/2025/kicksauber/2025kicksauberlogowhite.webp',
