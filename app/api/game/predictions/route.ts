@@ -84,7 +84,14 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ error: 'Duplicate drivers are not allowed' }, { status: 400 });
         }
 
-        const admin = createAdminClient();
+        let admin;
+        try {
+            admin = createAdminClient();
+        } catch (e) {
+            console.error('Admin client creation failed:', e);
+            return NextResponse.json({ error: 'Server configuration error: service role key missing or invalid' }, { status: 500 });
+        }
+
         const payload = {
             user_id: user.id,
             season,
@@ -104,12 +111,14 @@ export async function POST(request: NextRequest) {
             .single();
 
         if (error) {
-            return NextResponse.json({ error: 'Failed to save prediction' }, { status: 500 });
+            console.error('Prediction upsert error:', error);
+            return NextResponse.json({ error: `Database error: ${error.message}` }, { status: 500 });
         }
 
         return NextResponse.json(data);
     } catch (error) {
         console.error('Prediction save error:', error);
-        return NextResponse.json({ error: 'Failed to save prediction' }, { status: 500 });
+        const message = error instanceof Error ? error.message : 'Unknown error';
+        return NextResponse.json({ error: `Server error: ${message}` }, { status: 500 });
     }
 }
