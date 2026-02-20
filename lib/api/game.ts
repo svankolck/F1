@@ -25,24 +25,34 @@ export const FALLBACK_2026_DRIVERS: GameDriver[] = [
 ];
 
 export async function getGameDrivers(): Promise<GameDriver[]> {
-    try {
-        const standings = await getDriverStandings('current');
-        if (!standings || standings.length === 0) return FALLBACK_2026_DRIVERS;
-
-        return standings.map(s => ({
-            driverId: s.Driver.driverId,
-            code: s.Driver.code,
-            firstName: s.Driver.givenName,
-            lastName: s.Driver.familyName,
-            teamName: s.Constructors[0]?.name || 'Unknown',
-            teamColor: getTeamColor(s.Constructors[0]?.constructorId || ''),
-            headshotUrl: getDriverImageUrl(s.Driver.driverId),
-            number: s.Driver.permanentNumber || '',
-        }));
-    } catch (error) {
-        console.error('Failed to fetch game drivers:', error);
-        return FALLBACK_2026_DRIVERS;
+    // The 2026 season hasn't started yet, so the Jolpica API returns 2025 standings.
+    // Use the confirmed 2026 grid directly. Once the season starts and the API returns
+    // 2026 data, this can be switched back to fetching from the API.
+    const currentYear = new Date().getFullYear();
+    if (currentYear >= 2026) {
+        // Check if 2026 season data is available from the API
+        try {
+            const standings = await getDriverStandings('2026');
+            if (standings && standings.length >= 18) {
+                // API has real 2026 data — use it
+                return standings.map(s => ({
+                    driverId: s.Driver.driverId,
+                    code: s.Driver.code,
+                    firstName: s.Driver.givenName,
+                    lastName: s.Driver.familyName,
+                    teamName: s.Constructors[0]?.name || 'Unknown',
+                    teamColor: getTeamColor(s.Constructors[0]?.constructorId || ''),
+                    headshotUrl: getDriverImageUrl(s.Driver.driverId),
+                    number: s.Driver.permanentNumber || '',
+                }));
+            }
+        } catch {
+            // API doesn't have 2026 data yet — fall through to hardcoded list
+        }
     }
+
+    // Use the confirmed 2026 driver grid
+    return FALLBACK_2026_DRIVERS;
 }
 
 export function buildWeekendSchedule(race: Race): WeekendSchedule {
