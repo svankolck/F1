@@ -12,6 +12,7 @@ interface DefaultDriverSettingsProps {
 
 export default function DefaultDriverSettings({ drivers }: DefaultDriverSettingsProps) {
     const { user } = useAuth();
+    // Supabase client is only used for READING defaults (SELECT is safe client-side with RLS)
     const supabase = useMemo(() => createClient(), []);
     const [defaults, setDefaults] = useState({
         default_pole_driver: '',
@@ -53,7 +54,7 @@ export default function DefaultDriverSettings({ drivers }: DefaultDriverSettings
         load();
     }, [drivers]);
 
-    // Load existing defaults
+    // Load existing defaults via Supabase (SELECT is fine client-side — RLS allows owner reads)
     useEffect(() => {
         const userId = user?.id;
         if (!userId) return;
@@ -83,33 +84,22 @@ export default function DefaultDriverSettings({ drivers }: DefaultDriverSettings
         loadDefaults();
     }, [user?.id, supabase]);
 
+    // Save via server-side API route — session is validated on the server,
+    // which avoids client-side RLS cookie issues and is more secure.
     const handleSave = async () => {
         if (!user?.id) return;
         setSaving(true);
 
         try {
-            const updates = {
-                default_pole_driver: defaults.default_pole_driver || null,
-                default_p1_driver: defaults.default_p1_driver || null,
-                default_p2_driver: defaults.default_p2_driver || null,
-                default_p3_driver: defaults.default_p3_driver || null,
-            };
-
-            const updatePromise = supabase
-                .from('profiles')
-                .update(updates)
-                .eq('id', user.id);
-
-            const timeoutPromise = new Promise<never>((_, reject) => {
-                setTimeout(() => reject(new Error('Save request timed out after 10 seconds')), 10000);
+            const res = await fetch('/api/profile/defaults', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(defaults),
             });
 
-            const result = await Promise.race([updatePromise, timeoutPromise]);
-            const { error } = result as { error: unknown };
-
-            if (error) {
-                console.error('Supabase update error:', error);
-                throw error;
+            if (!res.ok) {
+                const err = await res.json().catch(() => ({ error: 'Unknown error' }));
+                throw new Error(err.error || `HTTP ${res.status}`);
             }
 
             setSaved(true);
