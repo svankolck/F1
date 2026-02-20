@@ -22,7 +22,7 @@ export default async function GamePage() {
     ]);
 
     // Load user predictions server-side so they're available on first render
-    let initialPredictions: Record<GameSessionType, Prediction | null> = {
+    const initialPredictions: Record<GameSessionType, Prediction | null> = {
         qualifying: null,
         race: null,
         sprint_qualifying: null,
