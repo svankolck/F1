@@ -48,7 +48,6 @@ export function useReplayEngine(replayData: ReplayData | null | undefined, curre
         // Actually, positions have a date. So we filter positions by date <= maxDate + 120000 (roughly lap end).
         const timeCutoff = maxDate > 0 ? maxDate + 120000 : Infinity;
         const validPositions = positions.filter(p => new Date(p.date).getTime() <= timeCutoff);
-        const validStints = stints.filter(s => true); // Stints usually map to laps, we can take all and filter by logic
         const validPitStops = pitStops.filter(p => p.lap_number <= currentLap);
         const validRC = raceControl.filter(r => new Date(r.date).getTime() <= timeCutoff);
 
