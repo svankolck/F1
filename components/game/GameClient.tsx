@@ -115,7 +115,7 @@ export default function GameClient({ initialSchedule, initialDrivers, initialRac
             const userIds = Array.from(userMap.keys());
             const { data: profiles } = await supabase
                 .from('public_profiles')
-                .select('id, username, avatar_url')
+                .select('id, username')
                 .in('id', userIds);
 
             const entries = Array.from(userMap.entries()).map(([userId, data]) => {
@@ -123,7 +123,7 @@ export default function GameClient({ initialSchedule, initialDrivers, initialRac
                 return {
                     userId,
                     username: profile?.username || 'Unknown',
-                    avatarUrl: profile?.avatar_url || undefined,
+                    avatarUrl: undefined,
                     totalPoints: data.total,
                     raceCount: data.rounds.size,
                     scores: [] as never[],
