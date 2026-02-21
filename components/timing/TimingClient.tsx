@@ -7,6 +7,8 @@ import SessionSelector from './SessionSelector';
 import LiveTimingTable from './LiveTimingTable';
 import QualifyingView from './QualifyingView';
 import TrackMap from './TrackMap';
+import TimelinePlayer from './TimelinePlayer';
+import { useReplayEngine } from './hooks/useReplayEngine';
 
 interface TimingClientProps {
     initialData: TimingBootstrap;
@@ -57,6 +59,10 @@ export default function TimingClient({ initialData }: TimingClientProps) {
     const [loading, setLoading] = useState(false);
     const [selectedSessionKey, setSelectedSessionKey] = useState<number | null>(initialData.selectedSession?.session_key || null);
 
+    // Replay state
+    const [isPlaying, setIsPlaying] = useState(false);
+    const [currentLap, setCurrentLap] = useState(1);
+
     const refresh = useCallback(async (sessionKey?: number | null) => {
         setLoading(true);
         try {
@@ -66,6 +72,8 @@ export default function TimingClient({ initialData }: TimingClientProps) {
             const payload: TimingBootstrap = await res.json();
             setData(payload);
             setSelectedSessionKey(payload.selectedSession?.session_key || null);
+            setCurrentLap(1);
+            setIsPlaying(false);
         } catch (error) {
             console.error('Timing refresh failed:', error);
         } finally {
@@ -87,7 +95,18 @@ export default function TimingClient({ initialData }: TimingClientProps) {
     }, [data.mode, refresh, selectedSessionKey]);
 
     const selectedSession = data.selectedSession;
-    const snapshot: TimingSnapshot | null = data.snapshot;
+
+    // Compute max lap for replay
+    const maxLap = useMemo(() => {
+        if (!data.replayData) return 1;
+        let max = 1;
+        data.replayData.laps.forEach(l => { if (l.lap_number > max) max = l.lap_number; });
+        return max;
+    }, [data.replayData]);
+
+    const replaySnapshot = useReplayEngine(data.replayData, currentLap);
+    const snapshot: TimingSnapshot | null = data.mode === 'replay' && replaySnapshot ? replaySnapshot : data.snapshot;
+
     const isQualifying = selectedSession?.session_type === 'Qualifying';
     const countdown = useCountdown(data.nextSession?.date_start || null);
 
@@ -133,9 +152,20 @@ export default function TimingClient({ initialData }: TimingClientProps) {
                         ) : (
                             <LiveTimingTable rows={snapshot.rows} />
                         )}
+
+                        {data.mode === 'replay' && maxLap > 1 && (
+                            <TimelinePlayer
+                                currentLap={currentLap}
+                                maxLap={maxLap}
+                                isPlaying={isPlaying}
+                                onTogglePlay={() => setIsPlaying(!isPlaying)}
+                                onChangeLap={setCurrentLap}
+                                sessionName={selectedSession?.country_name}
+                            />
+                        )}
                     </div>
                     <div className="xl:col-span-1">
-                        <TrackMap rows={snapshot.rows} />
+                        <TrackMap rows={snapshot.rows} session={selectedSession} />
                         <div className="glass-card border border-f1-border p-3 mt-4">
                             <h3 className="text-xs font-mono text-f1-red uppercase tracking-widest mb-2">Race Control</h3>
                             <div className="space-y-2 max-h-[280px] overflow-y-auto pr-1">

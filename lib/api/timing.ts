@@ -2,6 +2,7 @@ import {
     OpenF1Driver,
     OpenF1Lap,
     OpenF1Pit,
+    OpenF1Position,
     OpenF1RaceControl,
     OpenF1Session,
     OpenF1Stint,
@@ -10,6 +11,7 @@ import {
     getDrivers,
     getLaps,
     getLatestPositions,
+    getPositions,
     getPitStops,
     getRaceControl,
     getSessions,
@@ -43,6 +45,15 @@ export interface TimingSnapshot {
     sessionType: string;
 }
 
+export interface ReplayData {
+    drivers: OpenF1Driver[];
+    laps: OpenF1Lap[];
+    positions: OpenF1Position[];
+    stints: OpenF1Stint[];
+    pitStops: OpenF1Pit[];
+    raceControl: OpenF1RaceControl[];
+}
+
 export interface TimingBootstrap {
     mode: TimingMode;
     liveSession: OpenF1Session | null;
@@ -51,6 +62,7 @@ export interface TimingBootstrap {
     weekendSessions: OpenF1Session[];
     nextSession: OpenF1Session | null;
     snapshot: TimingSnapshot | null;
+    replayData?: ReplayData | null;
 }
 
 function delay(ms: number): Promise<void> {
@@ -66,7 +78,7 @@ function formatLapSeconds(value: number | null | undefined): string {
 
 function formatDelta(value: number | null | undefined): string {
     if (value === null || value === undefined || !Number.isFinite(value)) return '—';
-    return `+${value.toFixed(3)}s`;
+    return value > 0 ? `+${value.toFixed(3)}s` : `${value.toFixed(3)}s`;
 }
 
 function latestByDriver<T>(entries: T[], getDriver: (entry: T) => number, isNewer: (a: T, b: T) => boolean): Map<number, T> {
@@ -117,6 +129,23 @@ async function getLatestCompletedRaceSession(year: number): Promise<OpenF1Sessio
 async function getSessionByKey(sessionKey: number): Promise<OpenF1Session | null> {
     const sessions = await getSessions({ session_key: sessionKey.toString() }).catch(() => []);
     return sessions[0] || null;
+}
+
+export async function getReplayData(session: OpenF1Session): Promise<ReplayData> {
+    const sessionKey = session.session_key;
+    const drivers = await getDrivers(sessionKey).catch(() => [] as OpenF1Driver[]);
+    await delay(350);
+    const laps = await getLaps(sessionKey).catch(() => [] as OpenF1Lap[]);
+    await delay(350);
+    const positions = await getPositions(sessionKey).catch(() => [] as OpenF1Position[]);
+    await delay(350);
+    const stints = await getStints(sessionKey).catch(() => [] as OpenF1Stint[]);
+    await delay(350);
+    const pitStops = await getPitStops(sessionKey).catch(() => [] as OpenF1Pit[]);
+    await delay(350);
+    const raceControl = await getRaceControl(sessionKey).catch(() => [] as OpenF1RaceControl[]);
+
+    return { drivers, laps, positions, stints, pitStops, raceControl };
 }
 
 export async function buildTimingSnapshot(session: OpenF1Session): Promise<TimingSnapshot> {
@@ -240,7 +269,18 @@ export async function getTimingBootstrap(preferredSessionKey?: number): Promise<
         weekendSessions = sortSessions(sessions);
     }
 
-    const snapshot = selectedSession ? await buildTimingSnapshot(selectedSession) : null;
+    let snapshot = null;
+    let replayData = null;
+
+    if (selectedSession) {
+        if (mode === 'live') {
+            snapshot = await buildTimingSnapshot(selectedSession);
+        } else {
+            replayData = await getReplayData(selectedSession);
+            // Build an initial snapshot for lap 1 or the latest
+            snapshot = await buildTimingSnapshot(selectedSession);
+        }
+    }
 
     return {
         mode,
@@ -250,5 +290,6 @@ export async function getTimingBootstrap(preferredSessionKey?: number): Promise<
         weekendSessions,
         nextSession,
         snapshot,
+        replayData,
     };
 }
