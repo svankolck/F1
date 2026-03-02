@@ -33,10 +33,20 @@ export default function AvatarUpload({ userId, onUpload }: AvatarUploadProps) {
             const fileExt = file.name.split('.').pop() || 'jpg';
             const filePath = `${userId}/avatar.${fileExt}`;
 
-            // Step 1: Upload file
+            // Step 1: Remove existing avatar (ignore errors — file may not exist yet)
+            const { data: existingFiles } = await supabase.storage
+                .from('avatars')
+                .list(userId);
+
+            if (existingFiles && existingFiles.length > 0) {
+                const filesToRemove = existingFiles.map((f) => `${userId}/${f.name}`);
+                await supabase.storage.from('avatars').remove(filesToRemove);
+            }
+
+            // Step 2: Upload new file (fresh insert, no upsert needed)
             const { error: uploadError } = await supabase.storage
                 .from('avatars')
-                .upload(filePath, file, { upsert: true });
+                .upload(filePath, file);
 
             if (uploadError) {
                 console.error('Avatar upload error:', uploadError);
