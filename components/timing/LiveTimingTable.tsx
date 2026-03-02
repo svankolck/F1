@@ -25,11 +25,11 @@ export default function LiveTimingTable({ rows }: LiveTimingTableProps) {
                             <th className="text-left py-3 px-2">Driver</th>
                             <th className="text-left py-3 px-2">Interval</th>
                             <th className="text-left py-3 px-2">Gap</th>
-                            <th className="hidden md:table-cell text-left py-3 px-2">Last</th>
-                            <th className="hidden lg:table-cell text-left py-3 px-2">S1</th>
-                            <th className="hidden lg:table-cell text-left py-3 px-2">S2</th>
-                            <th className="hidden lg:table-cell text-left py-3 px-2">S3</th>
-                            <th className="hidden md:table-cell text-left py-3 px-2">Pit</th>
+                            <th className="text-left py-3 px-2">Last</th>
+                            <th className="hidden md:table-cell text-left py-3 px-2">S1</th>
+                            <th className="hidden md:table-cell text-left py-3 px-2">S2</th>
+                            <th className="hidden md:table-cell text-left py-3 px-2">S3</th>
+                            <th className="text-left py-3 px-2">Pit</th>
                             <th className="text-left py-3 px-2">Tyre</th>
                         </tr>
                     </thead>

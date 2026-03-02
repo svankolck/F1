@@ -1,18 +1,17 @@
 import { Suspense } from 'react';
 import TimingClient from '@/components/timing/TimingClient';
-import { getTimingBootstrap } from '@/lib/api/timing';
+import { getTimingData } from '@/lib/api/timing';
 
 export const revalidate = 15;
 
 export default async function TimingPage() {
-    const initialData = await getTimingBootstrap().catch(() => ({
-        mode: 'replay' as const,
-        liveSession: null,
-        replaySession: null,
-        selectedSession: null,
+    const initialData = await getTimingData().catch(() => ({
+        mode: 'idle' as const,
+        session: null,
+        rows: [],
+        updatedAt: new Date().toISOString(),
         weekendSessions: [],
         nextSession: null,
-        snapshot: null,
     }));
 
     return (
