@@ -9,17 +9,19 @@ import RoundSlider from '@/components/standings/RoundSlider';
 import PredictionLockTimer from './PredictionLockTimer';
 import GameLeaderboard from './GameLeaderboard';
 import GamePointsChart from './GamePointsChart';
+import AdminPanel from './AdminPanel';
 
 interface GameClientProps {
     initialSchedule: WeekendSchedule | null;
     initialDrivers: GameDriver[];
     initialRaces: Race[];
     initialPredictions?: Record<GameSessionType, Prediction | null>;
+    isAdmin?: boolean;
 }
 
-type TabType = 'prediction' | 'stand';
+type TabType = 'prediction' | 'stand' | 'admin';
 
-export default function GameClient({ initialSchedule, initialDrivers, initialRaces, initialPredictions }: GameClientProps) {
+export default function GameClient({ initialSchedule, initialDrivers, initialRaces, initialPredictions, isAdmin }: GameClientProps) {
     const { user } = useAuth();
     const supabase = createClient();
     const [activeTab, setActiveTab] = useState<TabType>('prediction');
@@ -328,6 +330,19 @@ export default function GameClient({ initialSchedule, initialDrivers, initialRac
                     <span className="material-icons text-sm mr-1 align-middle">leaderboard</span>
                     Standings
                 </button>
+                {isAdmin && (
+                    <button
+                        onClick={() => setActiveTab('admin')}
+                        className={`flex-1 py-2 px-4 rounded-lg text-xs font-bold uppercase tracking-wider transition-all
+                            ${activeTab === 'admin'
+                                ? 'bg-f1-red text-white shadow-lg shadow-f1-red/20'
+                                : 'text-f1-text-muted hover:text-white'
+                            }`}
+                    >
+                        <span className="material-icons text-sm mr-1 align-middle">admin_panel_settings</span>
+                        Admin
+                    </button>
+                )}
             </div>
 
             {/* Content */}
@@ -383,7 +398,7 @@ export default function GameClient({ initialSchedule, initialDrivers, initialRac
                         );
                     })()}
                 </div>
-            ) : (
+            ) : activeTab === 'stand' ? (
                 <div className="space-y-8">
                     <GameLeaderboard
                         entries={leaderboardData}
@@ -394,7 +409,12 @@ export default function GameClient({ initialSchedule, initialDrivers, initialRac
                         userName={user?.user_metadata?.username}
                     />
                 </div>
-            )}
+            ) : activeTab === 'admin' && isAdmin ? (
+                <AdminPanel
+                    season={schedule.season}
+                    races={initialRaces}
+                />
+            ) : null}
         </div>
     );
 }

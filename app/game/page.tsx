@@ -44,6 +44,14 @@ export default async function GamePage() {
         }
     }
 
+    // Check if user is admin
+    const { data: profile } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', user.id)
+        .single();
+    const isAdmin = profile?.role === 'admin';
+
     return (
         <Suspense fallback={
             <div className="flex items-center justify-center min-h-[60vh]">
@@ -55,6 +63,7 @@ export default async function GamePage() {
                 initialDrivers={drivers}
                 initialRaces={races}
                 initialPredictions={initialPredictions}
+                isAdmin={isAdmin}
             />
         </Suspense>
     );
