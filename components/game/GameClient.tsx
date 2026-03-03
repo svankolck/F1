@@ -183,11 +183,6 @@ export default function GameClient({ initialSchedule, initialDrivers, initialRac
             if (res.ok) {
                 const newSchedule = await res.json();
                 setSchedule(newSchedule);
-
-                // Load predictions for the NEW round directly (don't wait for effect)
-                if (user) {
-                    await loadPredictionsForRound(user.id, season, parseInt(round));
-                }
             } else {
                 console.error('Failed to load schedule for round', round);
             }
@@ -195,6 +190,14 @@ export default function GameClient({ initialSchedule, initialDrivers, initialRac
             console.error('Error switching round:', error);
         } finally {
             setIsLoading(false);
+        }
+
+        // Load predictions in background (non-blocking, after spinner is cleared)
+        if (user) {
+            const season = initialSchedule?.season || new Date().getFullYear();
+            loadPredictionsForRound(user.id, season, parseInt(round)).catch(e =>
+                console.error('[GameClient] Background prediction load failed:', e)
+            );
         }
     };
 
