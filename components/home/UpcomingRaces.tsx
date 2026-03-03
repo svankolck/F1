@@ -15,7 +15,7 @@ function formatDateRange(race: Race): string {
         race.date,
     ].filter(Boolean) as string[];
 
-    const sorted = [...new Set(candidates)].sort((a, b) => a.localeCompare(b));
+    const sorted = Array.from(new Set(candidates)).sort((a, b) => a.localeCompare(b));
     const start = sorted[0] || race.date;
     const end = race.date;
 
