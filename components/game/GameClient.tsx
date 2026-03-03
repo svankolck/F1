@@ -5,12 +5,10 @@ import { useAuth } from '@/components/auth/AuthProvider';
 import { createClient } from '@/lib/supabase/client';
 import { GameDriver, WeekendSchedule, Prediction, GameSessionType, Race, getFlagUrl } from '@/lib/types/f1';
 import RoundSlider from '@/components/standings/RoundSlider';
-import PredictionLockTimer from './PredictionLockTimer';
 import GameLeaderboard from './GameLeaderboard';
 import GamePointsChart from './GamePointsChart';
 import AdminPanel from './AdminPanel';
-import PredictionBoard from './PredictionBoard';
-import WeekendProgressBar from './WeekendProgressBar';
+import WeekendSessionsBoard from './WeekendSessionsBoard';
 
 interface GameClientProps {
     initialSchedule: WeekendSchedule | null;
@@ -364,34 +362,16 @@ export default function GameClient({ initialSchedule, initialDrivers, initialRac
                         if (!schedule.sessions.length) return <div>Invalid schedule configuration</div>;
 
                         return (
-                            <div className="space-y-4">
-                                <WeekendProgressBar sessions={schedule.sessions} />
-
-                                {/* Lock Timers */}
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    {schedule.sessions.filter((session) => !session.isLocked).map((session) => (
-                                        <PredictionLockTimer
-                                            key={`timer-${session.type}`}
-                                            sessionStartTime={session.startTime}
-                                            sessionLabel={session.label}
-                                        />
-                                    ))}
-                                </div>
-
-                                {schedule.sessions.map((session) => (
-                                    <div key={session.type} className="glass-card p-4 md:p-5 border border-f1-border/40">
-                                        <PredictionBoard
-                                            drivers={drivers}
-                                            sessionType={session.type}
-                                            sessionLabel={session.label}
-                                            isLocked={session.isLocked}
-                                            season={schedule.season}
-                                            round={schedule.round}
-                                            existingPrediction={predictions[session.type]}
-                                        />
-                                    </div>
-                                ))}
-                            </div>
+                            <WeekendSessionsBoard
+                                drivers={drivers}
+                                season={schedule.season}
+                                round={schedule.round}
+                                sessions={schedule.sessions}
+                                predictions={predictions}
+                                onPredictionSaved={(sessionType, prediction) => {
+                                    setPredictions((prev) => ({ ...prev, [sessionType]: prediction }));
+                                }}
+                            />
                         );
                     })()}
                 </div>

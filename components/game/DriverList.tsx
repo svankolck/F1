@@ -18,10 +18,10 @@ interface DriverListProps {
 export default function DriverList({ drivers, placedDriverIds, onSelect, selectedDriverId }: DriverListProps) {
     return (
         <div>
-            <p className="text-[10px] text-f1-text-muted uppercase tracking-widest mb-2 font-bold">
+            <p className="text-[10px] text-f1-text-muted uppercase tracking-widest mb-3 font-bold">
                 {selectedDriverId ? 'Tap a position to place driver' : 'Drag or tap a driver'}
             </p>
-            <div className="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-10 gap-2 max-h-[300px] overflow-y-auto p-1">
+            <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-2.5 max-h-[360px] overflow-y-auto p-1">
                 {drivers.map(driver => (
                     <DriverCard
                         key={driver.driverId}
