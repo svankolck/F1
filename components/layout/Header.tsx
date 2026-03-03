@@ -19,13 +19,7 @@ export default function Header() {
                         </span>
                     </div>
                 </Link>
-                <div className="flex items-center gap-3">
-                    <button className="p-2 rounded-full hover:bg-white/5 transition-colors group">
-                        <span className="material-icons text-f1-text-secondary text-xl group-hover:text-f1-red transition-colors">
-                            notifications
-                        </span>
-                    </button>
-                </div>
+
             </div>
         </header>
     );
