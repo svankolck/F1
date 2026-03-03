@@ -6,6 +6,7 @@ import { useAuth } from '@/components/auth/AuthProvider';
 
 const NAV_ITEMS = [
     { href: '/', icon: 'home', label: 'Home' },
+    { href: '/calendar', icon: 'calendar_month', label: 'Calendar' },
     { href: '/timing', icon: 'timer', label: 'Timing' },
     { href: '/standings', icon: 'leaderboard', label: 'Standings' },
     { href: '/results', icon: 'flag', label: 'Results' },
@@ -25,11 +26,16 @@ export default function BottomNav() {
         ...NAV_ITEMS.filter((item) => !item.authOnly || user),
         authItem,
     ];
+    const navMaxWidthClass =
+        visibleItems.length >= 7 ? 'max-w-xl' : visibleItems.length === 6 ? 'max-w-lg' : 'max-w-md';
 
     return (
         <nav className="fixed bottom-0 left-0 w-full bg-f1-bg/95 backdrop-blur-md border-t border-f1-border z-50">
-            <div className={`max-w-md mx-auto px-2 transition-all duration-300 ${visibleItems.length === 6 ? 'max-w-lg' : 'max-w-md'}`}>
-                <div className={`grid h-[60px] items-center ${visibleItems.length === 6 ? 'grid-cols-6' : 'grid-cols-5'}`}>
+            <div className={`mx-auto px-2 transition-all duration-300 ${navMaxWidthClass}`}>
+                <div
+                    className="grid h-[60px] items-center"
+                    style={{ gridTemplateColumns: `repeat(${visibleItems.length}, minmax(0, 1fr))` }}
+                >
                     {visibleItems.map((item) => {
                         const isActive =
                             item.href === '/' ? pathname === '/' : pathname.startsWith(item.href);

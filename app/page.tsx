@@ -1,13 +1,37 @@
+import Link from 'next/link';
 import Countdown from '@/components/home/Countdown';
 import PodiumCards from '@/components/home/PodiumCards';
-import { getNextRace, getCircuitResults, getQualifyingResults } from '@/lib/api/jolpica';
-import { getFlagUrl, getCircuitSvgPath } from '@/lib/types/f1';
+import UpcomingRaces from '@/components/home/UpcomingRaces';
+import { getNextRace, getRaceCalendar, getCircuitResults, getQualifyingResults } from '@/lib/api/jolpica';
+import { Race, getFlagUrl, getCircuitSvgPath } from '@/lib/types/f1';
 import { CIRCUIT_DETAILS } from '@/lib/data/circuits';
 
 export const revalidate = 300; // Revalidate every 5 minutes
 
 export default async function HomePage() {
-  const nextRace = await getNextRace();
+  const [nextRace, raceCalendar] = await Promise.all([
+    getNextRace(),
+    getRaceCalendar('current'),
+  ]);
+
+  let followingRaces: Race[] = [];
+  if (nextRace && raceCalendar.length) {
+    const nextIdx = raceCalendar.findIndex(
+      (race) => race.season === nextRace.season && race.round === nextRace.round
+    );
+
+    if (nextIdx >= 0) {
+      followingRaces = raceCalendar.slice(nextIdx + 1, nextIdx + 3);
+    } else {
+      const nextRaceTime = new Date(`${nextRace.date}T${nextRace.time || '14:00:00Z'}`).getTime();
+      followingRaces = raceCalendar
+        .filter((race) => {
+          const raceTime = new Date(`${race.date}T${race.time || '14:00:00Z'}`).getTime();
+          return raceTime > nextRaceTime;
+        })
+        .slice(0, 2);
+    }
+  }
 
   // Try to get previous year's results for this circuit
   let prevResults = null;
@@ -22,7 +46,7 @@ export default async function HomePage() {
       // Fetch qualifying results for that specific race to get actual pole position
       try {
         const qualifying = await getQualifyingResults(prevSeason, results.race.round);
-        polePosition = qualifying.find(q => q.position === "1") || null;
+        polePosition = qualifying.find((q) => q.position === '1') || null;
       } catch (e) {
         console.error('Failed to fetch qualifying results for home page', e);
       }
@@ -58,7 +82,7 @@ export default async function HomePage() {
           {/* Tags */}
           <div className="flex items-center gap-3 mb-4">
             <span className="px-3 py-1 rounded glass-card text-[10px] font-bold tracking-widest text-f1-red uppercase border border-f1-red/20">
-              Upcoming
+              Next
             </span>
             {nextRace && (
               <span className="text-[10px] font-medium text-f1-text-muted uppercase tracking-widest">
@@ -103,13 +127,26 @@ export default async function HomePage() {
 
           {/* Time info */}
           {amsterdamTime && (
-            <div className="flex items-center gap-3 mt-4">
-              <span className="material-icons text-f1-text-muted text-sm">schedule</span>
+            <div className="flex flex-wrap items-center gap-3 mt-4">
+              <span className="material-icons text-f1-red text-xl">schedule</span>
+              <span className="text-lg md:text-xl font-bold uppercase tracking-wider">
+                {amsterdamTime}
+              </span>
               <span className="text-xs text-f1-text-muted font-mono uppercase tracking-wider">
-                {amsterdamTime} • Europe/Amsterdam
+                Europe/Amsterdam
               </span>
             </div>
           )}
+
+          <div className="mt-5">
+            <Link
+              href="/calendar"
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-f1-border hover:border-f1-red/40 bg-f1-surface/40 hover:bg-f1-red/10 transition-colors text-sm font-bold uppercase tracking-wider"
+            >
+              View Full Calendar
+              <span className="material-icons text-base">arrow_forward</span>
+            </Link>
+          </div>
         </div>
 
         {/* Right: Circuit Info Card */}
@@ -256,6 +293,9 @@ export default async function HomePage() {
 
       {/* Divider */}
       <div className="w-full h-px bg-gradient-to-r from-transparent via-f1-border to-transparent" />
+
+      {/* Upcoming races */}
+      {followingRaces.length > 0 && <UpcomingRaces races={followingRaces} />}
 
       {/* Previous Year Podium */}
       {prevResults && (
