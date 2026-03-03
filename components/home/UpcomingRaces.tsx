@@ -1,6 +1,6 @@
-import Link from 'next/link';
 import { Race, getFlagUrl } from '@/lib/types/f1';
 import { CIRCUIT_DETAILS } from '@/lib/data/circuits';
+import Link from 'next/link';
 
 interface UpcomingRacesProps {
     races: Race[];
@@ -38,17 +38,9 @@ export default function UpcomingRaces({ races }: UpcomingRacesProps) {
 
     return (
         <section className="flex flex-col gap-4">
-            <div className="flex items-center justify-between gap-3">
-                <div>
-                    <h2 className="text-xs font-mono text-f1-red mb-1 uppercase tracking-widest">Upcoming</h2>
-                    <h3 className="text-xl md:text-2xl font-bold text-white uppercase tracking-tight">Next Stops</h3>
-                </div>
-                <Link
-                    href="/calendar"
-                    className="text-xs md:text-sm font-bold uppercase tracking-wider text-f1-text-secondary hover:text-white transition-colors"
-                >
-                    View Full Calendar {'->'}
-                </Link>
+            <div>
+                <h2 className="text-xs font-mono text-f1-red mb-1 uppercase tracking-widest">Upcoming</h2>
+                <h3 className="text-xl md:text-2xl font-bold text-white uppercase tracking-tight">Next Stops</h3>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">

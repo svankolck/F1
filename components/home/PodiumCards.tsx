@@ -125,17 +125,13 @@ export default function PodiumCards({ results, season, round, polePosition }: Po
             </div>
 
             {/* Full Race Results Button */}
-            <div className="flex justify-center mt-2">
+            <div className="flex justify-start mt-2">
                 <Link
                     href={`/results?season=${season}&round=${round}`}
-                    className="group/btn flex items-center gap-2 px-6 py-3 glass-card hover:border-f1-red/40 hover:bg-f1-red/5 transition-all duration-300 rounded-lg"
+                    className="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-f1-border hover:border-f1-red/40 bg-f1-surface/40 hover:bg-f1-red/10 transition-colors text-sm font-bold uppercase tracking-wider"
                 >
-                    <span className="text-sm font-bold uppercase tracking-widest text-f1-text-secondary group-hover/btn:text-white transition-colors">
-                        Full Race Results
-                    </span>
-                    <span className="material-icons text-f1-red text-base group-hover/btn:translate-x-1 transition-transform">
-                        arrow_forward
-                    </span>
+                    Full Race Results
+                    <span className="material-icons text-base">arrow_forward</span>
                 </Link>
             </div>
         </section>
