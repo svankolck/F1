@@ -1,57 +1,66 @@
-# Sprint Race Support — Impact op Bestaande Pagina's
+# Sprint Weekend Support (Variant B) — Volledig Plan
 
-> Dit plan beschrijft welke aanpassingen nodig zijn om sprint races correct te ondersteunen in de bestaande pagina's (Fase 1–5).
-
----
-
-## Achtergrond
-
-Sommige F1 weekenden hebben een sprintformat:
-- **Normaal weekend:** FP1, FP2, FP3, Qualifying, Race
-- **Sprintweekend:** FP1, Sprint Qualifying, Sprint Race, Qualifying, Race
-
-De Jolpica API levert sessie-informatie via het `sprint` veld in de race data.
+> Dit plan beschrijft de implementatie voor volledige sprintweekend-support met scoring op 4 sessies:
+> `sprint_qualifying`, `sprint`, `qualifying`, `race`.
 
 ---
 
-## Impact per Pagina
+## Productbesluit (vastgelegd)
 
-### 1. Home (`/`)
-**Huidig:** Toont countdown naar race + sessietijden (FP1, QUALI, RACE).
-**Aanpassing:**
-- Detecteer of het weekend een sprintweekend is
-- Toon extra sessieblokken: **Sprint Quali** en **Sprint Race**
-- Sessie grid uitbreiden van 3 naar 5 kolommen bij sprintweekend
+1. **Scoring model = Variant B**
+- Scoren op alle 4 competitieve sessies:
+  - Sprint Qualifying
+  - Sprint Race
+  - Qualifying
+  - Race
 
-### 2. Timing (`/timing`)
-**Huidig:** Live timing voor FP, Qualifying en Race sessies.
-**Aanpassing:**
-- `SessionSelector` uitbreiden met Sprint Qualifying en Sprint Race opties
-- Sprint qualifying heeft ander format (SQ1/SQ2/SQ3 vs Q1/Q2/Q3)
-- Sprint race timing ondersteunen (korter, ~100km)
+2. **Default predictions altijd toepassen**
+- Profiel-defaults moeten automatisch gevuld kunnen worden voor **alle sessies**:
+  - `sprint_qualifying`, `sprint`, `qualifying`, `race`
+- Voor elke sessie geldt lock op basis van sessiestart.
 
-### 3. Results (`/results`)
-**Huidig:** Toont race resultaten per ronde.
-**Aanpassing:**
-- Toon **Sprint** tab/sectie naast de race resultaten als het een sprintweekend was
-- Sprint resultaat ophalen via Jolpica `/sprint` endpoint
-- Sprint punten (8-7-6-5-4-3-2-1) tonen naast WK-punten
-
-### 4. Standings (`/standings`)
-**Huidig:** Driver en Constructor standings.
-**Aanpassing:**
-- Geen directe aanpassing nodig — standings van Jolpica bevatten al sprint punten
-- Optioneel: in detail-view per coureur sprint-resultaten apart tonen
-
-### 5. Battle Analytics (`/standings/battle`)
-**Huidig:** Directe vergelijking tussen 2 coureurs.
-**Aanpassing:**
-- Overlay sprint-resultaten in de grafiek (aparte kleur/stippellijn)
-- Sprint data ophalen naast reguliere race data
+3. **Non-sprint weekend**
+- Alleen `qualifying` + `race` aanwezig en scorend.
 
 ---
 
-## Detectie Sprintweekend
+## Huidige gaten (samenvatting)
+
+1. Game-UI is nu hardcoded op 2 sessies (quali + race) en mist sprintsessies als losse voorspelbare/scorende onderdelen.
+2. Results toont geen sprintresultaten-tab.
+3. Home toont geen sprintsessies in sessie-overzicht.
+4. Scoring-engine en DB-checks laten nu alleen `race` en `sprint` score-rijen toe.
+5. Pole-puntenmodel is inconsistent tussen prediction-opslag en scoring.
+
+---
+
+## Doelarchitectuur
+
+### 1) Sessie-gedreven model (single source of truth)
+- Gebruik overal `WeekendSchedule.sessions` als leidend.
+- Geen hardcoded duo-structuur meer (`qualiSession` + `raceSession`).
+- UI, defaults, locking, scoring, admin moeten dezelfde sessietypen respecteren.
+
+### 2) Scoring per sessietype
+- `qualifying` en `sprint_qualifying`:
+  - Scoren op `pole_driver_id` (eventueel later uitbreiden met top-3 kwalificatievoorspelling, nu niet nodig).
+- `race` en `sprint`:
+  - Scoren op `p1/p2/p3` (+ bonusregels).
+
+### 3) Defaults per sessie
+- Bij sessie zonder user-prediction:
+  - Gebruik profieldefaults zolang sessie niet locked is.
+  - `pole_driver_id` alleen voor kwalificatie-sessies.
+  - `p1/p2/p3` voor race/sprint sessies.
+
+### 4) Transparantie in UI
+- Toon per sessie:
+  - status (open/locked/completed)
+  - countdown
+  - of er default of user-pick staat
+  - gescoorde punten zodra beschikbaar
+
+## Detectie sprintweekend
 
 ```typescript
 // Jolpica API response bevat sprint data als het een sprintweekend is
@@ -64,21 +73,94 @@ interface RaceSchedule {
 }
 
 function isSprintWeekend(race: RaceSchedule): boolean {
-  return !!race.Sprint;
+  return Boolean(race.Sprint || race.SprintQualifying);
 }
 ```
 
 ---
 
-## Prioriteit
+## Implementatieplan (concreet)
 
-| Pagina | Impact | Prioriteit |
-|--------|--------|-----------|
-| Game (`/game`) | Centraal — sprint predictions + scoring | 🔴 Hoog (Fase 7) |
-| Home (`/`) | Extra sessieblokken tonen | 🟡 Medium |
-| Results (`/results`) | Sprint resultaten tabel | 🟡 Medium |
-| Timing (`/timing`) | Sprint sessies in selector | 🟢 Laag |
-| Standings (`/standings`) | Al correct (API bevat sprint) | ⚪ Geen |
-| Battle (`/standings/battle`) | Sprint overlay optioneel | 🟢 Laag |
+### Fase A — Game UI refactor naar N sessies
+1. Vervang 2-sessie rendering in `GameClient` door iteratie over `schedule.sessions`.
+2. Render per sessie een eigen `PredictionBoard` met juiste `sessionType`.
+3. Toon countdown per sessie (dus op sprintweekend 4 timers).
+4. Voeg sessieprogressie UI toe (bestaande `WeekendProgressBar` koppelen/gebruiken).
 
-> **Voorstel:** Sprint support in Game (Fase 7) eerst bouwen. Home en Results bijwerken als onderdeel van Fase 8 polish. Timing en Battle als nice-to-have.
+### Fase B — Defaults voor alle sessies
+1. Houd huidige “auto-create prediction when missing” aan, maar volledig sessiegedreven.
+2. Zorg dat defaults op sprintweekend voor 4 sessies worden toegepast.
+3. Label/markeer `is_default` in UI (optioneel maar aanbevolen voor debug).
+
+### Fase C — Scoring engine uitbreiden naar 4 sessies
+1. `calculateScores` ondersteunen voor:
+   - `qualifying`
+   - `sprint_qualifying`
+   - `sprint`
+   - `race`
+2. Definieer scoreregels:
+   - kwalificatie-sessies: pole-only score
+   - race/sprint: top-3 + bonus
+3. Auto-score cron uitbreiden met 4 session types en juiste buffers.
+4. Admin panel session selector uitbreiden met 4 opties.
+
+### Fase D — Database migraties
+1. `game_scores.session_type` check uitbreiden:
+   - van `('race','sprint')`
+   - naar `('qualifying','sprint_qualifying','sprint','race')`
+2. `scoring_log.session_type` check idem.
+3. Indexen en unique constraints blijven bruikbaar (`user_id, season, round, session_type`).
+4. Migratie idempotent maken.
+
+### Fase E — Results pagina sprint-support
+1. API payload uitbreiden met `sprintResults`.
+2. Results tabs:
+   - Race
+   - Qualifying
+   - Sprint (alleen tonen als sprintweekend)
+3. Sprintklassificatie in eigen tabel (hergebruik race table component waar mogelijk).
+
+### Fase F — Home sprint-sessies
+1. Sessiegrid dynamisch maken:
+   - standaard 3 (FP1, Quali, Race)
+   - sprintweekend 5 (FP1, Sprint Quali, Sprint, Quali, Race)
+2. Labels en tijden consistent formatteren.
+
+### Fase G — Testmatrix
+1. Non-sprint weekend:
+   - 2 sessies zichtbaar en scorend.
+2. Sprint weekend:
+   - 4 sessies zichtbaar, locktijden correct, defaults toegepast.
+3. Scoring:
+   - handmatig via admin + auto-score cron.
+4. Regressie:
+   - leaderboard totalen, chart, scoring-log statussen.
+
+---
+
+## Technische notities / risico's
+
+1. **Databron Sprint Qualifying results**
+- Jolpica heeft geen duidelijke endpoint-pariteit voor sprint qualifying results.
+- Oplossing:
+  - primair: officiële beschikbare endpoint gebruiken indien bevestigd.
+  - fallback: OpenF1- of alternatieve bron toevoegen alleen voor sprint qualifying uitslag.
+
+2. **Pole model expliciet houden**
+- Qualifying-pole en SprintQualifying-pole moeten elk in hun eigen sessiescore vallen.
+- Vermijd impliciete “race session bevat pole” logica.
+
+3. **Backfill beleid**
+- Bestaande seizoenen zonder quali-score entries blijven geldig.
+- Nieuwe logic moet ontbreken van oudere score-rijen netjes tolereren.
+
+---
+
+## Definitie van Done
+
+1. Sprintweekend toont 4 voorspelbare sessies in Game.
+2. Defaults worden automatisch toegepast voor alle open sessies.
+3. Alle 4 sessietypen kunnen gescoord worden (admin + cron).
+4. DB accepteert en bewaart scores/logs voor alle 4 sessietypen.
+5. Results toont sprintuitslagen waar beschikbaar.
+6. Home toont sprintsessies in het sessie-overzicht.

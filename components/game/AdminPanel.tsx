@@ -141,6 +141,8 @@ export default function AdminPanel({ season, races }: AdminPanelProps) {
                         onChange={(e) => setSelectedSession(e.target.value as GameSessionType)}
                         className="px-3 py-2 bg-white/5 border border-f1-border rounded-lg text-sm text-white focus:border-f1-red focus:outline-none"
                     >
+                        <option value="sprint_qualifying">Sprint Qualifying</option>
+                        <option value="qualifying">Qualifying</option>
                         <option value="race">Race</option>
                         <option value="sprint">Sprint</option>
                     </select>

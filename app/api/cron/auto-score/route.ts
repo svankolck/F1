@@ -14,7 +14,7 @@ const SCORING_BUFFERS: Record<string, number> = {
 };
 
 // Only score these session types
-const SCORABLE_SESSIONS: GameSessionType[] = ['race', 'sprint'];
+const SCORABLE_SESSIONS: GameSessionType[] = ['sprint_qualifying', 'sprint', 'qualifying', 'race'];
 
 export async function GET(request: NextRequest) {
     // Verify cron secret

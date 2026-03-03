@@ -66,17 +66,25 @@ export async function calculateScores(
 ): Promise<{ scored: number; results: { actualPole: string | null; actualP1: string | null; actualP2: string | null; actualP3: string | null } }> {
     const admin = createAdminClient();
 
-    if (sessionType !== 'race' && sessionType !== 'sprint') {
-        throw new Error('Only race and sprint scoring are supported');
-    }
-
     // Get actual results
     let actualPole: string | null = null;
     let actualP1: string | null = null;
     let actualP2: string | null = null;
     let actualP3: string | null = null;
 
-    if (sessionType === 'race') {
+    if (sessionType === 'qualifying') {
+        const qualiResults = await getQualifyingResults(season, round);
+        if (!qualiResults || qualiResults.length === 0) throw new Error('No qualifying results available yet');
+        actualPole = qualiResults[0]?.Driver.driverId || null;
+    } else if (sessionType === 'sprint_qualifying') {
+        const { results } = await getSprintResults(season, round);
+        if (!results || results.length === 0) throw new Error('No sprint results available yet');
+
+        // Jolpica does not currently expose dedicated sprint qualifying results;
+        // use sprint grid P1 as the closest available pole indicator.
+        const gridPole = results.find((r) => r.grid === '1');
+        actualPole = (gridPole || results[0])?.Driver.driverId || null;
+    } else if (sessionType === 'race') {
         const { results } = await getRaceResults(season, round);
         if (!results || results.length === 0) throw new Error('No race results available yet');
         actualP1 = results[0]?.Driver.driverId || null;
@@ -88,14 +96,14 @@ export async function calculateScores(
                 actualPole = qualiResults[0]?.Driver.driverId || null;
             }
         } catch { /* ignore */ }
-    }
-
-    if (sessionType === 'sprint') {
+    } else if (sessionType === 'sprint') {
         const { results } = await getSprintResults(season, round);
         if (!results || results.length === 0) throw new Error('No sprint results available yet');
         actualP1 = results[0]?.Driver.driverId || null;
         actualP2 = results[1]?.Driver.driverId || null;
         actualP3 = results[2]?.Driver.driverId || null;
+    } else {
+        throw new Error(`Unsupported session type: ${sessionType}`);
     }
 
     // Get all predictions + defaults
@@ -118,7 +126,7 @@ export async function calculateScores(
 
     for (const profile of (profileDefaults || []) as UserDefaults[]) {
         const hasSaved = predictionMap.has(profile.id);
-        const hasPole = sessionType === 'race';
+        const hasPole = sessionType === 'qualifying' || sessionType === 'sprint_qualifying';
         const fallback: StoredPrediction = {
             user_id: profile.id,
             pole_driver_id: hasPole ? profile.default_pole_driver : null,
@@ -163,22 +171,27 @@ export async function calculateScores(
         return { scored: 0, results: { actualPole, actualP1, actualP2, actualP3 } };
     }
 
-    const scoring = sessionType === 'sprint' ? SPRINT_SCORING : RACE_SCORING;
+    const scoring = sessionType === 'sprint' || sessionType === 'sprint_qualifying'
+        ? SPRINT_SCORING
+        : RACE_SCORING;
 
     const scores = effectivePredictions.map(pred => {
         let polePoints = 0;
         let p1Points = 0;
         let p2Points = 0;
         let p3Points = 0;
+        let bonusPoints = 0;
 
-        if (sessionType === 'race' && pred.pole_driver_id) {
+        if ((sessionType === 'qualifying' || sessionType === 'sprint_qualifying') && pred.pole_driver_id) {
             if (pred.pole_driver_id === actualPole) polePoints = scoring.pole;
         }
-        if (pred.p1_driver_id && pred.p1_driver_id === actualP1) p1Points = scoring.p1;
-        if (pred.p2_driver_id && pred.p2_driver_id === actualP2) p2Points = scoring.p2;
-        if (pred.p3_driver_id && pred.p3_driver_id === actualP3) p3Points = scoring.p3;
+        if (sessionType === 'race' || sessionType === 'sprint') {
+            if (pred.p1_driver_id && pred.p1_driver_id === actualP1) p1Points = scoring.p1;
+            if (pred.p2_driver_id && pred.p2_driver_id === actualP2) p2Points = scoring.p2;
+            if (pred.p3_driver_id && pred.p3_driver_id === actualP3) p3Points = scoring.p3;
+            bonusPoints = scoreTop3(pred, actualP1, actualP2, actualP3, scoring.bonus);
+        }
 
-        const bonusPoints = scoreTop3(pred, actualP1, actualP2, actualP3, scoring.bonus);
         const totalPoints = polePoints + p1Points + p2Points + p3Points + bonusPoints;
 
         return {

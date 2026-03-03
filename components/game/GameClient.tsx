@@ -4,12 +4,13 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '@/components/auth/AuthProvider';
 import { createClient } from '@/lib/supabase/client';
 import { GameDriver, WeekendSchedule, Prediction, GameSessionType, Race, getFlagUrl } from '@/lib/types/f1';
-import WeekendPredictionBoard from './WeekendPredictionBoard';
 import RoundSlider from '@/components/standings/RoundSlider';
 import PredictionLockTimer from './PredictionLockTimer';
 import GameLeaderboard from './GameLeaderboard';
 import GamePointsChart from './GamePointsChart';
 import AdminPanel from './AdminPanel';
+import PredictionBoard from './PredictionBoard';
+import WeekendProgressBar from './WeekendProgressBar';
 
 interface GameClientProps {
     initialSchedule: WeekendSchedule | null;
@@ -140,16 +141,23 @@ export default function GameClient({ initialSchedule, initialDrivers, initialRac
                     .filter(s => s.user_id === user.id)
                     .sort((a, b) => a.round - b.round);
 
+                const byRound = new Map<number, number>();
+                for (const score of userScores) {
+                    byRound.set(score.round, (byRound.get(score.round) || 0) + score.total_points);
+                }
+
                 let cumulative = 0;
-                const chart = userScores.map(s => {
-                    cumulative += s.total_points;
-                    return {
-                        round: s.round,
-                        raceName: `R${s.round}`,
-                        points: s.total_points,
-                        cumulative,
-                    };
-                });
+                const chart = Array.from(byRound.entries())
+                    .sort((a, b) => a[0] - b[0])
+                    .map(([round, points]) => {
+                        cumulative += points;
+                        return {
+                            round,
+                            raceName: `R${round}`,
+                            points,
+                            cumulative,
+                        };
+                    });
                 setChartData(chart);
             }
         }
@@ -183,9 +191,9 @@ export default function GameClient({ initialSchedule, initialDrivers, initialRac
                     round: activeSchedule.round,
                     session_type: session.type,
                     pole_driver_id: hasPole ? profile.default_pole_driver : null,
-                    p1_driver_id: profile.default_p1_driver,
-                    p2_driver_id: profile.default_p2_driver,
-                    p3_driver_id: profile.default_p3_driver,
+                    p1_driver_id: hasPole ? null : profile.default_p1_driver,
+                    p2_driver_id: hasPole ? null : profile.default_p2_driver,
+                    p3_driver_id: hasPole ? null : profile.default_p3_driver,
                     is_default: true,
                 };
 
@@ -199,9 +207,9 @@ export default function GameClient({ initialSchedule, initialDrivers, initialRac
                             round: activeSchedule.round,
                             sessionType: session.type,
                             pole_driver_id: defaultPred.pole_driver_id || null,
-                            p1_driver_id: defaultPred.p1_driver_id || null,
-                            p2_driver_id: defaultPred.p2_driver_id || null,
-                            p3_driver_id: defaultPred.p3_driver_id || null,
+                            p1_driver_id: hasPole ? null : defaultPred.p1_driver_id || null,
+                            p2_driver_id: hasPole ? null : defaultPred.p2_driver_id || null,
+                            p3_driver_id: hasPole ? null : defaultPred.p3_driver_id || null,
                             is_default: true,
                         }),
                     });
@@ -353,47 +361,36 @@ export default function GameClient({ initialSchedule, initialDrivers, initialRac
                             <div className="w-8 h-8 border-2 border-f1-red/30 border-t-f1-red rounded-full animate-spin" />
                         </div>
                     ) : (() => {
-                        // Identify sessions
-                        const quali = schedule.sessions.find(s => s.type === 'qualifying' || s.type === 'sprint_qualifying');
-                        const race = schedule.sessions.find(s => s.type === 'race'); // Assuming standard race for now, handle sprints later if needed
-
-                        if (!quali || !race) return <div>Invalid schedule configuration</div>;
+                        if (!schedule.sessions.length) return <div>Invalid schedule configuration</div>;
 
                         return (
                             <div className="space-y-4">
+                                <WeekendProgressBar sessions={schedule.sessions} />
+
                                 {/* Lock Timers */}
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    {!quali.isLocked && (
+                                    {schedule.sessions.filter((session) => !session.isLocked).map((session) => (
                                         <PredictionLockTimer
-                                            sessionStartTime={quali.startTime}
-                                            sessionLabel={quali.label}
+                                            key={`timer-${session.type}`}
+                                            sessionStartTime={session.startTime}
+                                            sessionLabel={session.label}
                                         />
-                                    )}
-                                    {!race.isLocked && (
-                                        <PredictionLockTimer
-                                            sessionStartTime={race.startTime}
-                                            sessionLabel={race.label}
-                                        />
-                                    )}
+                                    ))}
                                 </div>
 
-                                <WeekendPredictionBoard
-                                    drivers={drivers}
-                                    season={schedule.season}
-                                    round={schedule.round}
-                                    qualiSession={{
-                                        type: quali.type,
-                                        label: quali.label,
-                                        isLocked: quali.isLocked,
-                                        prediction: predictions[quali.type]
-                                    }}
-                                    raceSession={{
-                                        type: race.type,
-                                        label: race.label,
-                                        isLocked: race.isLocked,
-                                        prediction: predictions[race.type]
-                                    }}
-                                />
+                                {schedule.sessions.map((session) => (
+                                    <div key={session.type} className="glass-card p-4 md:p-5 border border-f1-border/40">
+                                        <PredictionBoard
+                                            drivers={drivers}
+                                            sessionType={session.type}
+                                            sessionLabel={session.label}
+                                            isLocked={session.isLocked}
+                                            season={schedule.season}
+                                            round={schedule.round}
+                                            existingPrediction={predictions[session.type]}
+                                        />
+                                    </div>
+                                ))}
                             </div>
                         );
                     })()}
