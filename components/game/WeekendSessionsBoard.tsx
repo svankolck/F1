@@ -54,6 +54,7 @@ export default function WeekendSessionsBoard({
 }: WeekendSessionsBoardProps) {
   const [selectedDriver, setSelectedDriver] = useState<GameDriver | null>(null);
   const [showDrivers, setShowDrivers] = useState(false);
+  const [pickerTarget, setPickerTarget] = useState<{ session: SessionSchedule; slot: SlotKey } | null>(null);
   const [slotsBySession, setSlotsBySession] = useState<Record<GameSessionType, SessionSlots>>({
     qualifying: { ...EMPTY_SLOTS },
     race: { ...EMPTY_SLOTS },
@@ -171,8 +172,15 @@ export default function WeekendSessionsBoard({
     if (selectedDriver) {
       setSlot(session, slot, selectedDriver);
     } else {
-      setShowDrivers(true);
+      // Open popup picker
+      setPickerTarget({ session, slot });
     }
+  };
+
+  const selectDriverFromPicker = (driver: GameDriver) => {
+    if (!pickerTarget) return;
+    setSlot(pickerTarget.session, pickerTarget.slot, driver);
+    setPickerTarget(null);
   };
 
   const renderSessionCard = (session: SessionSchedule) => {
@@ -320,6 +328,42 @@ export default function WeekendSessionsBoard({
           </div>
         )}
       </div>
+
+      {/* Driver Picker Modal */}
+      {pickerTarget && (
+        <div className="fixed inset-0 z-[70] flex items-end sm:items-center justify-center bg-black/70 p-3 sm:p-6"
+          onClick={() => setPickerTarget(null)}
+        >
+          <div className="w-full max-w-3xl rounded-2xl border border-f1-border bg-f1-bg p-4"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between gap-3 mb-3">
+              <div>
+                <p className="text-[10px] uppercase tracking-widest text-f1-text-muted">Select Driver</p>
+                <h4 className="text-sm font-bold">
+                  {pickerTarget.session.label} — {pickerTarget.slot.toUpperCase()}
+                </h4>
+              </div>
+              <button
+                onClick={() => setPickerTarget(null)}
+                className="w-7 h-7 rounded-full border border-f1-border hover:border-f1-red/40 flex items-center justify-center"
+              >
+                <span className="material-icons text-sm">close</span>
+              </button>
+            </div>
+            <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-2 max-h-[50vh] overflow-y-auto">
+              {drivers.map(driver => (
+                <DriverCard
+                  key={`picker-${driver.driverId}`}
+                  driver={driver}
+                  onSelect={selectDriverFromPicker}
+                  compact
+                />
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

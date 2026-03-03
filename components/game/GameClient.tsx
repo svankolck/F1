@@ -60,20 +60,28 @@ export default function GameClient({ initialSchedule, initialDrivers, initialRac
         cumulative: number;
     }>>([]);
 
-    // Determine active session from schedule
+    // Stable primitive deps for prediction loading
+    const scheduleRound = schedule?.round;
+    const scheduleSeason = schedule?.season;
 
-
-    // Load user predictions (only when switching rounds, initial data comes from server)
+    // Load user predictions — uses stable primitives to avoid re-fetching on object ref changes
     useEffect(() => {
-        if (!user || !schedule) return;
+        if (!user || !scheduleSeason || !scheduleRound) return;
+        let cancelled = false;
 
         async function loadPredictions() {
-            const { data } = await supabase
+            const { data, error } = await supabase
                 .from('predictions')
                 .select('*')
                 .eq('user_id', user!.id)
-                .eq('season', schedule!.season)
-                .eq('round', schedule!.round);
+                .eq('season', scheduleSeason!)
+                .eq('round', scheduleRound!);
+
+            if (cancelled) return;
+            if (error) {
+                console.error('Failed to load predictions:', error);
+                return;
+            }
 
             const preds: Record<GameSessionType, Prediction | null> = {
                 qualifying: null, race: null, sprint_qualifying: null, sprint: null,
@@ -86,8 +94,9 @@ export default function GameClient({ initialSchedule, initialDrivers, initialRac
             setPredictions(preds);
         }
         loadPredictions();
+        return () => { cancelled = true; };
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [user, schedule]);
+    }, [user, scheduleSeason, scheduleRound]);
 
     // Load leaderboard
     useEffect(() => {
