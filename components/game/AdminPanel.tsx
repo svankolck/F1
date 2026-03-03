@@ -122,14 +122,15 @@ export default function AdminPanel({ season, races }: AdminPanelProps) {
                     <select
                         value={selectedRound}
                         onChange={(e) => setSelectedRound(e.target.value)}
-                        className="flex-1 min-w-[160px] px-3 py-2 bg-white/5 border border-f1-border rounded-lg text-sm text-white focus:border-f1-red focus:outline-none"
+                        className="flex-1 min-w-[160px] px-3 py-2 rounded-lg text-sm text-white focus:outline-none focus:ring-1 focus:ring-f1-red appearance-none cursor-pointer"
+                        style={{ backgroundColor: '#1a1a2e', borderColor: '#2a2a3e', border: '1px solid #2a2a3e' }}
                     >
-                        <option value="">Select round...</option>
+                        <option value="" style={{ backgroundColor: '#1a1a2e', color: '#999' }}>Select round...</option>
                         {races.map((race) => {
                             const log = getLogForRound(parseInt(race.round), selectedSession);
                             const badge = log ? ` [${log.status}]` : '';
                             return (
-                                <option key={race.round} value={race.round}>
+                                <option key={race.round} value={race.round} style={{ backgroundColor: '#1a1a2e', color: '#fff' }}>
                                     R{race.round}: {race.raceName}{badge}
                                 </option>
                             );
@@ -139,12 +140,13 @@ export default function AdminPanel({ season, races }: AdminPanelProps) {
                     <select
                         value={selectedSession}
                         onChange={(e) => setSelectedSession(e.target.value as GameSessionType)}
-                        className="px-3 py-2 bg-white/5 border border-f1-border rounded-lg text-sm text-white focus:border-f1-red focus:outline-none"
+                        className="px-3 py-2 rounded-lg text-sm text-white focus:outline-none focus:ring-1 focus:ring-f1-red appearance-none cursor-pointer"
+                        style={{ backgroundColor: '#1a1a2e', borderColor: '#2a2a3e', border: '1px solid #2a2a3e' }}
                     >
-                        <option value="sprint_qualifying">Sprint Qualifying</option>
-                        <option value="qualifying">Qualifying</option>
-                        <option value="race">Race</option>
-                        <option value="sprint">Sprint</option>
+                        <option value="qualifying" style={{ backgroundColor: '#1a1a2e', color: '#fff' }}>Qualifying</option>
+                        <option value="sprint_qualifying" style={{ backgroundColor: '#1a1a2e', color: '#fff' }}>Sprint Qualifying</option>
+                        <option value="race" style={{ backgroundColor: '#1a1a2e', color: '#fff' }}>Race</option>
+                        <option value="sprint" style={{ backgroundColor: '#1a1a2e', color: '#fff' }}>Sprint</option>
                     </select>
 
                     <button
