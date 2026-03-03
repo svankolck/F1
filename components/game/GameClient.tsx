@@ -38,12 +38,11 @@ export default function GameClient({ initialSchedule, initialDrivers, initialRac
         countryFlags[race.Circuit.Location.country] = getFlagUrl(race.Circuit.Location.country);
     });
 
-    const [predictions, setPredictions] = useState<Record<GameSessionType, Prediction | null>>(initialPredictions || {
-        qualifying: null,
-        race: null,
-        sprint_qualifying: null,
-        sprint: null,
-    });
+    const emptyPredictions: Record<GameSessionType, Prediction | null> = {
+        qualifying: null, race: null, sprint_qualifying: null, sprint: null,
+    };
+
+    const [predictions, setPredictions] = useState<Record<GameSessionType, Prediction | null>>(initialPredictions || emptyPredictions);
 
     const [leaderboardData, setLeaderboardData] = useState<Array<{
         userId: string;
@@ -60,43 +59,40 @@ export default function GameClient({ initialSchedule, initialDrivers, initialRac
         cumulative: number;
     }>>([]);
 
-    // Stable primitive deps for prediction loading
-    const scheduleRound = schedule?.round;
-    const scheduleSeason = schedule?.season;
+    // Load predictions for a specific round
+    const loadPredictionsForRound = async (userId: string, season: number, round: number) => {
+        console.log('[GameClient] Loading predictions for round', round, 'season', season);
+        const { data, error } = await supabase
+            .from('predictions')
+            .select('*')
+            .eq('user_id', userId)
+            .eq('season', season)
+            .eq('round', round);
 
-    // Load user predictions — uses stable primitives to avoid re-fetching on object ref changes
-    useEffect(() => {
-        if (!user || !scheduleSeason || !scheduleRound) return;
-        let cancelled = false;
-
-        async function loadPredictions() {
-            const { data, error } = await supabase
-                .from('predictions')
-                .select('*')
-                .eq('user_id', user!.id)
-                .eq('season', scheduleSeason!)
-                .eq('round', scheduleRound!);
-
-            if (cancelled) return;
-            if (error) {
-                console.error('Failed to load predictions:', error);
-                return;
-            }
-
-            const preds: Record<GameSessionType, Prediction | null> = {
-                qualifying: null, race: null, sprint_qualifying: null, sprint: null,
-            };
-            if (data) {
-                for (const p of data) {
-                    preds[p.session_type as GameSessionType] = p as Prediction;
-                }
-            }
-            setPredictions(preds);
+        if (error) {
+            console.error('[GameClient] Failed to load predictions:', error);
+            return;
         }
-        loadPredictions();
-        return () => { cancelled = true; };
+
+        const preds: Record<GameSessionType, Prediction | null> = {
+            qualifying: null, race: null, sprint_qualifying: null, sprint: null,
+        };
+        if (data) {
+            console.log('[GameClient] Loaded', data.length, 'predictions for round', round);
+            for (const p of data) {
+                preds[p.session_type as GameSessionType] = p as Prediction;
+            }
+        }
+        setPredictions(preds);
+    };
+
+    // Initial load fallback: if no initialPredictions from SSR
+    useEffect(() => {
+        if (!user || !schedule) return;
+        if (initialPredictions && Object.values(initialPredictions).some(Boolean)) return;
+        loadPredictionsForRound(user.id, schedule.season, schedule.round);
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [user, scheduleSeason, scheduleRound]);
+    }, [user]);
 
     // Load leaderboard
     useEffect(() => {
@@ -174,10 +170,10 @@ export default function GameClient({ initialSchedule, initialDrivers, initialRac
         setIsLoading(true);
         setActiveRound(round);
 
+        // IMMEDIATELY clear predictions so old round data doesn't persist
+        setPredictions({ ...emptyPredictions });
+
         try {
-            // Assume current season for now (2026 as per user request context "2026 PREDICTION" implies we are looking at 2026, 
-            // but the app dynamic. `initialRaces` has the season. 
-            // Actually `initialSchedule.season` or `initialRaces[0].season`.
             const season = initialSchedule?.season || new Date().getFullYear();
             if (updateUrl) {
                 router.replace(`/game?round=${round}`, { scroll: false });
@@ -187,6 +183,11 @@ export default function GameClient({ initialSchedule, initialDrivers, initialRac
             if (res.ok) {
                 const newSchedule = await res.json();
                 setSchedule(newSchedule);
+
+                // Load predictions for the NEW round directly (don't wait for effect)
+                if (user) {
+                    await loadPredictionsForRound(user.id, season, parseInt(round));
+                }
             } else {
                 console.error('Failed to load schedule for round', round);
             }
