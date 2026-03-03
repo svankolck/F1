@@ -59,38 +59,28 @@ export default function GameClient({ initialSchedule, initialDrivers, initialRac
         cumulative: number;
     }>>([]);
 
-    // Load predictions for a specific round
-    const loadPredictionsForRound = async (userId: string, season: number, round: number) => {
+    // Load predictions for a specific round via server-side API (avoids RLS issues with client-side Supabase)
+    const loadPredictionsForRound = async (season: number, round: number) => {
         console.log('[GameClient] Loading predictions for round', round, 'season', season);
-        const { data, error } = await supabase
-            .from('predictions')
-            .select('*')
-            .eq('user_id', userId)
-            .eq('season', season)
-            .eq('round', round);
-
-        if (error) {
-            console.error('[GameClient] Failed to load predictions:', error);
-            return;
-        }
-
-        const preds: Record<GameSessionType, Prediction | null> = {
-            qualifying: null, race: null, sprint_qualifying: null, sprint: null,
-        };
-        if (data) {
-            console.log('[GameClient] Loaded', data.length, 'predictions for round', round);
-            for (const p of data) {
-                preds[p.session_type as GameSessionType] = p as Prediction;
+        try {
+            const res = await fetch(`/api/game/predictions/load?season=${season}&round=${round}`);
+            if (!res.ok) {
+                console.error('[GameClient] Prediction load API returned', res.status);
+                return;
             }
+            const preds = await res.json();
+            console.log('[GameClient] Loaded predictions for round', round, preds);
+            setPredictions(preds);
+        } catch (error) {
+            console.error('[GameClient] Failed to load predictions:', error);
         }
-        setPredictions(preds);
     };
 
     // Initial load fallback: if no initialPredictions from SSR
     useEffect(() => {
         if (!user || !schedule) return;
         if (initialPredictions && Object.values(initialPredictions).some(Boolean)) return;
-        loadPredictionsForRound(user.id, schedule.season, schedule.round);
+        loadPredictionsForRound(schedule.season, schedule.round);
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [user]);
 
@@ -195,7 +185,7 @@ export default function GameClient({ initialSchedule, initialDrivers, initialRac
         // Load predictions in background (non-blocking, after spinner is cleared)
         if (user) {
             const season = initialSchedule?.season || new Date().getFullYear();
-            loadPredictionsForRound(user.id, season, parseInt(round)).catch(e =>
+            loadPredictionsForRound(season, parseInt(round)).catch(e =>
                 console.error('[GameClient] Background prediction load failed:', e)
             );
         }
