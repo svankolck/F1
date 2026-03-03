@@ -11,6 +11,7 @@ import {
 } from '@/lib/types/f1';
 import DropZone from './DropZone';
 import DriverList from './DriverList';
+import DriverCard from './DriverCard';
 
 interface WeekendSessionsBoardProps {
   drivers: GameDriver[];
@@ -71,6 +72,7 @@ export default function WeekendSessionsBoard({
   onPredictionSaved,
 }: WeekendSessionsBoardProps) {
   const [selectedDriver, setSelectedDriver] = useState<GameDriver | null>(null);
+  const [pickerTarget, setPickerTarget] = useState<{ session: SessionSchedule; slot: SlotKey } | null>(null);
   const [slotsBySession, setSlotsBySession] = useState<Record<GameSessionType, SessionSlots>>({
     qualifying: { ...EMPTY_SLOTS },
     race: { ...EMPTY_SLOTS },
@@ -215,6 +217,21 @@ export default function WeekendSessionsBoard({
 
   const resolveDriver = (driverId: string | null) => (driverId ? driverMap.get(driverId) || null : null);
 
+  const handleSlotClick = (session: SessionSchedule, slot: SlotKey) => {
+    if (session.isLocked) return;
+    if (selectedDriver) {
+      setSlot(session, slot, selectedDriver);
+      return;
+    }
+    setPickerTarget({ session, slot });
+  };
+
+  const selectDriverFromPicker = (driver: GameDriver) => {
+    if (!pickerTarget) return;
+    setSlot(pickerTarget.session, pickerTarget.slot, driver);
+    setPickerTarget(null);
+  };
+
   const renderSessionCard = (session: SessionSchedule) => {
     const hasPole = hasPoleSlot(session.type);
     const scoring = getScoring(session.type);
@@ -264,9 +281,7 @@ export default function WeekendSessionsBoard({
               isPole
               onDrop={(driver) => setSlot(session, 'pole', driver)}
               onRemove={() => removeSlot(session, 'pole')}
-              onClick={() => {
-                if (selectedDriver) setSlot(session, 'pole', selectedDriver);
-              }}
+              onClick={() => handleSlotClick(session, 'pole')}
               highlight={!!selectedDriver}
             />
           </div>
@@ -281,9 +296,7 @@ export default function WeekendSessionsBoard({
                 isLocked={session.isLocked}
                 onDrop={(driver) => setSlot(session, slotKey, driver)}
                 onRemove={() => removeSlot(session, slotKey)}
-                onClick={() => {
-                  if (selectedDriver) setSlot(session, slotKey, selectedDriver);
-                }}
+                onClick={() => handleSlotClick(session, slotKey)}
                 highlight={!!selectedDriver}
               />
             ))}
@@ -298,7 +311,7 @@ export default function WeekendSessionsBoard({
       <section className="rounded-2xl border border-f1-border/50 bg-f1-surface/20 p-4 md:p-5">
         <div className="flex flex-wrap items-center justify-between gap-3 mb-3">
           <h3 className="text-sm font-bold uppercase tracking-widest text-f1-text-secondary">Weekend Status</h3>
-          <span className="text-xs text-f1-text-muted">Open = je kunt nog wijzigen</span>
+          <span className="text-xs text-f1-text-muted">Open = predictions can still be edited</span>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
           {sessions.map((session) => {
@@ -343,7 +356,7 @@ export default function WeekendSessionsBoard({
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
             <h3 className="text-3xl font-bold tracking-tight">Drivers</h3>
-            <p className="text-f1-text-secondary text-sm">Drag of tap een rijder en plaats hem in een sessie-slot.</p>
+            <p className="text-f1-text-secondary text-sm">Drag or tap a driver and place them in any session slot.</p>
             {selectedDriver && (
               <p className="text-xs text-f1-red mt-1">
                 Selected: <span className="font-bold">{selectedDriver.firstName} {selectedDriver.lastName}</span>
@@ -374,6 +387,39 @@ export default function WeekendSessionsBoard({
           selectedDriverId={selectedDriver?.driverId || null}
         />
       </section>
+
+      {pickerTarget && (
+        <div className="fixed inset-0 z-[70] flex items-end sm:items-center justify-center bg-black/70 p-3 sm:p-6">
+          <div className="w-full max-w-4xl rounded-2xl border border-f1-border bg-f1-bg p-4 sm:p-5">
+            <div className="flex items-center justify-between gap-3 mb-4">
+              <div>
+                <p className="text-xs uppercase tracking-widest text-f1-text-muted">Select Driver</p>
+                <h4 className="text-lg font-bold">
+                  {pickerTarget.session.label} - {pickerTarget.slot.toUpperCase()}
+                </h4>
+              </div>
+              <button
+                onClick={() => setPickerTarget(null)}
+                className="w-8 h-8 rounded-full border border-f1-border hover:border-f1-red/40 flex items-center justify-center"
+                aria-label="Close driver picker"
+              >
+                <span className="material-icons text-sm">close</span>
+              </button>
+            </div>
+
+            <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-2.5 max-h-[60vh] overflow-y-auto p-1">
+              {drivers.map((driver) => (
+                <DriverCard
+                  key={`picker-${driver.driverId}`}
+                  driver={driver}
+                  onSelect={selectDriverFromPicker}
+                  compact={false}
+                />
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

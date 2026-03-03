@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/components/auth/AuthProvider';
 import { createClient } from '@/lib/supabase/client';
 import { GameDriver, WeekendSchedule, Prediction, GameSessionType, Race, getFlagUrl } from '@/lib/types/f1';
@@ -21,12 +22,14 @@ interface GameClientProps {
 type TabType = 'prediction' | 'stand' | 'admin';
 
 export default function GameClient({ initialSchedule, initialDrivers, initialRaces, initialPredictions, isAdmin }: GameClientProps) {
+    const router = useRouter();
+    const searchParams = useSearchParams();
     const { user } = useAuth();
     const supabase = createClient();
     const [activeTab, setActiveTab] = useState<TabType>('prediction');
     const [schedule, setSchedule] = useState<WeekendSchedule | null>(initialSchedule);
     const [drivers] = useState<GameDriver[]>(initialDrivers);
-    const [activeRound, setActiveRound] = useState<string>(initialSchedule?.round.toString() || '1');
+    const [activeRound, setActiveRound] = useState<string>(searchParams.get('round') || initialSchedule?.round.toString() || '1');
     const [isLoading, setIsLoading] = useState(false);
 
     // Build country flag map
@@ -41,7 +44,6 @@ export default function GameClient({ initialSchedule, initialDrivers, initialRac
         sprint_qualifying: null,
         sprint: null,
     });
-    const [predictionsLoaded, setPredictionsLoaded] = useState(!!initialPredictions);
 
     const [leaderboardData, setLeaderboardData] = useState<Array<{
         userId: string;
@@ -64,12 +66,8 @@ export default function GameClient({ initialSchedule, initialDrivers, initialRac
     // Load user predictions (only when switching rounds, initial data comes from server)
     useEffect(() => {
         if (!user || !schedule) return;
-        // Skip client-side fetch for initial round — server already provided the data
-        if (schedule.round.toString() === (initialSchedule?.round.toString() || '') && initialPredictions) {
-            return;
-        }
+
         async function loadPredictions() {
-            setPredictionsLoaded(false);
             const { data } = await supabase
                 .from('predictions')
                 .select('*')
@@ -77,16 +75,15 @@ export default function GameClient({ initialSchedule, initialDrivers, initialRac
                 .eq('season', schedule!.season)
                 .eq('round', schedule!.round);
 
+            const preds: Record<GameSessionType, Prediction | null> = {
+                qualifying: null, race: null, sprint_qualifying: null, sprint: null,
+            };
             if (data) {
-                const preds: Record<GameSessionType, Prediction | null> = {
-                    qualifying: null, race: null, sprint_qualifying: null, sprint: null,
-                };
                 for (const p of data) {
                     preds[p.session_type as GameSessionType] = p as Prediction;
                 }
-                setPredictions(preds);
             }
-            setPredictionsLoaded(true);
+            setPredictions(preds);
         }
         loadPredictions();
         // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -162,70 +159,7 @@ export default function GameClient({ initialSchedule, initialDrivers, initialRac
         loadLeaderboard();
     }, [schedule, supabase, user]);
 
-    // Apply default drivers if no prediction exists
-    useEffect(() => {
-        if (!user || !schedule || !predictionsLoaded) return;
-        const activeSchedule = schedule;
-
-        async function applyDefaults() {
-            const { data: profile } = await supabase
-                .from('profiles')
-                .select('default_pole_driver, default_p1_driver, default_p2_driver, default_p3_driver')
-                .eq('id', user!.id)
-                .single();
-
-            if (!profile) return;
-
-            // For each session without a prediction, create one from defaults
-            for (const session of activeSchedule.sessions) {
-                if (predictions[session.type]) continue; // already has prediction
-                if (session.isLocked) continue; // can't create anymore
-
-                const hasPole = session.type === 'qualifying' || session.type === 'sprint_qualifying';
-
-                const defaultPred: Partial<Prediction> = {
-                    user_id: user!.id,
-                    season: activeSchedule.season,
-                    round: activeSchedule.round,
-                    session_type: session.type,
-                    pole_driver_id: hasPole ? profile.default_pole_driver : null,
-                    p1_driver_id: hasPole ? null : profile.default_p1_driver,
-                    p2_driver_id: hasPole ? null : profile.default_p2_driver,
-                    p3_driver_id: hasPole ? null : profile.default_p3_driver,
-                    is_default: true,
-                };
-
-                // Only if there are any defaults set
-                if (defaultPred.p1_driver_id || defaultPred.pole_driver_id) {
-                    const res = await fetch('/api/game/predictions', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            season: activeSchedule.season,
-                            round: activeSchedule.round,
-                            sessionType: session.type,
-                            pole_driver_id: defaultPred.pole_driver_id || null,
-                            p1_driver_id: hasPole ? null : defaultPred.p1_driver_id || null,
-                            p2_driver_id: hasPole ? null : defaultPred.p2_driver_id || null,
-                            p3_driver_id: hasPole ? null : defaultPred.p3_driver_id || null,
-                            is_default: true,
-                        }),
-                    });
-
-                    if (!res.ok) continue;
-
-                    const saved = await res.json() as Prediction;
-                    setPredictions(prev => ({ ...prev, [session.type]: saved }));
-                }
-            }
-        }
-        applyDefaults();
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [user, schedule, predictionsLoaded, predictions, supabase]);
-
-
-
-    const handleRoundSelect = async (round: string) => {
+    const handleRoundSelect = async (round: string, updateUrl: boolean = true) => {
         if (round === activeRound || isLoading) return;
         setIsLoading(true);
         setActiveRound(round);
@@ -235,6 +169,9 @@ export default function GameClient({ initialSchedule, initialDrivers, initialRac
             // but the app dynamic. `initialRaces` has the season. 
             // Actually `initialSchedule.season` or `initialRaces[0].season`.
             const season = initialSchedule?.season || new Date().getFullYear();
+            if (updateUrl) {
+                router.replace(`/game?round=${round}`, { scroll: false });
+            }
 
             const res = await fetch(`/api/game/schedule?season=${season}&round=${round}`);
             if (res.ok) {
@@ -249,6 +186,14 @@ export default function GameClient({ initialSchedule, initialDrivers, initialRac
             setIsLoading(false);
         }
     };
+
+    useEffect(() => {
+        const roundFromUrl = searchParams.get('round');
+        if (!roundFromUrl || !schedule) return;
+        if (roundFromUrl === schedule.round.toString()) return;
+        handleRoundSelect(roundFromUrl, false);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [searchParams, schedule]);
 
     if (!schedule) {
         return (

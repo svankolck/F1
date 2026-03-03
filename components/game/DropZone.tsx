@@ -41,6 +41,10 @@ export default function DropZone({ label, points, driver, isLocked, isPole, onDr
     }, [isLocked, onDrop]);
 
     const handleClick = () => {
+        if (onClick) {
+            onClick();
+            return;
+        }
         if (driver && !isLocked) {
             onRemove();
         }
@@ -51,7 +55,7 @@ export default function DropZone({ label, points, driver, isLocked, isPole, onDr
         return (
             <div
                 className={`relative rounded-xl border border-f1-border/30 bg-f1-surface/30 backdrop-blur-sm
-                    ${isPole ? 'p-5 min-h-[120px]' : 'p-4 min-h-[100px]'}
+                    ${isPole ? 'p-4 min-h-[100px]' : 'p-3 min-h-[84px]'}
                     flex flex-col items-center justify-center gap-2 opacity-70`}
             >
                 <span className="material-icons text-f1-text-muted text-lg">lock</span>
@@ -77,7 +81,7 @@ export default function DropZone({ label, points, driver, isLocked, isPole, onDr
         return (
             <div
                 className={`relative rounded-xl transition-all duration-300 flex flex-col items-center justify-center gap-2 cursor-pointer
-                    ${isPole ? 'p-5 min-h-[120px]' : 'p-4 min-h-[100px]'}
+                    ${isPole ? 'p-4 min-h-[100px]' : 'p-3 min-h-[84px]'}
                     ${isDragOver
                         ? 'border-2 border-f1-red bg-f1-red/10 shadow-lg shadow-f1-red/20 scale-[1.02]'
                         : 'border-2 border-dashed border-f1-border/40 bg-f1-surface/20 hover:border-f1-border/60 animate-pulse-glow'
@@ -104,7 +108,7 @@ export default function DropZone({ label, points, driver, isLocked, isPole, onDr
     return (
         <div
             className={`relative rounded-xl border-2 bg-f1-surface/40 backdrop-blur-sm
-                ${isPole ? 'p-5 min-h-[120px]' : 'p-4 min-h-[100px]'}
+                ${isPole ? 'p-4 min-h-[100px]' : 'p-3 min-h-[84px]'}
                 flex flex-col items-center justify-center gap-2 cursor-pointer
                 hover:bg-f1-surface/60 transition-all duration-300 group
                 ${highlight && !driver && !isLocked ? 'animate-pulse border-f1-red/50 ring-1 ring-f1-red/30' : ''}`}
