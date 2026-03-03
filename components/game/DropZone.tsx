@@ -50,103 +50,96 @@ export default function DropZone({ label, points, driver, isLocked, isPole, onDr
         }
     };
 
-    // Locked state
+    // Locked state — compact
     if (isLocked) {
         return (
-            <div
-                className={`relative rounded-xl border border-f1-border/30 bg-f1-surface/30 backdrop-blur-sm
-                    ${isPole ? 'p-4 min-h-[100px]' : 'p-3 min-h-[84px]'}
-                    flex flex-col items-center justify-center gap-2 opacity-70`}
-            >
-                <span className="material-icons text-f1-text-muted text-lg">lock</span>
+            <div className="relative rounded-lg border border-f1-border/30 bg-f1-surface/30 p-2 flex items-center gap-2 opacity-70">
+                <span className="material-icons text-f1-text-muted text-xs">lock</span>
                 {driver ? (
                     <>
-                        <span className="font-bold text-sm" style={{ color: driver.teamColor }}>
-                            {driver.code}
-                        </span>
-                        <span className="text-[10px] text-f1-text-muted">{driver.firstName} {driver.lastName}</span>
+                        <div className="w-6 h-6 rounded-full overflow-hidden bg-f1-bg border" style={{ borderColor: driver.teamColor }}>
+                            {driver.headshotUrl ? (
+                                <Image src={driver.headshotUrl} alt={driver.code} width={24} height={24} className="w-full h-full object-cover object-top" />
+                            ) : (
+                                <div className="w-full h-full flex items-center justify-center text-[8px] font-bold" style={{ color: driver.teamColor }}>{driver.code}</div>
+                            )}
+                        </div>
+                        <span className="font-bold text-xs" style={{ color: driver.teamColor }}>{driver.code}</span>
                     </>
                 ) : (
-                    <span className="text-xs text-f1-text-muted">Not set</span>
+                    <span className="text-[10px] text-f1-text-muted">—</span>
                 )}
-                <div className="absolute top-2 right-2">
-                    <span className="text-[9px] font-mono text-f1-text-muted uppercase">{label}</span>
-                </div>
+                <span className="ml-auto text-[9px] font-mono text-f1-text-muted uppercase">{label}</span>
             </div>
         );
     }
 
-    // Empty state
+    // Empty state — compact
     if (!driver) {
         return (
             <div
-                className={`relative rounded-xl transition-all duration-300 flex flex-col items-center justify-center gap-2 cursor-pointer
-                    ${isPole ? 'p-4 min-h-[100px]' : 'p-3 min-h-[84px]'}
+                className={`relative rounded-lg transition-all duration-200 flex items-center gap-2 cursor-pointer p-2
                     ${isDragOver
-                        ? 'border-2 border-f1-red bg-f1-red/10 shadow-lg shadow-f1-red/20 scale-[1.02]'
-                        : 'border-2 border-dashed border-f1-border/40 bg-f1-surface/20 hover:border-f1-border/60 animate-pulse-glow'
+                        ? 'border-2 border-f1-red bg-f1-red/10 scale-[1.01]'
+                        : highlight
+                            ? 'border-2 border-dashed border-f1-red/50 bg-f1-red/5 animate-pulse'
+                            : 'border-2 border-dashed border-f1-border/40 bg-f1-surface/20 hover:border-f1-border/60'
                     }`}
                 onDragOver={handleDragOver}
                 onDragLeave={handleDragLeave}
                 onDrop={handleDrop}
                 onClick={onClick}
             >
-                <div className="flex flex-col items-center gap-1">
-                    <span className={`material-icons ${isDragOver ? 'text-f1-red' : 'text-f1-text-muted'} ${isPole ? 'text-2xl' : 'text-lg'}`}>
-                        {isPole ? 'emoji_events' : 'add_circle_outline'}
-                    </span>
-                    <span className={`font-bold uppercase tracking-wider ${isPole ? 'text-sm' : 'text-xs'} ${isDragOver ? 'text-f1-red' : 'text-f1-text-muted'}`}>
-                        {label}
-                    </span>
-                    <span className="text-[10px] font-mono text-f1-text-muted">{points}pt</span>
-                </div>
+                <span className={`material-icons ${isDragOver ? 'text-f1-red' : 'text-f1-text-muted'} text-base`}>
+                    {isPole ? 'emoji_events' : 'add_circle_outline'}
+                </span>
+                <span className={`font-bold uppercase tracking-wider text-[10px] ${isDragOver ? 'text-f1-red' : 'text-f1-text-muted'}`}>
+                    {label}
+                </span>
+                <span className="ml-auto text-[9px] font-mono text-f1-text-muted">{points}pt</span>
             </div>
         );
     }
 
-    // Filled state
+    // Filled state — compact horizontal
     return (
         <div
-            className={`relative rounded-xl border-2 bg-f1-surface/40 backdrop-blur-sm
-                ${isPole ? 'p-4 min-h-[100px]' : 'p-3 min-h-[84px]'}
-                flex flex-col items-center justify-center gap-2 cursor-pointer
-                hover:bg-f1-surface/60 transition-all duration-300 group
-                ${highlight && !driver && !isLocked ? 'animate-pulse border-f1-red/50 ring-1 ring-f1-red/30' : ''}`}
-            style={{ borderColor: driver.teamColor + '80' }}
+            className="relative rounded-lg border bg-f1-surface/40 p-2 flex items-center gap-2 cursor-pointer hover:bg-f1-surface/60 transition-all duration-200 group"
+            style={{ borderColor: driver.teamColor + '60' }}
             onDragOver={handleDragOver}
             onDragLeave={handleDragLeave}
             onDrop={handleDrop}
             onClick={handleClick}
         >
-            {/* Remove button */}
-            <button
-                className="absolute top-1 right-1 w-5 h-5 rounded-full bg-f1-red/80 flex items-center justify-center
-                    opacity-0 group-hover:opacity-100 transition-opacity duration-200 hover:bg-f1-red"
-                onClick={(e) => { e.stopPropagation(); onRemove(); }}
-            >
-                <span className="material-icons text-white text-xs">close</span>
-            </button>
-
             {/* Position label */}
-            <div className="absolute top-2 left-2 flex items-center gap-1">
-                <span className="text-[9px] font-mono text-f1-text-muted uppercase">{label}</span>
-                <span className="text-[9px] font-mono" style={{ color: driver.teamColor }}>{points}pt</span>
-            </div>
+            <span className="text-[9px] font-mono text-f1-text-muted uppercase w-6">{label}</span>
 
-            {/* Driver info */}
-            <div className="w-10 h-10 rounded-full overflow-hidden bg-f1-bg border-2" style={{ borderColor: driver.teamColor }}>
+            {/* Driver avatar */}
+            <div className="w-7 h-7 rounded-full overflow-hidden bg-f1-bg border-2 flex-shrink-0" style={{ borderColor: driver.teamColor }}>
                 {driver.headshotUrl ? (
-                    <Image src={driver.headshotUrl} alt={driver.code} width={40} height={40} className="w-full h-full object-cover object-top" />
+                    <Image src={driver.headshotUrl} alt={driver.code} width={28} height={28} className="w-full h-full object-cover object-top" />
                 ) : (
-                    <div className="w-full h-full flex items-center justify-center text-xs font-bold" style={{ color: driver.teamColor }}>
+                    <div className="w-full h-full flex items-center justify-center text-[8px] font-bold" style={{ color: driver.teamColor }}>
                         {driver.code}
                     </div>
                 )}
             </div>
-            <span className="font-bold text-sm" style={{ color: driver.teamColor }}>
-                {driver.code}
-            </span>
-            <span className="text-[10px] text-f1-text-muted">{driver.firstName} {driver.lastName}</span>
+
+            {/* Driver name */}
+            <span className="font-bold text-xs" style={{ color: driver.teamColor }}>{driver.code}</span>
+            <span className="text-[10px] text-f1-text-muted hidden sm:inline">{driver.lastName}</span>
+
+            {/* Points */}
+            <span className="ml-auto text-[9px] font-mono" style={{ color: driver.teamColor }}>{points}pt</span>
+
+            {/* Remove button */}
+            <button
+                className="w-4 h-4 rounded-full bg-f1-red/80 flex items-center justify-center
+                    opacity-0 group-hover:opacity-100 transition-opacity duration-200 hover:bg-f1-red flex-shrink-0"
+                onClick={(e) => { e.stopPropagation(); onRemove(); }}
+            >
+                <span className="material-icons text-white text-[10px]">close</span>
+            </button>
         </div>
     );
 }

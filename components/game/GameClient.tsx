@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/components/auth/AuthProvider';
 import { createClient } from '@/lib/supabase/client';
@@ -25,7 +25,7 @@ export default function GameClient({ initialSchedule, initialDrivers, initialRac
     const router = useRouter();
     const searchParams = useSearchParams();
     const { user } = useAuth();
-    const supabase = createClient();
+    const supabase = useMemo(() => createClient(), []);
     const [activeTab, setActiveTab] = useState<TabType>('prediction');
     const [schedule, setSchedule] = useState<WeekendSchedule | null>(initialSchedule);
     const [drivers] = useState<GameDriver[]>(initialDrivers);
@@ -87,7 +87,7 @@ export default function GameClient({ initialSchedule, initialDrivers, initialRac
         }
         loadPredictions();
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [user, schedule, supabase]);
+    }, [user, schedule]);
 
     // Load leaderboard
     useEffect(() => {
@@ -157,7 +157,8 @@ export default function GameClient({ initialSchedule, initialDrivers, initialRac
             }
         }
         loadLeaderboard();
-    }, [schedule, supabase, user]);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [schedule, user]);
 
     const handleRoundSelect = async (round: string, updateUrl: boolean = true) => {
         if (round === activeRound || isLoading) return;
