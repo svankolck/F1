@@ -133,6 +133,11 @@ export default async function HomePage() {
               <span className="text-lg md:text-xl font-bold uppercase tracking-wider">
                 {amsterdamTime}
               </span>
+              {nextRace?.Sprint && (
+                <span className="rounded-full border border-orange-500/40 bg-orange-500/10 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.18em] text-orange-300">
+                  Sprint
+                </span>
+              )}
               <span className="text-xs text-f1-text-muted font-mono uppercase tracking-wider">
                 Europe/Amsterdam
               </span>

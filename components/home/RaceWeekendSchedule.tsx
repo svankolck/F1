@@ -90,7 +90,6 @@ function formatCountdown(target: string, now: Date): string {
 export default function RaceWeekendSchedule({ race }: RaceWeekendScheduleProps) {
   const [now, setNow] = useState(() => new Date());
   const sessions = getSessionItems(race);
-  const isSprintWeekend = Boolean(race.Sprint || race.SprintQualifying);
 
   useEffect(() => {
     const interval = window.setInterval(() => {
@@ -102,20 +101,6 @@ export default function RaceWeekendSchedule({ race }: RaceWeekendScheduleProps) 
 
   return (
     <div className="mt-5 w-full max-w-xl overflow-hidden glass-card hover:border-f1-red/30 transition-colors duration-500">
-      <div className="flex items-center justify-between gap-3 border-b border-f1-border/50 px-3.5 py-2.5">
-        <div>
-          <p className="text-[10px] font-bold uppercase tracking-[0.28em] text-f1-red">Race Weekend</p>
-          <p className="mt-1 text-[11px] uppercase tracking-[0.18em] text-f1-text-muted">
-            {isSprintWeekend ? 'Sprint Format' : 'Weekend Schedule'}
-          </p>
-        </div>
-        {isSprintWeekend && (
-          <span className="rounded-full border border-orange-500/40 bg-orange-500/10 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.18em] text-orange-300">
-            Sprint
-          </span>
-        )}
-      </div>
-
       <div className="space-y-1.5 p-1.5">
         {sessions.map((session) => (
           <div

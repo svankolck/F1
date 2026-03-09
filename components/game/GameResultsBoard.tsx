@@ -76,6 +76,100 @@ export default function GameResultsBoard({ entries, sessions, drivers }: GameRes
         );
     }
 
+    const renderCombinedBlock = (
+        entry: UserRoundResult,
+        title: string,
+        badgePrefix: string,
+        poleSessionType: string,
+        raceSessionType: string,
+    ) => {
+        const poleResult = entry.results.find((result) => result.sessionType === poleSessionType);
+        const raceResult = entry.results.find((result) => result.sessionType === raceSessionType);
+
+        if (!poleResult && !raceResult) return null;
+
+        const poleSummary = sessionMap.get(poleSessionType);
+        const raceSummary = sessionMap.get(raceSessionType);
+        const totalPoints = (poleResult?.totalPoints || 0) + (raceResult?.totalPoints || 0);
+        const usedDefaults = Boolean(poleResult?.usedDefaults || raceResult?.usedDefaults);
+
+        const cells = [
+            {
+                label: 'Pole',
+                driverId: poleResult?.prediction.pole_driver_id || null,
+                points: poleResult?.polePoints || 0,
+                actual: poleSummary?.actualPole || null,
+            },
+            {
+                label: 'P1',
+                driverId: raceResult?.prediction.p1_driver_id || null,
+                points: raceResult?.p1Points || 0,
+                actual: raceSummary?.actualP1 || null,
+            },
+            {
+                label: 'P2',
+                driverId: raceResult?.prediction.p2_driver_id || null,
+                points: raceResult?.p2Points || 0,
+                actual: raceSummary?.actualP2 || null,
+            },
+            {
+                label: 'P3',
+                driverId: raceResult?.prediction.p3_driver_id || null,
+                points: raceResult?.p3Points || 0,
+                actual: raceSummary?.actualP3 || null,
+            },
+        ];
+
+        return (
+            <div className="rounded-xl border border-f1-border/35 bg-white/[0.02] p-3 space-y-3">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                    <div className="flex flex-wrap items-center gap-2">
+                        <h4 className="text-[11px] font-bold uppercase tracking-[0.18em] text-white">{title}</h4>
+                        {poleSummary && (
+                            <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider border ${getStatusBadge(poleSummary.status)}`}>
+                                {badgePrefix}Q {poleSummary.status}
+                            </span>
+                        )}
+                        {raceSummary && (
+                            <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider border ${getStatusBadge(raceSummary.status)}`}>
+                                {badgePrefix}R {raceSummary.status}
+                            </span>
+                        )}
+                        {usedDefaults && (
+                            <span className="text-[10px] uppercase tracking-wider text-f1-text-muted">
+                                default picks used
+                            </span>
+                        )}
+                    </div>
+
+                    <div className="text-sm font-mono font-bold text-f1-red">
+                        {totalPoints} pts
+                    </div>
+                </div>
+
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                    {cells.map((cell) => (
+                        <div key={`${title}-${cell.label}`} className="rounded-lg border border-f1-border/25 bg-f1-surface/15 px-2.5 py-2">
+                            <div className="flex items-center justify-between gap-2">
+                                <p className="text-[10px] uppercase tracking-wider text-f1-text-muted">{cell.label}</p>
+                                <p className="text-[11px] font-mono text-f1-text-muted">{getDriverCode(cell.actual)}</p>
+                            </div>
+                            <p className="text-base font-bold mt-1">{getDriverCode(cell.driverId)}</p>
+                            <p className="text-[11px] text-f1-red mt-1">+{cell.points}</p>
+                        </div>
+                    ))}
+                </div>
+
+                {!!raceResult?.bonusPoints && (
+                    <div className="flex items-center justify-between rounded-lg border border-f1-border/20 bg-f1-surface/10 px-2.5 py-2">
+                        <span className="text-[10px] uppercase tracking-wider text-f1-text-muted">Bonus Top 3</span>
+                        <span className="text-[11px] font-bold text-f1-red">+{raceResult.bonusPoints}</span>
+                    </div>
+                )}
+            </div>
+        );
+    };
+
     return (
         <div className="space-y-4">
             <div>
@@ -85,15 +179,15 @@ export default function GameResultsBoard({ entries, sessions, drivers }: GameRes
 
             <div className="space-y-3">
                 {entries.map((entry, index) => (
-                    <div key={entry.userId} className="glass-card p-4 space-y-4">
-                        <div className="flex items-center justify-between gap-4">
+                    <div key={entry.userId} className="glass-card p-3 space-y-3">
+                        <div className="flex items-center justify-between gap-3">
                             <div className="flex items-center gap-3 min-w-0">
-                                <div className="w-8 text-center text-sm font-mono font-bold text-f1-text-muted">
+                                <div className="w-7 text-center text-sm font-mono font-bold text-f1-text-muted">
                                     {index + 1}
                                 </div>
-                                <div className="w-10 h-10 rounded-full overflow-hidden bg-f1-surface border border-f1-border flex-shrink-0">
+                                <div className="w-9 h-9 rounded-full overflow-hidden bg-f1-surface border border-f1-border flex-shrink-0">
                                     {entry.avatarUrl ? (
-                                        <Image src={entry.avatarUrl} alt="" width={40} height={40} className="w-full h-full object-cover" />
+                                        <Image src={entry.avatarUrl} alt="" width={36} height={36} className="w-full h-full object-cover" />
                                     ) : (
                                         <div className="w-full h-full flex items-center justify-center text-sm font-bold text-f1-text-muted">
                                             {entry.username.charAt(0).toUpperCase()}
@@ -101,7 +195,7 @@ export default function GameResultsBoard({ entries, sessions, drivers }: GameRes
                                     )}
                                 </div>
                                 <div className="min-w-0">
-                                    <p className="text-base font-bold truncate">{entry.username}</p>
+                                    <p className="text-[15px] font-bold truncate">{entry.username}</p>
                                     <p className="text-[11px] uppercase tracking-wider text-f1-text-muted">
                                         {entry.results.length} scored {entry.results.length === 1 ? 'session' : 'sessions'}
                                     </p>
@@ -109,73 +203,14 @@ export default function GameResultsBoard({ entries, sessions, drivers }: GameRes
                             </div>
 
                             <div className="text-right">
-                                <p className="text-2xl font-bold font-mono text-white">{entry.totalPoints}</p>
+                                <p className="text-xl font-bold font-mono text-white">{entry.totalPoints}</p>
                                 <p className="text-[11px] uppercase tracking-wider text-f1-text-muted">round points</p>
                             </div>
                         </div>
 
-                        <div className="space-y-3">
-                            {entry.results.map((result) => {
-                                const session = sessionMap.get(result.sessionType);
-                                const badgeClass = getStatusBadge(session?.status || 'unknown');
-
-                                return (
-                                    <div key={`${entry.userId}-${result.sessionType}`} className="rounded-xl border border-f1-border/40 bg-white/[0.02] p-3 space-y-3">
-                                        <div className="flex flex-wrap items-center justify-between gap-2">
-                                            <div className="flex items-center gap-2">
-                                                <h4 className="text-xs font-bold uppercase tracking-wider">{result.label}</h4>
-                                                <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider border ${badgeClass}`}>
-                                                    {session?.status || 'unknown'}
-                                                </span>
-                                                {result.usedDefaults && (
-                                                    <span className="text-[10px] uppercase tracking-wider text-f1-text-muted">
-                                                        default picks
-                                                    </span>
-                                                )}
-                                            </div>
-
-                                            <div className="text-sm font-mono font-bold text-f1-red">
-                                                {result.totalPoints} pts
-                                            </div>
-                                        </div>
-
-                                        <div className="grid grid-cols-2 md:grid-cols-5 gap-2">
-                                            <div className="rounded-lg border border-f1-border/30 bg-f1-surface/20 px-2.5 py-2">
-                                                <p className="text-[10px] uppercase tracking-wider text-f1-text-muted">Pole</p>
-                                                <p className="text-sm font-bold mt-1">{getDriverCode(result.prediction.pole_driver_id)}</p>
-                                                <p className="text-[11px] text-f1-red mt-1">+{result.polePoints}</p>
-                                            </div>
-                                            <div className="rounded-lg border border-f1-border/30 bg-f1-surface/20 px-2.5 py-2">
-                                                <p className="text-[10px] uppercase tracking-wider text-f1-text-muted">P1</p>
-                                                <p className="text-sm font-bold mt-1">{getDriverCode(result.prediction.p1_driver_id)}</p>
-                                                <p className="text-[11px] text-f1-red mt-1">+{result.p1Points}</p>
-                                            </div>
-                                            <div className="rounded-lg border border-f1-border/30 bg-f1-surface/20 px-2.5 py-2">
-                                                <p className="text-[10px] uppercase tracking-wider text-f1-text-muted">P2</p>
-                                                <p className="text-sm font-bold mt-1">{getDriverCode(result.prediction.p2_driver_id)}</p>
-                                                <p className="text-[11px] text-f1-red mt-1">+{result.p2Points}</p>
-                                            </div>
-                                            <div className="rounded-lg border border-f1-border/30 bg-f1-surface/20 px-2.5 py-2">
-                                                <p className="text-[10px] uppercase tracking-wider text-f1-text-muted">P3</p>
-                                                <p className="text-sm font-bold mt-1">{getDriverCode(result.prediction.p3_driver_id)}</p>
-                                                <p className="text-[11px] text-f1-red mt-1">+{result.p3Points}</p>
-                                            </div>
-                                            <div className="rounded-lg border border-f1-border/30 bg-f1-surface/20 px-2.5 py-2">
-                                                <p className="text-[10px] uppercase tracking-wider text-f1-text-muted">Bonus</p>
-                                                <p className="text-sm font-bold mt-1">Top 3</p>
-                                                <p className="text-[11px] text-f1-red mt-1">+{result.bonusPoints}</p>
-                                            </div>
-                                        </div>
-
-                                        <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-[11px] text-f1-text-muted font-mono">
-                                            <div>ACTUAL POLE: {getDriverCode(session?.actualPole || null)}</div>
-                                            <div>ACTUAL P1: {getDriverCode(session?.actualP1 || null)}</div>
-                                            <div>ACTUAL P2: {getDriverCode(session?.actualP2 || null)}</div>
-                                            <div>ACTUAL P3: {getDriverCode(session?.actualP3 || null)}</div>
-                                        </div>
-                                    </div>
-                                );
-                            })}
+                        <div className="space-y-2.5">
+                            {renderCombinedBlock(entry, 'Grand Prix', '', 'qualifying', 'race')}
+                            {renderCombinedBlock(entry, 'Sprint Weekend', 'S', 'sprint_qualifying', 'sprint')}
                         </div>
                     </div>
                 ))}
