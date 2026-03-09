@@ -1,9 +1,8 @@
 'use client';
 
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/components/auth/AuthProvider';
-import { createClient } from '@/lib/supabase/client';
 import { GameDriver, WeekendSchedule, Prediction, GameSessionType, Race, getFlagUrl } from '@/lib/types/f1';
 import RoundSlider from '@/components/standings/RoundSlider';
 import GameLeaderboard from './GameLeaderboard';
@@ -25,7 +24,6 @@ export default function GameClient({ initialSchedule, initialDrivers, initialRac
     const router = useRouter();
     const searchParams = useSearchParams();
     const { user } = useAuth();
-    const supabase = useMemo(() => createClient(), []);
     const [activeTab, setActiveTab] = useState<TabType>('prediction');
     const [schedule, setSchedule] = useState<WeekendSchedule | null>(initialSchedule);
     const [drivers] = useState<GameDriver[]>(initialDrivers);
@@ -62,73 +60,26 @@ export default function GameClient({ initialSchedule, initialDrivers, initialRac
     const loadLeaderboard = useCallback(async () => {
         if (!schedule) return;
 
-        const { data: scores } = await supabase
-            .from('game_scores')
-            .select('user_id, total_points, season, round, session_type')
-            .eq('season', schedule.season);
+        try {
+            const res = await fetch(`/api/game/leaderboard?season=${schedule.season}`, {
+                credentials: 'include',
+            });
 
-        if (!scores || scores.length === 0) {
+            if (!res.ok) {
+                setLeaderboardData([]);
+                setChartData([]);
+                return;
+            }
+
+            const data = await res.json();
+            setLeaderboardData(data.entries || []);
+            setChartData(data.chartData || []);
+        } catch (error) {
+            console.error('Failed to load leaderboard:', error);
             setLeaderboardData([]);
             setChartData([]);
-            return;
         }
-
-        const userMap = new Map<string, { total: number; rounds: Set<number> }>();
-        for (const s of scores) {
-            const existing = userMap.get(s.user_id) || { total: 0, rounds: new Set<number>() };
-            existing.total += s.total_points;
-            existing.rounds.add(s.round);
-            userMap.set(s.user_id, existing);
-        }
-
-        const userIds = Array.from(userMap.keys());
-        const { data: profiles } = await supabase
-            .from('public_profiles')
-            .select('id, username')
-            .in('id', userIds);
-
-        const entries = Array.from(userMap.entries()).map(([userId, data]) => {
-            const profile = profiles?.find(p => p.id === userId);
-            return {
-                userId,
-                username: profile?.username || 'Unknown',
-                avatarUrl: undefined,
-                totalPoints: data.total,
-                raceCount: data.rounds.size,
-                scores: [] as never[],
-            };
-        });
-
-        setLeaderboardData(entries);
-
-        if (!user) {
-            setChartData([]);
-            return;
-        }
-
-        const userScores = scores
-            .filter(s => s.user_id === user.id)
-            .sort((a, b) => a.round - b.round);
-
-        const byRound = new Map<number, number>();
-        for (const score of userScores) {
-            byRound.set(score.round, (byRound.get(score.round) || 0) + score.total_points);
-        }
-
-        let cumulative = 0;
-        const chart = Array.from(byRound.entries())
-            .sort((a, b) => a[0] - b[0])
-            .map(([round, points]) => {
-                cumulative += points;
-                return {
-                    round,
-                    raceName: `R${round}`,
-                    points,
-                    cumulative,
-                };
-            });
-        setChartData(chart);
-    }, [schedule, supabase, user]);
+    }, [schedule]);
 
     // Load predictions for a specific round via server-side API (avoids RLS issues with client-side Supabase)
     const loadPredictionsForRound = async (season: number, round: number) => {
