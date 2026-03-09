@@ -7,6 +7,7 @@ import { GameDriver, WeekendSchedule, Prediction, GameSessionType, Race, getFlag
 import RoundSlider from '@/components/standings/RoundSlider';
 import GameLeaderboard from './GameLeaderboard';
 import GamePointsChart from './GamePointsChart';
+import GameResultsBoard from './GameResultsBoard';
 import AdminPanel from './AdminPanel';
 import WeekendSessionsBoard from './WeekendSessionsBoard';
 
@@ -18,7 +19,7 @@ interface GameClientProps {
     isAdmin?: boolean;
 }
 
-type TabType = 'prediction' | 'stand' | 'admin';
+type TabType = 'prediction' | 'results' | 'stand' | 'admin';
 
 export default function GameClient({ initialSchedule, initialDrivers, initialRaces, initialPredictions, isAdmin }: GameClientProps) {
     const router = useRouter();
@@ -56,6 +57,40 @@ export default function GameClient({ initialSchedule, initialDrivers, initialRac
         points: number;
         cumulative: number;
     }>>([]);
+    const [roundResults, setRoundResults] = useState<{
+        entries: Array<{
+            userId: string;
+            username: string;
+            avatarUrl?: string;
+            totalPoints: number;
+            results: Array<{
+                sessionType: string;
+                label: string;
+                totalPoints: number;
+                polePoints: number;
+                p1Points: number;
+                p2Points: number;
+                p3Points: number;
+                bonusPoints: number;
+                prediction: {
+                    pole_driver_id: string | null;
+                    p1_driver_id: string | null;
+                    p2_driver_id: string | null;
+                    p3_driver_id: string | null;
+                };
+                usedDefaults: boolean;
+            }>;
+        }>;
+        sessions: Array<{
+            sessionType: string;
+            label: string;
+            status: string;
+            actualPole: string | null;
+            actualP1: string | null;
+            actualP2: string | null;
+            actualP3: string | null;
+        }>;
+    }>({ entries: [], sessions: [] });
 
     const loadLeaderboard = useCallback(async () => {
         if (!schedule) return;
@@ -80,6 +115,30 @@ export default function GameClient({ initialSchedule, initialDrivers, initialRac
             setChartData([]);
         }
     }, [schedule]);
+
+    const loadRoundResults = useCallback(async () => {
+        if (!schedule) return;
+
+        try {
+            const res = await fetch(`/api/game/results?season=${schedule.season}&round=${activeRound}`, {
+                credentials: 'include',
+            });
+
+            if (!res.ok) {
+                setRoundResults({ entries: [], sessions: [] });
+                return;
+            }
+
+            const data = await res.json();
+            setRoundResults({
+                entries: data.entries || [],
+                sessions: data.sessions || [],
+            });
+        } catch (error) {
+            console.error('Failed to load round results:', error);
+            setRoundResults({ entries: [], sessions: [] });
+        }
+    }, [activeRound, schedule]);
 
     // Load predictions for a specific round via server-side API (avoids RLS issues with client-side Supabase)
     const loadPredictionsForRound = async (season: number, round: number) => {
@@ -114,6 +173,11 @@ export default function GameClient({ initialSchedule, initialDrivers, initialRac
         if (activeTab !== 'stand') return;
         loadLeaderboard();
     }, [activeTab, loadLeaderboard]);
+
+    useEffect(() => {
+        if (activeTab !== 'results') return;
+        loadRoundResults();
+    }, [activeTab, loadRoundResults]);
 
     const handleRoundSelect = async (round: string, updateUrl: boolean = true) => {
         if (round === activeRound || isLoading) return;
@@ -235,6 +299,17 @@ export default function GameClient({ initialSchedule, initialDrivers, initialRac
                     Prediction
                 </button>
                 <button
+                    onClick={() => setActiveTab('results')}
+                    className={`flex-1 py-2 px-4 rounded-lg text-xs font-bold uppercase tracking-wider transition-all
+                        ${activeTab === 'results'
+                            ? 'bg-f1-red text-white shadow-lg shadow-f1-red/20'
+                            : 'text-f1-text-muted hover:text-white'
+                        }`}
+                >
+                    <span className="material-icons text-sm mr-1 align-middle">fact_check</span>
+                    Results
+                </button>
+                <button
                     onClick={() => setActiveTab('stand')}
                     className={`flex-1 py-2 px-4 rounded-lg text-xs font-bold uppercase tracking-wider transition-all
                         ${activeTab === 'stand'
@@ -295,6 +370,12 @@ export default function GameClient({ initialSchedule, initialDrivers, initialRac
                         userName={user?.user_metadata?.username}
                     />
                 </div>
+            ) : activeTab === 'results' ? (
+                <GameResultsBoard
+                    entries={roundResults.entries}
+                    sessions={roundResults.sessions}
+                    drivers={drivers}
+                />
             ) : activeTab === 'admin' && isAdmin ? (
                 <AdminPanel
                     season={schedule.season}
