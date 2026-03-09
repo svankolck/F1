@@ -126,18 +126,6 @@ export default async function HomePage() {
             />
           )}
 
-          <div className="mt-5">
-            <Link
-              href="/calendar"
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-f1-border hover:border-f1-red/40 bg-f1-surface/40 hover:bg-f1-red/10 transition-colors text-sm font-bold uppercase tracking-wider"
-            >
-              View Full Calendar
-              <span className="material-icons text-base">arrow_forward</span>
-            </Link>
-          </div>
-
-          {nextRace && <RaceWeekendSchedule race={nextRace} />}
-
           {/* Time info */}
           {amsterdamTime && (
             <div className="flex flex-wrap items-center gap-3 mt-5">
@@ -150,6 +138,18 @@ export default async function HomePage() {
               </span>
             </div>
           )}
+
+          {nextRace && <RaceWeekendSchedule race={nextRace} />}
+
+          <div className="mt-5">
+            <Link
+              href="/calendar"
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-f1-border hover:border-f1-red/40 bg-f1-surface/40 hover:bg-f1-red/10 transition-colors text-sm font-bold uppercase tracking-wider"
+            >
+              View Full Calendar
+              <span className="material-icons text-base">arrow_forward</span>
+            </Link>
+          </div>
         </div>
 
         {/* Right: Circuit Info Card */}

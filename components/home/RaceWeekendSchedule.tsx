@@ -101,8 +101,8 @@ export default function RaceWeekendSchedule({ race }: RaceWeekendScheduleProps) 
   }, []);
 
   return (
-    <div className="mt-5 overflow-hidden rounded-2xl border border-f1-border/70 bg-[linear-gradient(180deg,rgba(255,255,255,0.05),rgba(255,255,255,0.02))] shadow-[0_18px_45px_rgba(0,0,0,0.18)]">
-      <div className="flex items-center justify-between gap-3 border-b border-f1-border/60 px-4 py-3">
+    <div className="mt-5 w-full max-w-xl overflow-hidden glass-card hover:border-f1-red/30 transition-colors duration-500">
+      <div className="flex items-center justify-between gap-3 border-b border-f1-border/50 px-3.5 py-2.5">
         <div>
           <p className="text-[10px] font-bold uppercase tracking-[0.28em] text-f1-red">Race Weekend</p>
           <p className="mt-1 text-[11px] uppercase tracking-[0.18em] text-f1-text-muted">
@@ -116,14 +116,14 @@ export default function RaceWeekendSchedule({ race }: RaceWeekendScheduleProps) 
         )}
       </div>
 
-      <div className="space-y-2 p-2">
+      <div className="space-y-1.5 p-1.5">
         {sessions.map((session) => (
           <div
             key={session.key}
-            className={`grid grid-cols-[minmax(0,1.4fr)_42px_64px_58px] items-center gap-2 rounded-xl border px-3 py-2.5 sm:grid-cols-[minmax(0,1.4fr)_52px_72px_64px] ${
+            className={`grid grid-cols-[minmax(0,1.35fr)_38px_58px_50px] items-center gap-2 rounded-lg border px-2.5 py-2 sm:grid-cols-[minmax(0,1.35fr)_44px_62px_54px] ${
               session.isRace
-                ? 'border-f1-red/30 bg-[linear-gradient(90deg,rgba(225,6,0,0.16),rgba(225,6,0,0.04))]'
-                : 'border-white/6 bg-[linear-gradient(90deg,rgba(255,255,255,0.04),rgba(255,255,255,0.015))]'
+                ? 'border-f1-red/20 bg-[linear-gradient(90deg,rgba(225,6,0,0.12),rgba(225,6,0,0.03))]'
+                : 'border-white/5 bg-[linear-gradient(90deg,rgba(255,255,255,0.035),rgba(255,255,255,0.012))]'
             }`}
           >
             <span className={`truncate text-sm font-semibold ${session.isRace ? 'text-white' : 'text-f1-text-secondary'}`}>
