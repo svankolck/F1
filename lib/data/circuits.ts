@@ -5,6 +5,8 @@ const F1_IMG = (country: string) =>
     `https://media.formula1.com/image/upload/f_auto,c_limit,w_1440,q_auto/f_auto/q_auto/content/dam/fom-website/2018-redesign-assets/Racehub%20header%20images%2016x9/${country}`;
 
 export const CIRCUIT_DETAILS: Record<string, CircuitDetails> = {
+    // ── 2026 Season Calendar ──────────────────────────────────
+
     // Round 1 — Australia
     albert_park: {
         circuitId: 'albert_park',
@@ -71,15 +73,15 @@ export const CIRCUIT_DETAILS: Record<string, CircuitDetails> = {
         lapRecord: { time: '1:29.708', driver: 'Max Verstappen', year: '2023' },
     },
 
-    // Round 7 — Emilia-Romagna (Imola)
-    imola: {
-        circuitId: 'imola',
-        imageUrl: F1_IMG('Emilia%20Romagna'),
-        length: '4.909 km',
-        firstGrandPrix: '1980',
-        laps: 63,
-        raceDistance: '309.049 km',
-        lapRecord: { time: '1:15.484', driver: 'Lewis Hamilton', year: '2020' },
+    // Round 7 — Canada
+    villeneuve: {
+        circuitId: 'villeneuve',
+        imageUrl: F1_IMG('Canada'),
+        length: '4.361 km',
+        firstGrandPrix: '1978',
+        laps: 70,
+        raceDistance: '305.270 km',
+        lapRecord: { time: '1:13.078', driver: 'Valtteri Bottas', year: '2019' },
     },
 
     // Round 8 — Monaco
@@ -93,7 +95,7 @@ export const CIRCUIT_DETAILS: Record<string, CircuitDetails> = {
         lapRecord: { time: '1:12.909', driver: 'Lewis Hamilton', year: '2021' },
     },
 
-    // Round 9 — Spain
+    // Round 9 — Barcelona-Catalunya (Spain)
     catalunya: {
         circuitId: 'catalunya',
         imageUrl: F1_IMG('Spain'),
@@ -104,18 +106,7 @@ export const CIRCUIT_DETAILS: Record<string, CircuitDetails> = {
         lapRecord: { time: '1:16.330', driver: 'Max Verstappen', year: '2023' },
     },
 
-    // Round 10 — Canada
-    villeneuve: {
-        circuitId: 'villeneuve',
-        imageUrl: F1_IMG('Canada'),
-        length: '4.361 km',
-        firstGrandPrix: '1978',
-        laps: 70,
-        raceDistance: '305.270 km',
-        lapRecord: { time: '1:13.078', driver: 'Valtteri Bottas', year: '2019' },
-    },
-
-    // Round 11 — Austria
+    // Round 10 — Austria
     red_bull_ring: {
         circuitId: 'red_bull_ring',
         imageUrl: F1_IMG('Austria'),
@@ -126,7 +117,7 @@ export const CIRCUIT_DETAILS: Record<string, CircuitDetails> = {
         lapRecord: { time: '1:05.619', driver: 'Carlos Sainz', year: '2020' },
     },
 
-    // Round 12 — Great Britain
+    // Round 11 — Great Britain
     silverstone: {
         circuitId: 'silverstone',
         imageUrl: F1_IMG('Great%20Britain'),
@@ -137,7 +128,7 @@ export const CIRCUIT_DETAILS: Record<string, CircuitDetails> = {
         lapRecord: { time: '1:27.097', driver: 'Max Verstappen', year: '2020' },
     },
 
-    // Round 13 — Belgium
+    // Round 12 — Belgium
     spa: {
         circuitId: 'spa',
         imageUrl: F1_IMG('Belgium'),
@@ -148,7 +139,7 @@ export const CIRCUIT_DETAILS: Record<string, CircuitDetails> = {
         lapRecord: { time: '1:46.286', driver: 'Valtteri Bottas', year: '2018' },
     },
 
-    // Round 14 — Hungary
+    // Round 13 — Hungary
     hungaroring: {
         circuitId: 'hungaroring',
         imageUrl: F1_IMG('Hungary'),
@@ -159,7 +150,7 @@ export const CIRCUIT_DETAILS: Record<string, CircuitDetails> = {
         lapRecord: { time: '1:16.627', driver: 'Lewis Hamilton', year: '2020' },
     },
 
-    // Round 15 — Netherlands
+    // Round 14 — Netherlands
     zandvoort: {
         circuitId: 'zandvoort',
         imageUrl: F1_IMG('Netherlands'),
@@ -170,7 +161,7 @@ export const CIRCUIT_DETAILS: Record<string, CircuitDetails> = {
         lapRecord: { time: '1:11.097', driver: 'Lewis Hamilton', year: '2021' },
     },
 
-    // Round 16 — Italy (Monza)
+    // Round 15 — Italy (Monza)
     monza: {
         circuitId: 'monza',
         imageUrl: F1_IMG('Italy'),
@@ -179,6 +170,17 @@ export const CIRCUIT_DETAILS: Record<string, CircuitDetails> = {
         laps: 53,
         raceDistance: '306.720 km',
         lapRecord: { time: '1:21.046', driver: 'Rubens Barrichello', year: '2004' },
+    },
+
+    // Round 16 — Spain (Madrid) — NEW for 2026
+    madring: {
+        circuitId: 'madring',
+        imageUrl: F1_IMG('Spain'),
+        length: '5.474 km',
+        firstGrandPrix: '2026',
+        laps: 56,
+        raceDistance: '306.544 km',
+        lapRecord: { time: 'TBA', driver: '-', year: '2026' },
     },
 
     // Round 17 — Azerbaijan

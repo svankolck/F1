@@ -301,7 +301,6 @@ export const CIRCUIT_SVG_MAP: Record<string, string> = {
     shanghai: 'shanghai',
     suzuka: 'suzuka',
     miami: 'miami',
-    imola: 'imola',
     monaco: 'monaco',
     villeneuve: 'montreal',
     catalunya: 'catalunya',
@@ -311,6 +310,7 @@ export const CIRCUIT_SVG_MAP: Record<string, string> = {
     spa: 'spa-francorchamps',
     zandvoort: 'zandvoort',
     monza: 'monza',
+    madring: '', // Madrid — new for 2026, no SVG yet
     marina_bay: 'marina-bay',
     losail: 'lusail',
     americas: 'austin',
