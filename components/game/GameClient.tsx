@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/components/auth/AuthProvider';
 import { createClient } from '@/lib/supabase/client';
@@ -59,6 +59,77 @@ export default function GameClient({ initialSchedule, initialDrivers, initialRac
         cumulative: number;
     }>>([]);
 
+    const loadLeaderboard = useCallback(async () => {
+        if (!schedule) return;
+
+        const { data: scores } = await supabase
+            .from('game_scores')
+            .select('user_id, total_points, season, round, session_type')
+            .eq('season', schedule.season);
+
+        if (!scores || scores.length === 0) {
+            setLeaderboardData([]);
+            setChartData([]);
+            return;
+        }
+
+        const userMap = new Map<string, { total: number; rounds: Set<number> }>();
+        for (const s of scores) {
+            const existing = userMap.get(s.user_id) || { total: 0, rounds: new Set<number>() };
+            existing.total += s.total_points;
+            existing.rounds.add(s.round);
+            userMap.set(s.user_id, existing);
+        }
+
+        const userIds = Array.from(userMap.keys());
+        const { data: profiles } = await supabase
+            .from('public_profiles')
+            .select('id, username')
+            .in('id', userIds);
+
+        const entries = Array.from(userMap.entries()).map(([userId, data]) => {
+            const profile = profiles?.find(p => p.id === userId);
+            return {
+                userId,
+                username: profile?.username || 'Unknown',
+                avatarUrl: undefined,
+                totalPoints: data.total,
+                raceCount: data.rounds.size,
+                scores: [] as never[],
+            };
+        });
+
+        setLeaderboardData(entries);
+
+        if (!user) {
+            setChartData([]);
+            return;
+        }
+
+        const userScores = scores
+            .filter(s => s.user_id === user.id)
+            .sort((a, b) => a.round - b.round);
+
+        const byRound = new Map<number, number>();
+        for (const score of userScores) {
+            byRound.set(score.round, (byRound.get(score.round) || 0) + score.total_points);
+        }
+
+        let cumulative = 0;
+        const chart = Array.from(byRound.entries())
+            .sort((a, b) => a[0] - b[0])
+            .map(([round, points]) => {
+                cumulative += points;
+                return {
+                    round,
+                    raceName: `R${round}`,
+                    points,
+                    cumulative,
+                };
+            });
+        setChartData(chart);
+    }, [schedule, supabase, user]);
+
     // Load predictions for a specific round via server-side API (avoids RLS issues with client-side Supabase)
     const loadPredictionsForRound = async (season: number, round: number) => {
         console.log('[GameClient] Loading predictions for round', round, 'season', season);
@@ -84,76 +155,14 @@ export default function GameClient({ initialSchedule, initialDrivers, initialRac
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [user]);
 
-    // Load leaderboard
     useEffect(() => {
-        async function loadLeaderboard() {
-            if (!schedule) return;
-            const { data: scores } = await supabase
-                .from('game_scores')
-                .select('user_id, total_points, season, round, session_type')
-                .eq('season', schedule.season);
-
-            if (!scores || scores.length === 0) return;
-
-            // Group by user
-            const userMap = new Map<string, { total: number; rounds: Set<number> }>();
-            for (const s of scores) {
-                const existing = userMap.get(s.user_id) || { total: 0, rounds: new Set<number>() };
-                existing.total += s.total_points;
-                existing.rounds.add(s.round);
-                userMap.set(s.user_id, existing);
-            }
-
-            // Fetch profiles
-            const userIds = Array.from(userMap.keys());
-            const { data: profiles } = await supabase
-                .from('public_profiles')
-                .select('id, username')
-                .in('id', userIds);
-
-            const entries = Array.from(userMap.entries()).map(([userId, data]) => {
-                const profile = profiles?.find(p => p.id === userId);
-                return {
-                    userId,
-                    username: profile?.username || 'Unknown',
-                    avatarUrl: undefined,
-                    totalPoints: data.total,
-                    raceCount: data.rounds.size,
-                    scores: [] as never[],
-                };
-            });
-
-            setLeaderboardData(entries);
-
-            // Build chart data for current user
-            if (user) {
-                const userScores = scores
-                    .filter(s => s.user_id === user.id)
-                    .sort((a, b) => a.round - b.round);
-
-                const byRound = new Map<number, number>();
-                for (const score of userScores) {
-                    byRound.set(score.round, (byRound.get(score.round) || 0) + score.total_points);
-                }
-
-                let cumulative = 0;
-                const chart = Array.from(byRound.entries())
-                    .sort((a, b) => a[0] - b[0])
-                    .map(([round, points]) => {
-                        cumulative += points;
-                        return {
-                            round,
-                            raceName: `R${round}`,
-                            points,
-                            cumulative,
-                        };
-                    });
-                setChartData(chart);
-            }
-        }
         loadLeaderboard();
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [schedule, user]);
+    }, [loadLeaderboard]);
+
+    useEffect(() => {
+        if (activeTab !== 'stand') return;
+        loadLeaderboard();
+    }, [activeTab, loadLeaderboard]);
 
     const handleRoundSelect = async (round: string, updateUrl: boolean = true) => {
         if (round === activeRound || isLoading) return;
@@ -339,6 +348,7 @@ export default function GameClient({ initialSchedule, initialDrivers, initialRac
                 <AdminPanel
                     season={schedule.season}
                     races={initialRaces}
+                    onScoresUpdated={loadLeaderboard}
                 />
             ) : null}
         </div>

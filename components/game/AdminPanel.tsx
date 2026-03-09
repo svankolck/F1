@@ -21,6 +21,7 @@ interface ScoringLogEntry {
 interface AdminPanelProps {
     season: number;
     races: Race[];
+    onScoresUpdated?: () => void;
 }
 
 function getDriverCode(driverId: string | null): string {
@@ -38,7 +39,7 @@ function getStatusBadge(status: string) {
     }
 }
 
-export default function AdminPanel({ season, races }: AdminPanelProps) {
+export default function AdminPanel({ season, races, onScoresUpdated }: AdminPanelProps) {
     const [scoringLog, setScoringLog] = useState<ScoringLogEntry[]>([]);
     const [selectedRound, setSelectedRound] = useState<string>('');
     const [selectedSession, setSelectedSession] = useState<GameSessionType>('race');
@@ -75,6 +76,7 @@ export default function AdminPanel({ season, races }: AdminPanelProps) {
             if (res.ok) {
                 setLastResult(`✅ Scored ${data.scored} predictions | P1: ${getDriverCode(data.results.actualP1)}, P2: ${getDriverCode(data.results.actualP2)}, P3: ${getDriverCode(data.results.actualP3)}`);
                 loadScoringLog();
+                onScoresUpdated?.();
             } else {
                 setLastResult(`❌ ${data.error}`);
             }
@@ -98,7 +100,10 @@ export default function AdminPanel({ season, races }: AdminPanelProps) {
                     status: newStatus,
                 }),
             });
-            if (res.ok) loadScoringLog();
+            if (res.ok) {
+                loadScoringLog();
+                onScoresUpdated?.();
+            }
         } catch (err) {
             console.error('Failed to toggle status:', err);
         }
