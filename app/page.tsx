@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import Countdown from '@/components/home/Countdown';
 import PodiumCards from '@/components/home/PodiumCards';
+import RaceWeekendSchedule from '@/components/home/RaceWeekendSchedule';
 import UpcomingRaces from '@/components/home/UpcomingRaces';
 import { getNextRace, getRaceCalendar, getCircuitResults, getQualifyingResults } from '@/lib/api/jolpica';
 import { Race, getFlagUrl, getCircuitSvgPath } from '@/lib/types/f1';
@@ -125,19 +126,6 @@ export default async function HomePage() {
             />
           )}
 
-          {/* Time info */}
-          {amsterdamTime && (
-            <div className="flex flex-wrap items-center gap-3 mt-4">
-              <span className="material-icons text-f1-red text-xl">schedule</span>
-              <span className="text-lg md:text-xl font-bold uppercase tracking-wider">
-                {amsterdamTime}
-              </span>
-              <span className="text-xs text-f1-text-muted font-mono uppercase tracking-wider">
-                Europe/Amsterdam
-              </span>
-            </div>
-          )}
-
           <div className="mt-5">
             <Link
               href="/calendar"
@@ -147,6 +135,21 @@ export default async function HomePage() {
               <span className="material-icons text-base">arrow_forward</span>
             </Link>
           </div>
+
+          {nextRace && <RaceWeekendSchedule race={nextRace} />}
+
+          {/* Time info */}
+          {amsterdamTime && (
+            <div className="flex flex-wrap items-center gap-3 mt-5">
+              <span className="material-icons text-f1-red text-xl">schedule</span>
+              <span className="text-lg md:text-xl font-bold uppercase tracking-wider">
+                {amsterdamTime}
+              </span>
+              <span className="text-xs text-f1-text-muted font-mono uppercase tracking-wider">
+                Europe/Amsterdam
+              </span>
+            </div>
+          )}
         </div>
 
         {/* Right: Circuit Info Card */}
@@ -243,49 +246,6 @@ export default async function HomePage() {
                   )}
                 </div>
               </div>
-
-              {/* Session Schedule */}
-              {nextRace && (
-                <div className="grid grid-cols-3 gap-2 border-t border-f1-border/50 pt-3">
-                  {nextRace.FirstPractice && (
-                    <div className="text-center">
-                      <span className="text-[9px] font-mono text-f1-text-muted block">FP1</span>
-                      <span className="text-[10px] font-medium">
-                        {new Date(`${nextRace.FirstPractice.date}T${nextRace.FirstPractice.time}`).toLocaleString('en-GB', {
-                          timeZone: 'Europe/Amsterdam',
-                          weekday: 'short',
-                          hour: '2-digit',
-                          minute: '2-digit',
-                        })}
-                      </span>
-                    </div>
-                  )}
-                  {nextRace.Qualifying && (
-                    <div className="text-center">
-                      <span className="text-[9px] font-mono text-f1-text-muted block">QUALI</span>
-                      <span className="text-[10px] font-medium">
-                        {new Date(`${nextRace.Qualifying.date}T${nextRace.Qualifying.time}`).toLocaleString('en-GB', {
-                          timeZone: 'Europe/Amsterdam',
-                          weekday: 'short',
-                          hour: '2-digit',
-                          minute: '2-digit',
-                        })}
-                      </span>
-                    </div>
-                  )}
-                  <div className="text-center">
-                    <span className="text-[9px] font-mono text-f1-red block">RACE</span>
-                    <span className="text-[10px] font-bold text-f1-red">
-                      {raceDateTime?.toLocaleString('en-GB', {
-                        timeZone: 'Europe/Amsterdam',
-                        weekday: 'short',
-                        hour: '2-digit',
-                        minute: '2-digit',
-                      })}
-                    </span>
-                  </div>
-                </div>
-              )}
             </div>
           </div>
         </div>
