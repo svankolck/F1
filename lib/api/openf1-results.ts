@@ -326,12 +326,14 @@ export async function getOpenF1ResultsForRound(
     circuitId: string
 ): Promise<OpenF1ResultsPayload> {
     const circuitName = getOpenF1CircuitName(circuitId);
+    
     if (!circuitName) {
         return { practiceResults: {}, sprintQualifying: [] };
     }
 
     try {
         const sessions = await getOpenF1SessionsForMeeting(year, circuitName);
+        
         if (sessions.length === 0) {
             return { practiceResults: {}, sprintQualifying: [] };
         }
@@ -368,8 +370,11 @@ export async function getOpenF1ResultsForRound(
 
         // Sprint qualifying
         let sprintQualifying: SprintQualiResult[] = [];
-        if (sprintQualiSession && new Date(sprintQualiSession.date_end) < now) {
-            sprintQualifying = await getSprintQualifyingClassification(sprintQualiSession.session_key);
+        if (sprintQualiSession) {
+            const isCompleted = new Date(sprintQualiSession.date_end) < now;
+            if (isCompleted) {
+                sprintQualifying = await getSprintQualifyingClassification(sprintQualiSession.session_key);
+            }
         }
 
         return { practiceResults, sprintQualifying };
