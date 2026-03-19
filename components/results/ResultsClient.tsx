@@ -97,10 +97,10 @@ function getSessionTabs(
 ): SessionTab[] {
     const tabs: SessionTab[] = [];
 
-    // FP sessions first
-    if (practiceResults['fp1']?.length > 0) tabs.push({ key: 'fp1', label: 'FP1' });
-    if (practiceResults['fp2']?.length > 0) tabs.push({ key: 'fp2', label: 'FP2' });
-    if (practiceResults['fp3']?.length > 0) tabs.push({ key: 'fp3', label: 'FP3' });
+    // FP sessions first - show them if the key exists (even if empty)
+    if ('fp1' in practiceResults) tabs.push({ key: 'fp1', label: 'FP1' });
+    if ('fp2' in practiceResults) tabs.push({ key: 'fp2', label: 'FP2' });
+    if ('fp3' in practiceResults) tabs.push({ key: 'fp3', label: 'FP3' });
 
     // Sprint Qualifying
     if (isSprintWeekend(race) || openf1SprintQuali.length > 0) {

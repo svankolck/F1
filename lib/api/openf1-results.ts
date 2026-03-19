@@ -115,11 +115,14 @@ export function getOpenF1CircuitName(jolpicaCircuitId: string): string {
 // ===== Practice Classification =====
 
 export async function getPracticeClassification(sessionKey: number): Promise<PracticeResult[]> {
+    console.log(`[OpenF1] Starting classification fetch for session ${sessionKey}`);
     try {
         const [laps, drivers] = await Promise.all([
             fetchOpenF1<OpenF1Lap>('/laps', { session_key: sessionKey.toString() }),
             fetchOpenF1<OpenF1Driver>('/drivers', { session_key: sessionKey.toString() }),
         ]);
+
+        console.log(`[OpenF1] Session ${sessionKey}: fetched ${laps.length} laps and ${drivers.length} drivers`);
 
         // Build driver info map
         const driverMap = new Map<number, OpenF1Driver>();
@@ -343,6 +346,8 @@ export async function getOpenF1ResultsForRound(
             .filter((s) => s.session_type === 'Practice')
             .sort((a, b) => new Date(a.date_start).getTime() - new Date(b.date_start).getTime());
 
+        console.log(`[OpenF1] Found ${practiceSessions.length} practice sessions for ${circuitName}`);
+
         const sprintQualiSession = sessions.find(
             (s) => s.session_name === 'Sprint Qualifying'
         );
@@ -352,20 +357,21 @@ export async function getOpenF1ResultsForRound(
         const completedPractice = practiceSessions.filter(
             (s) => new Date(s.date_end) < now
         );
+        console.log(`[OpenF1] Completed practice sessions: ${completedPractice.length}`);
 
         // Fetch practice results in parallel
         const practicePromises = completedPractice.map(async (session, idx) => {
             const key = `fp${idx + 1}`;
             const results = await getPracticeClassification(session.session_key);
+            console.log(`[OpenF1] Results for ${session.session_name} (${session.session_key}): ${results.length}`);
             return { key, results };
         });
 
         const practiceEntries = await Promise.all(practicePromises);
         const practiceResults: Record<string, PracticeResult[]> = {};
         practiceEntries.forEach(({ key, results }) => {
-            if (results.length > 0) {
-                practiceResults[key] = results;
-            }
+            // Include every session that was found, even if results are empty
+            practiceResults[key] = results;
         });
 
         // Sprint qualifying
