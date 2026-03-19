@@ -22,13 +22,13 @@ export default function ClassificationTable({ results }: ClassificationTableProp
                 <table className="w-full min-w-[820px]">
                     <thead className="bg-white/5 border-b border-f1-border">
                         <tr className="text-[10px] font-mono uppercase tracking-widest text-f1-text-muted">
-                            <th className="text-left py-3 px-3">Pos</th>
-                            <th className="text-left py-3 px-3">Driver</th>
-                            <th className="text-left py-3 px-3">Team</th>
-                            <th className="text-left py-3 px-3">Grid</th>
-                            <th className="text-left py-3 px-3">Laps</th>
-                            <th className="text-left py-3 px-3">Time / Status</th>
-                            <th className="text-right py-3 px-3">Pts</th>
+                            <th className="text-left py-2.5 px-3 leading-5">Pos</th>
+                            <th className="text-left py-2.5 px-3 leading-5">Driver</th>
+                            <th className="text-left py-2.5 px-3 leading-5">Team</th>
+                            <th className="text-left py-2.5 px-3 leading-5">Grid</th>
+                            <th className="text-left py-2.5 px-3 leading-5">Laps</th>
+                            <th className="text-left py-2.5 px-3 leading-5">Time / Status</th>
+                            <th className="text-right py-2.5 px-3 leading-5">Pts</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -38,10 +38,10 @@ export default function ClassificationTable({ results }: ClassificationTableProp
                             return (
                                 <tr
                                     key={`${row.Driver.driverId}-${row.position}`}
-                                    className={`border-b border-f1-border/40 ${idx % 2 === 0 ? 'bg-white/[0.02]' : 'bg-transparent'} hover:bg-white/5 transition-colors group`}
+                                    className={`h-[45px] border-b border-f1-border/40 ${idx % 2 === 0 ? 'bg-white/[0.02]' : 'bg-transparent'} hover:bg-white/5 transition-colors group`}
                                 >
-                                    <td className="py-3 px-3 text-sm font-mono font-bold">P{row.position}</td>
-                                    <td className="py-3 px-3 text-sm font-semibold">
+                                    <td className="py-2.5 px-3 text-sm font-mono font-bold leading-5">P{row.position}</td>
+                                    <td className="py-2.5 px-3 text-sm font-semibold leading-5">
                                         <div className="flex items-center gap-2">
                                             <div 
                                                 className="w-1 h-4 rounded-full" 

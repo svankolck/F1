@@ -34,10 +34,10 @@ export default function PracticeTable({ results }: PracticeTableProps) {
                         {results.map((result, idx) => (
                             <tr 
                                 key={result.driverNumber}
-                                className={`border-b border-f1-border/40 ${idx % 2 === 0 ? 'bg-white/[0.02]' : 'bg-transparent'} hover:bg-white/5 transition-colors group`}
+                                className={`h-[45px] border-b border-f1-border/40 ${idx % 2 === 0 ? 'bg-white/[0.02]' : 'bg-transparent'} hover:bg-white/5 transition-colors group`}
                             >
-                                <td className="py-3 px-3 text-sm font-mono font-bold">P{result.position}</td>
-                                <td className="py-3 px-3 text-sm font-semibold">
+                                <td className="py-2.5 px-3 text-sm font-mono font-bold leading-5">P{result.position}</td>
+                                <td className="py-2.5 px-3 text-sm font-semibold leading-5">
                                     <div className="flex items-center gap-2">
                                         <div 
                                             className="w-1 h-4 rounded-full" 
@@ -48,16 +48,16 @@ export default function PracticeTable({ results }: PracticeTableProps) {
                                         </span>
                                     </div>
                                 </td>
-                                <td className="py-3 px-3 text-xs text-f1-text-secondary uppercase tracking-wide">
+                                <td className="py-2.5 px-3 text-xs text-f1-text-secondary uppercase tracking-wide leading-5">
                                     {result.teamName}
                                 </td>
-                                <td className="py-3 px-3 text-sm font-mono font-bold text-white">
+                                <td className="py-2.5 px-3 text-sm font-mono font-bold text-white leading-5">
                                     {result.bestLapFormatted}
                                 </td>
-                                <td className="py-3 px-3 text-xs font-mono text-f1-text-muted">
+                                <td className="py-2.5 px-3 text-xs font-mono text-f1-text-muted leading-5">
                                     {result.gap}
                                 </td>
-                                <td className="py-3 px-3 text-right font-mono text-xs text-f1-text-muted">
+                                <td className="py-2.5 px-3 text-right font-mono text-xs text-f1-text-muted leading-5">
                                     {result.lapsCompleted}
                                 </td>
                             </tr>

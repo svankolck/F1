@@ -47,10 +47,10 @@ export default function QualifyingTable({ qualifying }: QualifyingTableProps) {
                             return (
                                 <tr
                                     key={`${row.Driver.driverId}-${row.position}`}
-                                    className={`border-b border-f1-border/40 ${idx % 2 === 0 ? 'bg-white/[0.02]' : 'bg-transparent'} hover:bg-white/5 transition-colors group`}
+                                    className={`h-[45px] border-b border-f1-border/40 ${idx % 2 === 0 ? 'bg-white/[0.02]' : 'bg-transparent'} hover:bg-white/5 transition-colors group`}
                                 >
-                                    <td className="py-3 px-3 text-sm font-mono font-bold">P{row.position}</td>
-                                    <td className="py-3 px-3 text-sm font-semibold">
+                                    <td className="py-2.5 px-3 text-sm font-mono font-bold leading-5">P{row.position}</td>
+                                    <td className="py-2.5 px-3 text-sm font-semibold leading-5">
                                         <div className="flex items-center gap-2">
                                             <div 
                                                 className="w-1 h-4 rounded-full" 
@@ -61,17 +61,17 @@ export default function QualifyingTable({ qualifying }: QualifyingTableProps) {
                                             </span>
                                         </div>
                                     </td>
-                                    <td className="py-3 px-3 text-xs text-f1-text-secondary uppercase tracking-wide">{row.Constructor.name}</td>
-                                    <td className="py-3 px-3 text-sm font-mono">{row.Q1 || '—'}</td>
-                                    <td className="py-3 px-3 text-sm font-mono">{row.Q2 || '—'}</td>
-                                    <td className="py-3 px-3 text-sm font-mono">{row.Q3 || '—'}</td>
-                                    <td className="py-3 px-3 text-right">
+                                    <td className="py-2.5 px-3 text-xs text-f1-text-secondary uppercase tracking-wide leading-5">{row.Constructor.name}</td>
+                                    <td className="py-2.5 px-3 text-sm font-mono leading-5">{row.Q1 || '—'}</td>
+                                    <td className="py-2.5 px-3 text-sm font-mono leading-5">{row.Q2 || '—'}</td>
+                                    <td className="py-2.5 px-3 text-sm font-mono leading-5">{row.Q3 || '—'}</td>
+                                    <td className="py-2.5 px-3 text-right leading-5">
                                         {elimination ? (
-                                            <span className={`inline-flex px-2 py-0.5 rounded-full border text-[10px] font-bold uppercase tracking-wider ${elimination.className}`}>
+                                            <span className={`inline-flex items-center px-2 h-5 rounded-full border text-[9px] font-bold uppercase tracking-widest leading-none ${elimination.className}`}>
                                                 {elimination.label}
                                             </span>
                                         ) : (
-                                            <span className="text-[10px] text-emerald-300 uppercase tracking-widest font-bold">Q3</span>
+                                            <span className="text-[10px] text-emerald-300 uppercase tracking-widest font-bold leading-5">Q3</span>
                                         )}
                                     </td>
                                 </tr>
