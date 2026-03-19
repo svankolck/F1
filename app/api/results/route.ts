@@ -1,16 +1,21 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getQualifyingResults, getRaceCalendar, getRaceResults, getSprintResults } from '@/lib/api/jolpica';
+import { getOpenF1ResultsForRound } from '@/lib/api/openf1-results';
 
 export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const season = searchParams.get('season') || 'current';
     const round = searchParams.get('round') || '1';
+    const circuitId = searchParams.get('circuitId');
+
+    const year = season === 'current' ? new Date().getFullYear() : parseInt(season);
 
     try {
-        const [racePayload, qualifying, sprintPayload] = await Promise.all([
+        const [racePayload, qualifying, sprintPayload, openf1Data] = await Promise.all([
             getRaceResults(season, round).catch(() => ({ race: null, results: [] })),
             getQualifyingResults(season, round).catch(() => []),
             getSprintResults(season, round).catch(() => ({ race: null, results: [] })),
+            circuitId ? getOpenF1ResultsForRound(year, circuitId).catch(() => ({ practiceResults: {}, sprintQualifying: [] })) : Promise.resolve({ practiceResults: {}, sprintQualifying: [] }),
         ]);
 
         if (racePayload.race) {
@@ -19,6 +24,8 @@ export async function GET(request: NextRequest) {
                 results: racePayload.results,
                 qualifying,
                 sprintResults: sprintPayload.results || [],
+                practiceResults: openf1Data.practiceResults,
+                openf1SprintQualifying: openf1Data.sprintQualifying,
             });
         }
 
@@ -30,11 +37,21 @@ export async function GET(request: NextRequest) {
             results: [],
             qualifying,
             sprintResults: sprintPayload.results || [],
+            practiceResults: openf1Data.practiceResults,
+            openf1SprintQualifying: openf1Data.sprintQualifying,
         });
     } catch (error) {
         console.error('Results API error:', error);
         return NextResponse.json(
-            { race: null, results: [], qualifying: [], sprintResults: [], error: 'Failed to fetch race results' },
+            { 
+                race: null, 
+                results: [], 
+                qualifying: [], 
+                sprintResults: [], 
+                practiceResults: {}, 
+                openf1SprintQualifying: [],
+                error: 'Failed to fetch race results' 
+            },
             { status: 500 }
         );
     }

@@ -1,6 +1,7 @@
 import { Suspense } from 'react';
 import ResultsClient from '@/components/results/ResultsClient';
 import { getQualifyingResults, getRaceCalendar, getRaceResults, getSprintResults } from '@/lib/api/jolpica';
+import { getOpenF1ResultsForRound } from '@/lib/api/openf1-results';
 import { getFlagUrl } from '@/lib/types/f1';
 
 export const revalidate = 300;
@@ -23,11 +24,13 @@ export default async function ResultsPage() {
     const currentYear = new Date().getFullYear().toString();
     const races = await getRaceCalendar('current').catch(() => []);
     const initialRound = getLatestCompletedRound(races);
+    const initialRace = races.find(r => r.round === initialRound);
 
-    const [racePayload, qualifying, sprintPayload] = await Promise.all([
+    const [racePayload, qualifying, sprintPayload, openf1Data] = await Promise.all([
         getRaceResults('current', initialRound).catch(() => ({ race: null, results: [] })),
         getQualifyingResults('current', initialRound).catch(() => []),
         getSprintResults('current', initialRound).catch(() => ({ race: null, results: [] })),
+        initialRace ? getOpenF1ResultsForRound(parseInt(currentYear), initialRace.Circuit.circuitId).catch(() => ({ practiceResults: {}, sprintQualifying: [] })) : Promise.resolve({ practiceResults: {}, sprintQualifying: [] }),
     ]);
 
     const countryFlags: Record<string, string> = {};
@@ -57,6 +60,8 @@ export default async function ResultsPage() {
                 initialResults={racePayload.results || []}
                 initialQualifying={qualifying}
                 initialSprintResults={sprintPayload.results || []}
+                initialPracticeResults={openf1Data.practiceResults}
+                initialOpenF1SprintQualifying={openf1Data.sprintQualifying}
                 availableSeasons={availableSeasons}
                 countryFlags={countryFlags}
             />

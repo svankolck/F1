@@ -3,10 +3,12 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { QualifyingResult, Race, RaceResult, getFlagUrl } from '@/lib/types/f1';
+import { PracticeResult, SprintQualiResult } from '@/lib/api/openf1-results';
 import RaceSlider from './RaceSlider';
 import PodiumShowcase from './PodiumShowcase';
 import ClassificationTable from './ClassificationTable';
 import QualifyingTable from './QualifyingTable';
+import PracticeTable from './PracticeTable';
 
 interface ResultsClientProps {
     initialSeason: string;
@@ -16,11 +18,13 @@ interface ResultsClientProps {
     initialResults: RaceResult[];
     initialQualifying: QualifyingResult[];
     initialSprintResults: RaceResult[];
+    initialPracticeResults?: Record<string, PracticeResult[]>;
+    initialOpenF1SprintQualifying?: SprintQualiResult[];
     availableSeasons: string[];
     countryFlags: Record<string, string>;
 }
 
-type ViewMode = 'race' | 'qualifying' | 'sprint';
+type ViewMode = 'race' | 'qualifying' | 'sprint' | 'sprint_qualifying' | 'fp1' | 'fp2' | 'fp3';
 type RaceStatus = 'Completed' | 'Live' | 'Upcoming';
 
 interface ResultsApiPayload {
@@ -28,6 +32,8 @@ interface ResultsApiPayload {
     results: RaceResult[];
     qualifying: QualifyingResult[];
     sprintResults: RaceResult[];
+    practiceResults?: Record<string, PracticeResult[]>;
+    openf1SprintQualifying?: SprintQualiResult[];
 }
 
 function getStatus(race: Race | null): RaceStatus {
@@ -83,10 +89,25 @@ interface SessionTab {
     label: string;
 }
 
-function getSessionTabs(race: Race | null, sprintResults: RaceResult[]): SessionTab[] {
+function getSessionTabs(
+    race: Race | null, 
+    sprintResults: RaceResult[], 
+    practiceResults: Record<string, PracticeResult[]>, 
+    openf1SprintQuali: SprintQualiResult[]
+): SessionTab[] {
     const tabs: SessionTab[] = [];
 
-    // Sprint tabs first (chronologically they happen before qualifying/race)
+    // FP sessions first
+    if (practiceResults['fp1']?.length > 0) tabs.push({ key: 'fp1', label: 'FP1' });
+    if (practiceResults['fp2']?.length > 0) tabs.push({ key: 'fp2', label: 'FP2' });
+    if (practiceResults['fp3']?.length > 0) tabs.push({ key: 'fp3', label: 'FP3' });
+
+    // Sprint Qualifying
+    if (isSprintWeekend(race) || openf1SprintQuali.length > 0) {
+        tabs.push({ key: 'sprint_qualifying', label: 'SQ' });
+    }
+
+    // Sprint Race
     if (isSprintWeekend(race) || sprintResults.length > 0) {
         tabs.push({ key: 'sprint', label: 'Sprint' });
     }
@@ -98,6 +119,33 @@ function getSessionTabs(race: Race | null, sprintResults: RaceResult[]): Session
     return tabs;
 }
 
+// Map OpenF1 SQ results to Jolpica-like QualifyingResult for table reuse
+function mapSQtoQualifying(results: SprintQualiResult[]): QualifyingResult[] {
+    return results.map(r => ({
+        number: r.driverNumber.toString(),
+        position: r.position.toString(),
+        Driver: {
+            driverId: r.driverCode.toLowerCase(),
+            permanentNumber: r.driverNumber.toString(),
+            code: r.driverCode,
+            givenName: r.firstName,
+            familyName: r.lastName,
+            nationality: '', // not in OpenF1 driver data usually
+            url: '',
+            dateOfBirth: ''
+        },
+        Constructor: {
+            constructorId: r.teamName.toLowerCase().replace(' ', '-'),
+            url: '',
+            name: r.teamName,
+            nationality: ''
+        },
+        Q1: r.sq1 || '',
+        Q2: r.sq2 || '',
+        Q3: r.sq3 || ''
+    }));
+}
+
 export default function ResultsClient({
     initialSeason,
     initialRound,
@@ -106,6 +154,8 @@ export default function ResultsClient({
     initialResults,
     initialQualifying,
     initialSprintResults,
+    initialPracticeResults = {},
+    initialOpenF1SprintQualifying = [],
     availableSeasons,
     countryFlags,
 }: ResultsClientProps) {
@@ -121,6 +171,8 @@ export default function ResultsClient({
     const [results, setResults] = useState<RaceResult[]>(initialResults);
     const [qualifying, setQualifying] = useState<QualifyingResult[]>(initialQualifying);
     const [sprintResults, setSprintResults] = useState<RaceResult[]>(initialSprintResults);
+    const [practiceResults, setPracticeResults] = useState<Record<string, PracticeResult[]>>(initialPracticeResults);
+    const [openf1SprintQuali, setOpenf1SprintQuali] = useState<SprintQualiResult[]>(initialOpenF1SprintQualifying);
     const [loading, setLoading] = useState(false);
 
     const updateUrl = useCallback((season: string, round: string, tab: ViewMode) => {
@@ -131,10 +183,15 @@ export default function ResultsClient({
         router.replace(`/results?${params.toString()}`, { scroll: false });
     }, [router]);
 
-    const fetchResults = useCallback(async (season: string, round: string) => {
+    const fetchResults = useCallback(async (season: string, round: string, circuitId?: string) => {
         setLoading(true);
         try {
-            const response = await fetch(`/api/results?season=${season}&round=${round}`);
+            const url = new URL('/api/results', window.location.origin);
+            url.searchParams.set('season', season);
+            url.searchParams.set('round', round);
+            if (circuitId) url.searchParams.set('circuitId', circuitId);
+
+            const response = await fetch(url.toString());
             if (!response.ok) {
                 throw new Error('Failed to load results');
             }
@@ -143,12 +200,16 @@ export default function ResultsClient({
             setResults(payload.results || []);
             setQualifying(payload.qualifying || []);
             setSprintResults(payload.sprintResults || []);
+            setPracticeResults(payload.practiceResults || {});
+            setOpenf1SprintQuali(payload.openf1SprintQualifying || []);
         } catch (error) {
             console.error('Results fetch failed:', error);
             setRace(null);
             setResults([]);
             setQualifying([]);
             setSprintResults([]);
+            setPracticeResults({});
+            setOpenf1SprintQuali([]);
         } finally {
             setLoading(false);
         }
@@ -172,10 +233,11 @@ export default function ResultsClient({
     }, []);
 
     const handleRoundChange = useCallback((round: string) => {
+        const selectedRace = seasonRaces.find(r => r.round === round);
         setSelectedRound(round);
         updateUrl(selectedSeason, round, viewMode);
-        fetchResults(selectedSeason, round);
-    }, [fetchResults, selectedSeason, updateUrl, viewMode]);
+        fetchResults(selectedSeason, round, selectedRace?.Circuit.circuitId);
+    }, [fetchResults, seasonRaces, selectedSeason, updateUrl, viewMode]);
 
     const handleSeasonChange = useCallback(async (season: string) => {
         setSelectedSeason(season);
@@ -183,10 +245,11 @@ export default function ResultsClient({
 
         const races = await fetchSeasonCalendar(season);
         const round = getLastCompletedRound(races);
+        const selectedRace = races.find(r => r.round === round);
         setSelectedRound(round);
         updateUrl(season, round, viewMode);
 
-        await fetchResults(season, round);
+        await fetchResults(season, round, selectedRace?.Circuit.circuitId);
     }, [fetchResults, fetchSeasonCalendar, updateUrl, viewMode]);
 
     const handleViewChange = useCallback((tab: ViewMode) => {
@@ -202,7 +265,16 @@ export default function ResultsClient({
             if (urlSeason !== initialSeason) {
                 fetchSeasonCalendar(urlSeason);
             }
-            fetchResults(urlSeason, urlRound);
+            // Find circuitId for initial load if from URL
+            const fetchInit = async () => {
+                let currentRaces = seasonRaces;
+                if (urlSeason !== initialSeason) {
+                    currentRaces = await fetchSeasonCalendar(urlSeason);
+                }
+                const selectedRace = currentRaces.find(r => r.round === urlRound);
+                fetchResults(urlSeason, urlRound, selectedRace?.Circuit.circuitId);
+            };
+            fetchInit();
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
@@ -218,10 +290,13 @@ export default function ResultsClient({
 
     const selectedRace = seasonRaces.find((r) => r.round === selectedRound) || race;
     const status = getStatus(selectedRace || null);
-    const sessionTabs = getSessionTabs(selectedRace, sprintResults);
+    const sessionTabs = getSessionTabs(selectedRace, sprintResults, practiceResults, openf1SprintQuali);
 
     // If the current viewMode is not available in the tabs, fall back to 'race'
     const activeTab = sessionTabs.find((t) => t.key === viewMode) ? viewMode : 'race';
+
+    // Map SQ results
+    const mappedSQ = useMemo(() => mapSQtoQualifying(openf1SprintQuali), [openf1SprintQuali]);
 
     return (
         <div className="flex flex-col gap-5 w-full">
@@ -285,12 +360,12 @@ export default function ResultsClient({
                 </div>
             )}
 
-            <div className="flex gap-1 bg-f1-surface/50 p-1 rounded-lg w-fit">
+            <div className="flex flex-wrap gap-1 bg-f1-surface/50 p-1 rounded-lg w-fit">
                 {sessionTabs.map((tab) => (
                     <button
                         key={tab.key}
                         onClick={() => handleViewChange(tab.key)}
-                        className={`px-5 py-2 rounded-md text-xs font-bold uppercase tracking-widest transition-all duration-300 ${
+                        className={`px-3 sm:px-5 py-2 rounded-md text-[10px] sm:text-xs font-bold uppercase tracking-widest transition-all duration-300 ${
                             activeTab === tab.key
                                 ? 'bg-f1-red text-white shadow-lg shadow-f1-red/20'
                                 : 'text-f1-text-muted hover:text-white'
@@ -324,6 +399,22 @@ export default function ResultsClient({
                     {sprintResults.length > 0 && <PodiumShowcase results={sprintResults} />}
                     <ClassificationTable results={sprintResults} />
                 </>
+            )}
+
+            {!loading && activeTab === 'sprint_qualifying' && (
+                <QualifyingTable qualifying={mappedSQ} />
+            )}
+
+            {!loading && activeTab === 'fp1' && (
+                <PracticeTable results={practiceResults['fp1']} />
+            )}
+
+            {!loading && activeTab === 'fp2' && (
+                <PracticeTable results={practiceResults['fp2']} />
+            )}
+
+            {!loading && activeTab === 'fp3' && (
+                <PracticeTable results={practiceResults['fp3']} />
             )}
         </div>
     );
