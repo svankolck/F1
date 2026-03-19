@@ -121,17 +121,17 @@ export default function GameResultsBoard({ entries, sessions, drivers }: GameRes
         ];
 
         return (
-            <div className="rounded-xl border border-f1-border/35 bg-white/[0.02] p-3 space-y-3">
+            <div className="rounded-xl border border-f1-border/35 bg-white/[0.02] p-2 space-y-2">
                 <div className="flex flex-wrap items-center justify-between gap-2">
                     <div className="flex flex-wrap items-center gap-2">
-                        <h4 className="text-[11px] font-bold uppercase tracking-[0.18em] text-white">{title}</h4>
+                        <h4 className="text-[10px] font-bold uppercase tracking-[0.18em] text-white">{title}</h4>
                         {poleSummary && (
-                            <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider border ${getStatusBadge(poleSummary.status)}`}>
+                            <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider border ${getStatusBadge(poleSummary.status)}`}>
                                 {badgePrefix}Q {poleSummary.status}
                             </span>
                         )}
                         {raceSummary && (
-                            <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider border ${getStatusBadge(raceSummary.status)}`}>
+                            <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider border ${getStatusBadge(raceSummary.status)}`}>
                                 {badgePrefix}R {raceSummary.status}
                             </span>
                         )}
@@ -142,28 +142,28 @@ export default function GameResultsBoard({ entries, sessions, drivers }: GameRes
                         )}
                     </div>
 
-                    <div className="text-sm font-mono font-bold text-f1-red">
+                    <div className="text-xs font-mono font-bold text-f1-red">
                         {totalPoints} pts
                     </div>
                 </div>
 
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
                     {cells.map((cell) => (
-                        <div key={`${title}-${cell.label}`} className="rounded-lg border border-f1-border/25 bg-f1-surface/15 px-2.5 py-2">
+                        <div key={`${title}-${cell.label}`} className="rounded-lg border border-f1-border/25 bg-f1-surface/15 px-2 py-1.5">
                             <div className="flex items-center justify-between gap-2">
-                                <p className="text-[10px] uppercase tracking-wider text-f1-text-muted">{cell.label}</p>
-                                <p className="text-[11px] font-mono text-f1-text-muted">{getDriverCode(cell.actual)}</p>
+                                <p className="text-[9px] uppercase tracking-wider text-f1-text-muted">{cell.label}</p>
+                                <p className="text-[10px] font-mono text-f1-text-muted">{getDriverCode(cell.actual)}</p>
                             </div>
-                            <p className="text-base font-bold mt-1">{getDriverCode(cell.driverId)}</p>
-                            <p className="text-[11px] text-f1-red mt-1">+{cell.points}</p>
+                            <p className="text-[13px] font-bold mt-0.5">{getDriverCode(cell.driverId)}</p>
+                            <p className="text-[10px] text-f1-red mt-0.5">+{cell.points}</p>
                         </div>
                     ))}
                 </div>
 
                 {!!raceResult?.bonusPoints && (
-                    <div className="flex items-center justify-between rounded-lg border border-f1-border/20 bg-f1-surface/10 px-2.5 py-2">
-                        <span className="text-[10px] uppercase tracking-wider text-f1-text-muted">Bonus Top 3</span>
-                        <span className="text-[11px] font-bold text-f1-red">+{raceResult.bonusPoints}</span>
+                    <div className="flex items-center justify-between rounded-lg border border-f1-border/20 bg-f1-surface/10 px-2 py-1.5">
+                        <span className="text-[9px] uppercase tracking-wider text-f1-text-muted">Bonus Top 3</span>
+                        <span className="text-[10px] font-bold text-f1-red">+{raceResult.bonusPoints}</span>
                     </div>
                 )}
             </div>
@@ -179,7 +179,7 @@ export default function GameResultsBoard({ entries, sessions, drivers }: GameRes
 
             <div className="space-y-3">
                 {entries.map((entry, index) => (
-                    <div key={entry.userId} className="glass-card p-3 space-y-3">
+                    <div key={entry.userId} className="glass-card p-2.5 space-y-2.5">
                         <div className="flex items-center justify-between gap-3">
                             <div className="flex items-center gap-3 min-w-0">
                                 <div className="w-7 text-center text-sm font-mono font-bold text-f1-text-muted">
