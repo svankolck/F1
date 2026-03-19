@@ -15,17 +15,19 @@ interface ResultsClientProps {
     initialRaces: Race[];
     initialResults: RaceResult[];
     initialQualifying: QualifyingResult[];
+    initialSprintResults: RaceResult[];
     availableSeasons: string[];
     countryFlags: Record<string, string>;
 }
 
-type ViewMode = 'race' | 'qualifying';
+type ViewMode = 'race' | 'qualifying' | 'sprint';
 type RaceStatus = 'Completed' | 'Live' | 'Upcoming';
 
 interface ResultsApiPayload {
     race: Race | null;
     results: RaceResult[];
     qualifying: QualifyingResult[];
+    sprintResults: RaceResult[];
 }
 
 function getStatus(race: Race | null): RaceStatus {
@@ -71,6 +73,31 @@ function getLastCompletedRound(races: Race[]): string {
     return races[0].round;
 }
 
+function isSprintWeekend(race: Race | null): boolean {
+    if (!race) return false;
+    return !!(race.Sprint || race.SprintQualifying);
+}
+
+interface SessionTab {
+    key: ViewMode;
+    label: string;
+}
+
+function getSessionTabs(race: Race | null, sprintResults: RaceResult[]): SessionTab[] {
+    const tabs: SessionTab[] = [];
+
+    // Sprint tabs first (chronologically they happen before qualifying/race)
+    if (isSprintWeekend(race) || sprintResults.length > 0) {
+        tabs.push({ key: 'sprint', label: 'Sprint' });
+    }
+
+    // Main session tabs
+    tabs.push({ key: 'qualifying', label: 'Qualifying' });
+    tabs.push({ key: 'race', label: 'Race' });
+
+    return tabs;
+}
+
 export default function ResultsClient({
     initialSeason,
     initialRound,
@@ -78,6 +105,7 @@ export default function ResultsClient({
     initialRaces,
     initialResults,
     initialQualifying,
+    initialSprintResults,
     availableSeasons,
     countryFlags,
 }: ResultsClientProps) {
@@ -92,6 +120,7 @@ export default function ResultsClient({
     const [race, setRace] = useState<Race | null>(initialRace);
     const [results, setResults] = useState<RaceResult[]>(initialResults);
     const [qualifying, setQualifying] = useState<QualifyingResult[]>(initialQualifying);
+    const [sprintResults, setSprintResults] = useState<RaceResult[]>(initialSprintResults);
     const [loading, setLoading] = useState(false);
 
     const updateUrl = useCallback((season: string, round: string, tab: ViewMode) => {
@@ -113,11 +142,13 @@ export default function ResultsClient({
             setRace(payload.race || null);
             setResults(payload.results || []);
             setQualifying(payload.qualifying || []);
+            setSprintResults(payload.sprintResults || []);
         } catch (error) {
             console.error('Results fetch failed:', error);
             setRace(null);
             setResults([]);
             setQualifying([]);
+            setSprintResults([]);
         } finally {
             setLoading(false);
         }
@@ -187,6 +218,10 @@ export default function ResultsClient({
 
     const selectedRace = seasonRaces.find((r) => r.round === selectedRound) || race;
     const status = getStatus(selectedRace || null);
+    const sessionTabs = getSessionTabs(selectedRace, sprintResults);
+
+    // If the current viewMode is not available in the tabs, fall back to 'race'
+    const activeTab = sessionTabs.find((t) => t.key === viewMode) ? viewMode : 'race';
 
     return (
         <div className="flex flex-col gap-5 w-full">
@@ -241,26 +276,29 @@ export default function ResultsClient({
                         <span className="text-[10px] font-mono text-f1-text-muted uppercase tracking-widest">
                             Race: {selectedRace.date}
                         </span>
-                        <span className="text-[10px] font-mono text-f1-text-muted uppercase tracking-widest">
-                            Weather: N/A
-                        </span>
+                        {isSprintWeekend(selectedRace) && (
+                            <span className="px-2 py-0.5 rounded-full border text-[10px] font-bold uppercase tracking-widest bg-orange-500/10 border-orange-400/30 text-orange-300">
+                                Sprint Weekend
+                            </span>
+                        )}
                     </div>
                 </div>
             )}
 
             <div className="flex gap-1 bg-f1-surface/50 p-1 rounded-lg w-fit">
-                <button
-                    onClick={() => handleViewChange('race')}
-                    className={`px-5 py-2 rounded-md text-xs font-bold uppercase tracking-widest transition-all duration-300 ${viewMode === 'race' ? 'bg-f1-red text-white shadow-lg shadow-f1-red/20' : 'text-f1-text-muted hover:text-white'}`}
-                >
-                    Race
-                </button>
-                <button
-                    onClick={() => handleViewChange('qualifying')}
-                    className={`px-5 py-2 rounded-md text-xs font-bold uppercase tracking-widest transition-all duration-300 ${viewMode === 'qualifying' ? 'bg-f1-red text-white shadow-lg shadow-f1-red/20' : 'text-f1-text-muted hover:text-white'}`}
-                >
-                    Qualifying
-                </button>
+                {sessionTabs.map((tab) => (
+                    <button
+                        key={tab.key}
+                        onClick={() => handleViewChange(tab.key)}
+                        className={`px-5 py-2 rounded-md text-xs font-bold uppercase tracking-widest transition-all duration-300 ${
+                            activeTab === tab.key
+                                ? 'bg-f1-red text-white shadow-lg shadow-f1-red/20'
+                                : 'text-f1-text-muted hover:text-white'
+                        }`}
+                    >
+                        {tab.label}
+                    </button>
+                ))}
             </div>
 
             {loading && (
@@ -270,15 +308,22 @@ export default function ResultsClient({
                 </div>
             )}
 
-            {!loading && viewMode === 'race' && (
+            {!loading && activeTab === 'race' && (
                 <>
                     <PodiumShowcase results={results} />
                     <ClassificationTable results={results} />
                 </>
             )}
 
-            {!loading && viewMode === 'qualifying' && (
+            {!loading && activeTab === 'qualifying' && (
                 <QualifyingTable qualifying={qualifying} />
+            )}
+
+            {!loading && activeTab === 'sprint' && (
+                <>
+                    {sprintResults.length > 0 && <PodiumShowcase results={sprintResults} />}
+                    <ClassificationTable results={sprintResults} />
+                </>
             )}
         </div>
     );

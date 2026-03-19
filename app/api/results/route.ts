@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getQualifyingResults, getRaceCalendar, getRaceResults } from '@/lib/api/jolpica';
+import { getQualifyingResults, getRaceCalendar, getRaceResults, getSprintResults } from '@/lib/api/jolpica';
 
 export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
@@ -7,9 +7,10 @@ export async function GET(request: NextRequest) {
     const round = searchParams.get('round') || '1';
 
     try {
-        const [racePayload, qualifying] = await Promise.all([
+        const [racePayload, qualifying, sprintPayload] = await Promise.all([
             getRaceResults(season, round).catch(() => ({ race: null, results: [] })),
             getQualifyingResults(season, round).catch(() => []),
+            getSprintResults(season, round).catch(() => ({ race: null, results: [] })),
         ]);
 
         if (racePayload.race) {
@@ -17,6 +18,7 @@ export async function GET(request: NextRequest) {
                 race: racePayload.race,
                 results: racePayload.results,
                 qualifying,
+                sprintResults: sprintPayload.results || [],
             });
         }
 
@@ -27,11 +29,12 @@ export async function GET(request: NextRequest) {
             race,
             results: [],
             qualifying,
+            sprintResults: sprintPayload.results || [],
         });
     } catch (error) {
         console.error('Results API error:', error);
         return NextResponse.json(
-            { race: null, results: [], qualifying: [], error: 'Failed to fetch race results' },
+            { race: null, results: [], qualifying: [], sprintResults: [], error: 'Failed to fetch race results' },
             { status: 500 }
         );
     }
