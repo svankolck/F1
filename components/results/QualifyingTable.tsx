@@ -1,4 +1,5 @@
 import { QualifyingResult } from '@/lib/types/f1';
+import { getTeamColor } from '@/lib/utils/team-colors';
 
 interface QualifyingTableProps {
     qualifying: QualifyingResult[];
@@ -27,7 +28,7 @@ export default function QualifyingTable({ qualifying }: QualifyingTableProps) {
     return (
         <div className="glass-card overflow-hidden border border-f1-border">
             <div className="overflow-x-auto">
-                <table className="w-full min-w-[760px]">
+                <table className="w-full min-w-[820px]">
                     <thead className="bg-white/5 border-b border-f1-border">
                         <tr className="text-[10px] font-mono uppercase tracking-widest text-f1-text-muted">
                             <th className="text-left py-3 px-3">Pos</th>
@@ -42,14 +43,23 @@ export default function QualifyingTable({ qualifying }: QualifyingTableProps) {
                     <tbody>
                         {qualifying.map((row, idx) => {
                             const elimination = getEliminationTag(row);
+                            const teamColor = getTeamColor(row.Constructor.constructorId);
                             return (
                                 <tr
                                     key={`${row.Driver.driverId}-${row.position}`}
-                                    className={`border-b border-f1-border/40 ${idx % 2 === 0 ? 'bg-white/[0.02]' : 'bg-transparent'}`}
+                                    className={`border-b border-f1-border/40 ${idx % 2 === 0 ? 'bg-white/[0.02]' : 'bg-transparent'} hover:bg-white/5 transition-colors group`}
                                 >
                                     <td className="py-3 px-3 text-sm font-mono font-bold">P{row.position}</td>
                                     <td className="py-3 px-3 text-sm font-semibold">
-                                        {row.Driver.givenName} <span className="uppercase">{row.Driver.familyName}</span>
+                                        <div className="flex items-center gap-2">
+                                            <div 
+                                                className="w-1 h-4 rounded-full" 
+                                                style={{ backgroundColor: teamColor }} 
+                                            />
+                                            <span>
+                                                {row.Driver.givenName} <span className="uppercase">{row.Driver.familyName}</span>
+                                            </span>
+                                        </div>
                                     </td>
                                     <td className="py-3 px-3 text-xs text-f1-text-secondary uppercase tracking-wide">{row.Constructor.name}</td>
                                     <td className="py-3 px-3 text-sm font-mono">{row.Q1 || '—'}</td>

@@ -1,4 +1,5 @@
 import { RaceResult } from '@/lib/types/f1';
+import { getTeamColor } from '@/lib/utils/team-colors';
 import FastestLapBadge from './FastestLapBadge';
 
 interface ClassificationTableProps {
@@ -33,14 +34,23 @@ export default function ClassificationTable({ results }: ClassificationTableProp
                     <tbody>
                         {results.map((row, idx) => {
                             const isFastest = row.FastestLap?.rank === '1';
+                            const teamColor = getTeamColor(row.Constructor.constructorId);
                             return (
                                 <tr
                                     key={`${row.Driver.driverId}-${row.position}`}
-                                    className={`border-b border-f1-border/40 ${idx % 2 === 0 ? 'bg-white/[0.02]' : 'bg-transparent'}`}
+                                    className={`border-b border-f1-border/40 ${idx % 2 === 0 ? 'bg-white/[0.02]' : 'bg-transparent'} hover:bg-white/5 transition-colors group`}
                                 >
                                     <td className="py-3 px-3 text-sm font-mono font-bold">P{row.position}</td>
                                     <td className="py-3 px-3 text-sm font-semibold">
-                                        {row.Driver.givenName} <span className="uppercase">{row.Driver.familyName}</span>
+                                        <div className="flex items-center gap-2">
+                                            <div 
+                                                className="w-1 h-4 rounded-full" 
+                                                style={{ backgroundColor: teamColor }} 
+                                            />
+                                            <span>
+                                                {row.Driver.givenName} <span className="uppercase">{row.Driver.familyName}</span>
+                                            </span>
+                                        </div>
                                     </td>
                                     <td className="py-3 px-3 text-xs text-f1-text-secondary uppercase tracking-wide">{row.Constructor.name}</td>
                                     <td className="py-3 px-3 text-sm font-mono">P{row.grid}</td>

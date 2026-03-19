@@ -19,7 +19,7 @@ export default function PracticeTable({ results }: PracticeTableProps) {
     return (
         <div className="glass-card overflow-hidden border border-f1-border">
             <div className="overflow-x-auto">
-                <table className="w-full min-w-[760px]">
+                <table className="w-full min-w-[820px]">
                     <thead className="bg-white/5 border-b border-f1-border">
                         <tr className="text-[10px] font-mono uppercase tracking-widest text-f1-text-muted">
                             <th className="text-left py-3 px-3">Pos</th>
