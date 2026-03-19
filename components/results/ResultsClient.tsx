@@ -185,7 +185,6 @@ export default function ResultsClient({
 
     const fetchResults = useCallback(async (season: string, round: string, circuitId?: string) => {
         setLoading(true);
-        console.log(`[ResultsClient] Fetching results for ${season} ${round} ${circuitId}`);
         try {
             const url = new URL('/api/results', window.location.origin);
             url.searchParams.set('season', season);
@@ -197,7 +196,6 @@ export default function ResultsClient({
                 throw new Error('Failed to load results');
             }
             const payload: ResultsApiPayload = await response.json();
-            console.log('[ResultsClient] Payload received SQ:', payload.openf1SprintQualifying?.length);
             
             setRace(payload.race || null);
             setResults(payload.results || []);
@@ -219,7 +217,6 @@ export default function ResultsClient({
     }, []);
 
     const fetchSeasonCalendar = useCallback(async (season: string) => {
-        console.log(`[ResultsClient] Fetching calendar for ${season}`);
         try {
             const response = await fetch(`https://api.jolpi.ca/ergast/f1/${season}.json`);
             if (!response.ok) {
