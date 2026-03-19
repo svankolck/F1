@@ -303,12 +303,7 @@ export default function ResultsClient({
     const activeTab = sessionTabs.find((t) => t.key === viewMode) ? viewMode : 'race';
 
     // Map SQ results
-    const mappedSQ = useMemo(() => {
-        console.log('[ResultsClient] Mapping SQ results:', openf1SprintQuali?.length);
-        return mapSQtoQualifying(openf1SprintQuali);
-    }, [openf1SprintQuali]);
-
-    console.log('[ResultsClient] Rendering view:', activeTab, 'SQ data:', mappedSQ.length);
+    const mappedSQ = useMemo(() => mapSQtoQualifying(openf1SprintQuali), [openf1SprintQuali]);
 
     return (
         <div className="flex flex-col gap-5 w-full">
