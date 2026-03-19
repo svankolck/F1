@@ -161,11 +161,11 @@ export default function GameResultsBoard({ entries, sessions, drivers }: GameRes
                     </div>
                 </div>
 
-                <div className="mt-2 flex flex-wrap gap-1.5">
+                <div className="mt-2 grid grid-cols-2 gap-1.5 lg:grid-cols-4">
                     {cells.map((cell) => (
                         <div
                             key={`${title}-${cell.label}`}
-                            className={`min-w-[104px] flex-1 rounded-lg border px-2 py-1.5 ${getPickTone(cell.points, cell.driverId, cell.actual)}`}
+                            className={`min-w-0 rounded-lg border px-2 py-1.5 ${getPickTone(cell.points, cell.driverId, cell.actual)}`}
                         >
                             <div className="flex items-center justify-between gap-2">
                                 <p className="text-[9px] uppercase tracking-[0.18em] text-f1-text-muted">{cell.label}</p>
@@ -179,14 +179,16 @@ export default function GameResultsBoard({ entries, sessions, drivers }: GameRes
                             </div>
                         </div>
                     ))}
+                </div>
 
-                    {!!raceResult?.bonusPoints && (
-                        <div className="flex min-w-[116px] flex-1 items-center justify-between rounded-lg border border-f1-red/20 bg-f1-red/10 px-2 py-1.5">
+                {!!raceResult?.bonusPoints && (
+                    <div className="mt-1.5 flex justify-end">
+                        <div className="flex w-full items-center justify-between rounded-lg border border-f1-red/20 bg-f1-red/10 px-2 py-1.5 sm:w-auto sm:min-w-[148px] sm:gap-4">
                             <span className="text-[9px] uppercase tracking-[0.18em] text-f1-text-muted">Bonus Top 3</span>
                             <span className="text-[10px] font-mono font-bold text-f1-red">{formatPoints(raceResult.bonusPoints)}</span>
                         </div>
-                    )}
-                </div>
+                    </div>
+                )}
             </div>
         );
     };
