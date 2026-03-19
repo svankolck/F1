@@ -185,6 +185,7 @@ export default function ResultsClient({
 
     const fetchResults = useCallback(async (season: string, round: string, circuitId?: string) => {
         setLoading(true);
+        console.log(`[ResultsClient] Fetching results for ${season} ${round} ${circuitId}`);
         try {
             const url = new URL('/api/results', window.location.origin);
             url.searchParams.set('season', season);
@@ -196,6 +197,8 @@ export default function ResultsClient({
                 throw new Error('Failed to load results');
             }
             const payload: ResultsApiPayload = await response.json();
+            console.log('[ResultsClient] Payload received SQ:', payload.openf1SprintQualifying?.length);
+            
             setRace(payload.race || null);
             setResults(payload.results || []);
             setQualifying(payload.qualifying || []);
@@ -216,6 +219,7 @@ export default function ResultsClient({
     }, []);
 
     const fetchSeasonCalendar = useCallback(async (season: string) => {
+        console.log(`[ResultsClient] Fetching calendar for ${season}`);
         try {
             const response = await fetch(`https://api.jolpi.ca/ergast/f1/${season}.json`);
             if (!response.ok) {
@@ -261,20 +265,26 @@ export default function ResultsClient({
         const urlSeason = searchParams.get('season');
         const urlRound = searchParams.get('round');
 
-        if (urlSeason && urlRound && (urlSeason !== initialSeason || urlRound !== initialRound)) {
-            if (urlSeason !== initialSeason) {
-                fetchSeasonCalendar(urlSeason);
-            }
-            // Find circuitId for initial load if from URL
-            const fetchInit = async () => {
+        // Check if we need to fetch due to URL params or missing data
+        const needsFetch = 
+            (urlSeason && urlSeason !== initialSeason) || 
+            (urlRound && urlRound !== initialRound) ||
+            (openf1SprintQuali.length === 0 && isSprintWeekend(selectedRace));
+
+        if (needsFetch) {
+            const fetchInitData = async () => {
                 let currentRaces = seasonRaces;
-                if (urlSeason !== initialSeason) {
+                const fetchSeason = urlSeason || selectedSeason;
+                const fetchRound = urlRound || selectedRound;
+                
+                if (urlSeason && urlSeason !== initialSeason) {
                     currentRaces = await fetchSeasonCalendar(urlSeason);
                 }
-                const selectedRace = currentRaces.find(r => r.round === urlRound);
-                fetchResults(urlSeason, urlRound, selectedRace?.Circuit.circuitId);
+                
+                const currentSelectedRace = currentRaces.find(r => r.round === fetchRound);
+                fetchResults(fetchSeason, fetchRound, currentSelectedRace?.Circuit.circuitId);
             };
-            fetchInit();
+            fetchInitData();
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
@@ -296,7 +306,12 @@ export default function ResultsClient({
     const activeTab = sessionTabs.find((t) => t.key === viewMode) ? viewMode : 'race';
 
     // Map SQ results
-    const mappedSQ = useMemo(() => mapSQtoQualifying(openf1SprintQuali), [openf1SprintQuali]);
+    const mappedSQ = useMemo(() => {
+        console.log('[ResultsClient] Mapping SQ results:', openf1SprintQuali?.length);
+        return mapSQtoQualifying(openf1SprintQuali);
+    }, [openf1SprintQuali]);
+
+    console.log('[ResultsClient] Rendering view:', activeTab, 'SQ data:', mappedSQ.length);
 
     return (
         <div className="flex flex-col gap-5 w-full">
