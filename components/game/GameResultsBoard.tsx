@@ -134,6 +134,8 @@ export default function GameResultsBoard({ entries, sessions, drivers }: GameRes
             },
         ];
 
+        const hasBonus = Boolean(raceResult?.bonusPoints);
+
         return (
             <div className="rounded-xl border border-f1-border/30 bg-white/[0.03] px-2.5 py-2 xl:flex-1">
                 <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1.5">
@@ -161,15 +163,15 @@ export default function GameResultsBoard({ entries, sessions, drivers }: GameRes
                     </div>
                 </div>
 
-                <div className="mt-2 grid grid-cols-2 gap-1.5 lg:grid-cols-4">
+                <div className={`mt-2 grid grid-cols-2 gap-1.5 ${hasBonus ? 'lg:grid-cols-5' : 'lg:grid-cols-4'}`}>
                     {cells.map((cell) => (
                         <div
                             key={`${title}-${cell.label}`}
                             className={`min-w-0 rounded-lg border px-2 py-1.5 ${getPickTone(cell.points, cell.driverId, cell.actual)}`}
                         >
                             <div className="flex items-center justify-between gap-2">
-                                <p className="text-[9px] uppercase tracking-[0.18em] text-f1-text-muted">{cell.label}</p>
-                                <p className="text-[10px] font-mono text-f1-text-muted">{getDriverCode(cell.actual)}</p>
+                                <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-f1-text-muted">{cell.label}</p>
+                                <p className="text-[11px] font-mono text-f1-text-muted">{getDriverCode(cell.actual)}</p>
                             </div>
                             <div className="mt-1 flex items-end justify-between gap-2">
                                 <p className="text-[13px] font-bold leading-none">{getDriverCode(cell.driverId)}</p>
@@ -179,16 +181,14 @@ export default function GameResultsBoard({ entries, sessions, drivers }: GameRes
                             </div>
                         </div>
                     ))}
-                </div>
 
-                {!!raceResult?.bonusPoints && (
-                    <div className="mt-1.5 flex justify-end">
-                        <div className="flex w-full items-center justify-between rounded-lg border border-f1-red/20 bg-f1-red/10 px-2 py-1.5 sm:w-auto sm:min-w-[148px] sm:gap-4">
-                            <span className="text-[9px] uppercase tracking-[0.18em] text-f1-text-muted">Bonus Top 3</span>
+                    {!!raceResult?.bonusPoints && (
+                        <div className="col-span-2 flex min-w-0 items-center justify-between rounded-lg border border-f1-red/20 bg-f1-red/10 px-2 py-1.5 lg:col-span-1">
+                            <span className="text-[10px] font-bold uppercase tracking-[0.16em] text-f1-text-muted">Bonus Top 3</span>
                             <span className="text-[10px] font-mono font-bold text-f1-red">{formatPoints(raceResult.bonusPoints)}</span>
                         </div>
-                    </div>
-                )}
+                    )}
+                </div>
             </div>
         );
     };
@@ -204,27 +204,30 @@ export default function GameResultsBoard({ entries, sessions, drivers }: GameRes
                 {entries.map((entry, index) => (
                     <div key={entry.userId} className="glass-card px-3 py-2.5">
                         <div className="flex flex-col gap-2.5 xl:flex-row xl:items-center">
-                            <div className="flex min-w-0 items-center gap-2.5 xl:w-[220px] xl:flex-none">
-                                <div className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full border border-f1-border/30 bg-white/[0.04] text-[11px] font-mono font-bold text-f1-text-muted">
-                                    {index + 1}
+                            <div className="xl:w-[148px] xl:flex-none">
+                                <div className="flex items-center gap-2.5">
+                                    <div className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full border border-f1-border/30 bg-white/[0.04] text-[11px] font-mono font-bold text-f1-text-muted">
+                                        {index + 1}
+                                    </div>
+                                    <div className="h-8 w-8 flex-shrink-0 overflow-hidden rounded-full border border-f1-border/70 bg-f1-surface">
+                                        {entry.avatarUrl ? (
+                                            <Image src={entry.avatarUrl} alt="" width={32} height={32} className="h-full w-full object-cover" />
+                                        ) : (
+                                            <div className="flex h-full w-full items-center justify-center text-xs font-bold text-f1-text-muted">
+                                                {entry.username.charAt(0).toUpperCase()}
+                                            </div>
+                                        )}
+                                    </div>
                                 </div>
-                                <div className="h-8 w-8 flex-shrink-0 overflow-hidden rounded-full border border-f1-border/70 bg-f1-surface">
-                                    {entry.avatarUrl ? (
-                                        <Image src={entry.avatarUrl} alt="" width={32} height={32} className="h-full w-full object-cover" />
-                                    ) : (
-                                        <div className="flex h-full w-full items-center justify-center text-xs font-bold text-f1-text-muted">
-                                            {entry.username.charAt(0).toUpperCase()}
-                                        </div>
-                                    )}
-                                </div>
-                                <div className="min-w-0">
+
+                                <div className="mt-2 min-w-0">
                                     <p className="truncate text-sm font-bold">{entry.username}</p>
                                     <p className="text-[10px] uppercase tracking-[0.18em] text-f1-text-muted">
                                         {entry.results.length} scored {entry.results.length === 1 ? 'session' : 'sessions'}
                                     </p>
                                 </div>
 
-                                <div className="ml-auto text-right xl:hidden">
+                                <div className="mt-2 text-right xl:hidden">
                                     <p className="text-lg font-bold font-mono leading-none text-white">{entry.totalPoints}</p>
                                     <p className="mt-1 text-[10px] uppercase tracking-[0.18em] text-f1-text-muted">round pts</p>
                                 </div>
