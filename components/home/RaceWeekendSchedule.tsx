@@ -100,7 +100,7 @@ export default function RaceWeekendSchedule({ race }: RaceWeekendScheduleProps) 
   }, []);
 
   return (
-    <div className="mt-5 w-full max-w-xl overflow-hidden glass-card hover:border-f1-red/30 transition-colors duration-500">
+    <div className="mt-5 w-full max-w-full overflow-hidden glass-card hover:border-f1-red/30 transition-colors duration-500">
       <div className="space-y-1.5 p-1.5">
         {sessions.map((session) => (
           <div
