@@ -4,9 +4,20 @@ import { PracticeResult } from '@/lib/api/openf1-results';
 
 interface PracticeTableProps {
     results: PracticeResult[];
+    errorMessage?: string;
 }
 
-export default function PracticeTable({ results }: PracticeTableProps) {
+export default function PracticeTable({ results, errorMessage }: PracticeTableProps) {
+    if (errorMessage) {
+        return (
+            <div className="glass-card p-8 text-center border border-amber-400/20">
+                <span className="material-icons text-3xl text-amber-300 mb-2 block">warning_amber</span>
+                <p className="text-white font-medium mb-2">Practice data could not be loaded.</p>
+                <p className="text-f1-text-secondary max-w-xl mx-auto">{errorMessage}</p>
+            </div>
+        );
+    }
+
     if (!results || results.length === 0) {
         return (
             <div className="glass-card p-8 text-center">

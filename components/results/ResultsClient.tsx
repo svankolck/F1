@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { QualifyingResult, Race, RaceResult, getFlagUrl } from '@/lib/types/f1';
-import { PracticeResult, SprintQualiResult } from '@/lib/api/openf1-results';
+import { PracticeResult, PracticeSessionError, SprintQualiResult } from '@/lib/api/openf1-results';
 import RaceSlider from './RaceSlider';
 import PodiumShowcase from './PodiumShowcase';
 import ClassificationTable from './ClassificationTable';
@@ -19,6 +19,7 @@ interface ResultsClientProps {
     initialQualifying: QualifyingResult[];
     initialSprintResults: RaceResult[];
     initialPracticeResults?: Record<string, PracticeResult[]>;
+    initialPracticeErrors?: Record<string, PracticeSessionError>;
     initialOpenF1SprintQualifying?: SprintQualiResult[];
     availableSeasons: string[];
     countryFlags: Record<string, string>;
@@ -33,6 +34,7 @@ interface ResultsApiPayload {
     qualifying: QualifyingResult[];
     sprintResults: RaceResult[];
     practiceResults?: Record<string, PracticeResult[]>;
+    practiceErrors?: Record<string, PracticeSessionError>;
     openf1SprintQualifying?: SprintQualiResult[];
 }
 
@@ -93,14 +95,16 @@ function getSessionTabs(
     race: Race | null, 
     sprintResults: RaceResult[], 
     practiceResults: Record<string, PracticeResult[]>, 
+    practiceErrors: Record<string, PracticeSessionError>,
     openf1SprintQuali: SprintQualiResult[]
 ): SessionTab[] {
     const tabs: SessionTab[] = [];
+    const hasPracticeSession = (key: 'fp1' | 'fp2' | 'fp3') => key in practiceResults || key in practiceErrors;
 
-    // FP sessions first - show them if the key exists (even if empty)
-    if ('fp1' in practiceResults) tabs.push({ key: 'fp1', label: 'FP1' });
-    if ('fp2' in practiceResults) tabs.push({ key: 'fp2', label: 'FP2' });
-    if ('fp3' in practiceResults) tabs.push({ key: 'fp3', label: 'FP3' });
+    // FP sessions first
+    if (hasPracticeSession('fp1')) tabs.push({ key: 'fp1', label: 'FP1' });
+    if (hasPracticeSession('fp2')) tabs.push({ key: 'fp2', label: 'FP2' });
+    if (hasPracticeSession('fp3')) tabs.push({ key: 'fp3', label: 'FP3' });
 
     // Sprint Qualifying
     if (isSprintWeekend(race) || openf1SprintQuali.length > 0) {
@@ -155,6 +159,7 @@ export default function ResultsClient({
     initialQualifying,
     initialSprintResults,
     initialPracticeResults = {},
+    initialPracticeErrors = {},
     initialOpenF1SprintQualifying = [],
     availableSeasons,
     countryFlags,
@@ -172,6 +177,7 @@ export default function ResultsClient({
     const [qualifying, setQualifying] = useState<QualifyingResult[]>(initialQualifying);
     const [sprintResults, setSprintResults] = useState<RaceResult[]>(initialSprintResults);
     const [practiceResults, setPracticeResults] = useState<Record<string, PracticeResult[]>>(initialPracticeResults);
+    const [practiceErrors, setPracticeErrors] = useState<Record<string, PracticeSessionError>>(initialPracticeErrors);
     const [openf1SprintQuali, setOpenf1SprintQuali] = useState<SprintQualiResult[]>(initialOpenF1SprintQualifying);
     const [loading, setLoading] = useState(false);
 
@@ -202,6 +208,7 @@ export default function ResultsClient({
             setQualifying(payload.qualifying || []);
             setSprintResults(payload.sprintResults || []);
             setPracticeResults(payload.practiceResults || {});
+            setPracticeErrors(payload.practiceErrors || {});
             setOpenf1SprintQuali(payload.openf1SprintQualifying || []);
         } catch (error) {
             console.error('Results fetch failed:', error);
@@ -210,6 +217,7 @@ export default function ResultsClient({
             setQualifying([]);
             setSprintResults([]);
             setPracticeResults({});
+            setPracticeErrors({});
             setOpenf1SprintQuali([]);
         } finally {
             setLoading(false);
@@ -297,7 +305,7 @@ export default function ResultsClient({
 
     const selectedRace = seasonRaces.find((r) => r.round === selectedRound) || race;
     const status = getStatus(selectedRace || null);
-    const sessionTabs = getSessionTabs(selectedRace, sprintResults, practiceResults, openf1SprintQuali);
+    const sessionTabs = getSessionTabs(selectedRace, sprintResults, practiceResults, practiceErrors, openf1SprintQuali);
 
     // If the current viewMode is not available in the tabs, fall back to 'race'
     const activeTab = sessionTabs.find((t) => t.key === viewMode) ? viewMode : 'race';
@@ -413,15 +421,15 @@ export default function ResultsClient({
             )}
 
             {!loading && activeTab === 'fp1' && (
-                <PracticeTable results={practiceResults['fp1']} />
+                <PracticeTable results={practiceResults['fp1']} errorMessage={practiceErrors['fp1']?.message} />
             )}
 
             {!loading && activeTab === 'fp2' && (
-                <PracticeTable results={practiceResults['fp2']} />
+                <PracticeTable results={practiceResults['fp2']} errorMessage={practiceErrors['fp2']?.message} />
             )}
 
             {!loading && activeTab === 'fp3' && (
-                <PracticeTable results={practiceResults['fp3']} />
+                <PracticeTable results={practiceResults['fp3']} errorMessage={practiceErrors['fp3']?.message} />
             )}
         </div>
     );

@@ -30,7 +30,7 @@ export default async function ResultsPage() {
         getRaceResults('current', initialRound).catch(() => ({ race: null, results: [] })),
         getQualifyingResults('current', initialRound).catch(() => []),
         getSprintResults('current', initialRound).catch(() => ({ race: null, results: [] })),
-        initialRace ? getOpenF1ResultsForRound(parseInt(currentYear), initialRace.Circuit.circuitId).catch(() => ({ practiceResults: {}, sprintQualifying: [] })) : Promise.resolve({ practiceResults: {}, sprintQualifying: [] }),
+        initialRace ? getOpenF1ResultsForRound(parseInt(currentYear), initialRace.Circuit.circuitId).catch(() => ({ practiceResults: {}, practiceErrors: {}, sprintQualifying: [] })) : Promise.resolve({ practiceResults: {}, practiceErrors: {}, sprintQualifying: [] }),
     ]);
 
     const countryFlags: Record<string, string> = {};
@@ -61,6 +61,7 @@ export default async function ResultsPage() {
                 initialQualifying={qualifying}
                 initialSprintResults={sprintPayload.results || []}
                 initialPracticeResults={openf1Data.practiceResults}
+                initialPracticeErrors={openf1Data.practiceErrors}
                 initialOpenF1SprintQualifying={openf1Data.sprintQualifying}
                 availableSeasons={availableSeasons}
                 countryFlags={countryFlags}

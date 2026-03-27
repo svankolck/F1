@@ -1,17 +1,35 @@
 import { OpenF1Session, OpenF1Driver, OpenF1Lap } from '@/lib/types/f1';
 
 const BASE_URL = 'https://api.openf1.org/v1';
+const OPENF1_MAX_RETRIES = 2;
+const OPENF1_RETRY_DELAY_MS = 400;
 
 async function fetchOpenF1<T>(endpoint: string, params?: Record<string, string>): Promise<T[]> {
     const url = new URL(`${BASE_URL}${endpoint}`);
     if (params) {
         Object.entries(params).forEach(([key, value]) => url.searchParams.set(key, value));
     }
-    const res = await fetch(url.toString(), {
-        next: { revalidate: 300 },
-    });
-    if (!res.ok) throw new Error(`OpenF1 API error: ${res.status}`);
-    return res.json();
+
+    let attempt = 0;
+    while (attempt <= OPENF1_MAX_RETRIES) {
+        const res = await fetch(url.toString(), {
+            next: { revalidate: 300 },
+        });
+
+        if (res.ok) {
+            return res.json();
+        }
+
+        if (![429, 500, 502, 503, 504].includes(res.status) || attempt === OPENF1_MAX_RETRIES) {
+            throw new Error(`OpenF1 API error: ${res.status} for ${url.toString()}`);
+        }
+
+        const delayMs = OPENF1_RETRY_DELAY_MS * (attempt + 1);
+        await new Promise((resolve) => setTimeout(resolve, delayMs));
+        attempt++;
+    }
+
+    throw new Error(`OpenF1 API error: exhausted retries for ${url.toString()}`);
 }
 
 // ===== Types for Results =====
@@ -28,6 +46,11 @@ export interface PracticeResult {
     bestLapFormatted: string;
     gap: string;
     lapsCompleted: number;
+}
+
+export interface PracticeSessionError {
+    sessionName: string;
+    message: string;
 }
 
 export interface SprintQualiResult {
@@ -61,6 +84,28 @@ function formatGap(leaderTime: number, driverTime: number | null): string {
     if (driverTime === leaderTime) return '';
     const gap = driverTime - leaderTime;
     return `+${gap.toFixed(3)}`;
+}
+
+function getPracticeSessionKey(sessionName: string): 'fp1' | 'fp2' | 'fp3' | null {
+    const normalized = sessionName.toLowerCase();
+    if (normalized.includes('practice 1')) return 'fp1';
+    if (normalized.includes('practice 2')) return 'fp2';
+    if (normalized.includes('practice 3')) return 'fp3';
+    return null;
+}
+
+function formatPracticeSessionError(error: unknown): string {
+    const message = error instanceof Error ? error.message : 'Unknown OpenF1 practice fetch error';
+
+    if (message.includes('429')) {
+        return 'OpenF1 rate-limited this session request. Please try again shortly.';
+    }
+
+    if (message.includes('404')) {
+        return 'OpenF1 has not published lap data for this session yet.';
+    }
+
+    return 'OpenF1 practice data could not be loaded right now.';
 }
 
 // ===== Session Lookup =====
@@ -116,73 +161,68 @@ export function getOpenF1CircuitName(jolpicaCircuitId: string): string {
 
 export async function getPracticeClassification(sessionKey: number): Promise<PracticeResult[]> {
     console.log(`[OpenF1] Starting classification fetch for session ${sessionKey}`);
-    try {
-        const [laps, drivers] = await Promise.all([
-            fetchOpenF1<OpenF1Lap>('/laps', { session_key: sessionKey.toString() }),
-            fetchOpenF1<OpenF1Driver>('/drivers', { session_key: sessionKey.toString() }),
-        ]);
+    const [laps, drivers] = await Promise.all([
+        fetchOpenF1<OpenF1Lap>('/laps', { session_key: sessionKey.toString() }),
+        fetchOpenF1<OpenF1Driver>('/drivers', { session_key: sessionKey.toString() }),
+    ]);
 
-        console.log(`[OpenF1] Session ${sessionKey}: fetched ${laps.length} laps and ${drivers.length} drivers`);
+    console.log(`[OpenF1] Session ${sessionKey}: fetched ${laps.length} laps and ${drivers.length} drivers`);
 
-        // Build driver info map
-        const driverMap = new Map<number, OpenF1Driver>();
-        drivers.forEach((d) => {
-            const existing = driverMap.get(d.driver_number);
-            if (!existing) driverMap.set(d.driver_number, d);
-        });
+    // Build driver info map
+    const driverMap = new Map<number, OpenF1Driver>();
+    drivers.forEach((d) => {
+        const existing = driverMap.get(d.driver_number);
+        if (!existing) driverMap.set(d.driver_number, d);
+    });
 
-        // Find best lap per driver (exclude pit out laps and null durations)
-        const bestLaps = new Map<number, { bestTime: number; lapCount: number }>();
-        laps.forEach((lap) => {
-            if (lap.is_pit_out_lap || !lap.lap_duration || lap.lap_duration <= 0) {
-                // Still count for lap total
-                const existing = bestLaps.get(lap.driver_number);
-                if (existing) {
-                    existing.lapCount++;
-                } else {
-                    bestLaps.set(lap.driver_number, { bestTime: Infinity, lapCount: 1 });
-                }
-                return;
-            }
-
+    // Find best lap per driver (exclude pit out laps and null durations)
+    const bestLaps = new Map<number, { bestTime: number; lapCount: number }>();
+    laps.forEach((lap) => {
+        if (lap.is_pit_out_lap || !lap.lap_duration || lap.lap_duration <= 0) {
+            // Still count for lap total
             const existing = bestLaps.get(lap.driver_number);
             if (existing) {
                 existing.lapCount++;
-                if (lap.lap_duration < existing.bestTime) {
-                    existing.bestTime = lap.lap_duration;
-                }
             } else {
-                bestLaps.set(lap.driver_number, { bestTime: lap.lap_duration, lapCount: 1 });
+                bestLaps.set(lap.driver_number, { bestTime: Infinity, lapCount: 1 });
             }
-        });
+            return;
+        }
 
-        // Sort by best time
-        const sorted = Array.from(bestLaps.entries())
-            .filter(([, data]) => data.bestTime !== Infinity)
-            .sort((a, b) => a[1].bestTime - b[1].bestTime);
+        const existing = bestLaps.get(lap.driver_number);
+        if (existing) {
+            existing.lapCount++;
+            if (lap.lap_duration < existing.bestTime) {
+                existing.bestTime = lap.lap_duration;
+            }
+        } else {
+            bestLaps.set(lap.driver_number, { bestTime: lap.lap_duration, lapCount: 1 });
+        }
+    });
 
-        const leaderTime = sorted.length > 0 ? sorted[0][1].bestTime : null;
+    // Sort by best time
+    const sorted = Array.from(bestLaps.entries())
+        .filter(([, data]) => data.bestTime !== Infinity)
+        .sort((a, b) => a[1].bestTime - b[1].bestTime);
 
-        return sorted.map(([driverNumber, data], idx) => {
-            const driver = driverMap.get(driverNumber);
-            return {
-                position: idx + 1,
-                driverNumber,
-                driverCode: driver?.name_acronym || `#${driverNumber}`,
-                firstName: driver?.first_name || '',
-                lastName: driver?.last_name || '',
-                teamName: driver?.team_name || '',
-                teamColor: driver?.team_colour ? `#${driver.team_colour}` : '#888888',
-                bestLapTime: data.bestTime,
-                bestLapFormatted: formatLapTime(data.bestTime),
-                gap: formatGap(leaderTime!, data.bestTime),
-                lapsCompleted: data.lapCount,
-            };
-        });
-    } catch (error) {
-        console.error('Practice classification error:', error);
-        return [];
-    }
+    const leaderTime = sorted.length > 0 ? sorted[0][1].bestTime : null;
+
+    return sorted.map(([driverNumber, data], idx) => {
+        const driver = driverMap.get(driverNumber);
+        return {
+            position: idx + 1,
+            driverNumber,
+            driverCode: driver?.name_acronym || `#${driverNumber}`,
+            firstName: driver?.first_name || '',
+            lastName: driver?.last_name || '',
+            teamName: driver?.team_name || '',
+            teamColor: driver?.team_colour ? `#${driver.team_colour}` : '#888888',
+            bestLapTime: data.bestTime,
+            bestLapFormatted: formatLapTime(data.bestTime),
+            gap: formatGap(leaderTime!, data.bestTime),
+            lapsCompleted: data.lapCount,
+        };
+    });
 }
 
 // ===== Sprint Qualifying Classification =====
@@ -321,6 +361,7 @@ export async function getSprintQualifyingClassification(sessionKey: number): Pro
 
 export interface OpenF1ResultsPayload {
     practiceResults: Record<string, PracticeResult[]>; // 'fp1', 'fp2', 'fp3'
+    practiceErrors: Record<string, PracticeSessionError>;
     sprintQualifying: SprintQualiResult[];
 }
 
@@ -331,14 +372,14 @@ export async function getOpenF1ResultsForRound(
     const circuitName = getOpenF1CircuitName(circuitId);
     
     if (!circuitName) {
-        return { practiceResults: {}, sprintQualifying: [] };
+        return { practiceResults: {}, practiceErrors: {}, sprintQualifying: [] };
     }
 
     try {
         const sessions = await getOpenF1SessionsForMeeting(year, circuitName);
         
         if (sessions.length === 0) {
-            return { practiceResults: {}, sprintQualifying: [] };
+            return { practiceResults: {}, practiceErrors: {}, sprintQualifying: [] };
         }
 
         // Categorize sessions
@@ -359,20 +400,25 @@ export async function getOpenF1ResultsForRound(
         );
         console.log(`[OpenF1] Completed practice sessions: ${completedPractice.length}`);
 
-        // Fetch practice results in parallel
-        const practicePromises = completedPractice.map(async (session, idx) => {
-            const key = `fp${idx + 1}`;
-            const results = await getPracticeClassification(session.session_key);
-            console.log(`[OpenF1] Results for ${session.session_name} (${session.session_key}): ${results.length}`);
-            return { key, results };
-        });
-
-        const practiceEntries = await Promise.all(practicePromises);
         const practiceResults: Record<string, PracticeResult[]> = {};
-        practiceEntries.forEach(({ key, results }) => {
-            // Include every session that was found, even if results are empty
-            practiceResults[key] = results;
-        });
+        const practiceErrors: Record<string, PracticeSessionError> = {};
+
+        for (const session of completedPractice) {
+            const key = getPracticeSessionKey(session.session_name);
+            if (!key) continue;
+
+            try {
+                const results = await getPracticeClassification(session.session_key);
+                console.log(`[OpenF1] Results for ${session.session_name} (${session.session_key}): ${results.length}`);
+                practiceResults[key] = results;
+            } catch (error) {
+                console.error(`[OpenF1] Failed to fetch ${session.session_name} (${session.session_key}):`, error);
+                practiceErrors[key] = {
+                    sessionName: session.session_name,
+                    message: formatPracticeSessionError(error),
+                };
+            }
+        }
 
         // Sprint qualifying
         let sprintQualifying: SprintQualiResult[] = [];
@@ -383,9 +429,9 @@ export async function getOpenF1ResultsForRound(
             }
         }
 
-        return { practiceResults, sprintQualifying };
+        return { practiceResults, practiceErrors, sprintQualifying };
     } catch (error) {
         console.error('OpenF1 results fetch error:', error);
-        return { practiceResults: {}, sprintQualifying: [] };
+        return { practiceResults: {}, practiceErrors: {}, sprintQualifying: [] };
     }
 }

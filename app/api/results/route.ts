@@ -15,7 +15,7 @@ export async function GET(request: NextRequest) {
             getRaceResults(season, round).catch(() => ({ race: null, results: [] })),
             getQualifyingResults(season, round).catch(() => []),
             getSprintResults(season, round).catch(() => ({ race: null, results: [] })),
-            circuitId ? getOpenF1ResultsForRound(year, circuitId).catch(() => ({ practiceResults: {}, sprintQualifying: [] })) : Promise.resolve({ practiceResults: {}, sprintQualifying: [] }),
+            circuitId ? getOpenF1ResultsForRound(year, circuitId).catch(() => ({ practiceResults: {}, practiceErrors: {}, sprintQualifying: [] })) : Promise.resolve({ practiceResults: {}, practiceErrors: {}, sprintQualifying: [] }),
         ]);
 
         if (racePayload.race) {
@@ -25,6 +25,7 @@ export async function GET(request: NextRequest) {
                 qualifying,
                 sprintResults: sprintPayload.results || [],
                 practiceResults: openf1Data.practiceResults,
+                practiceErrors: openf1Data.practiceErrors,
                 openf1SprintQualifying: openf1Data.sprintQualifying,
             });
         }
@@ -38,6 +39,7 @@ export async function GET(request: NextRequest) {
             qualifying,
             sprintResults: sprintPayload.results || [],
             practiceResults: openf1Data.practiceResults,
+            practiceErrors: openf1Data.practiceErrors,
             openf1SprintQualifying: openf1Data.sprintQualifying,
         });
     } catch (error) {
@@ -49,6 +51,7 @@ export async function GET(request: NextRequest) {
                 qualifying: [], 
                 sprintResults: [], 
                 practiceResults: {}, 
+                practiceErrors: {},
                 openf1SprintQualifying: [],
                 error: 'Failed to fetch race results' 
             },
