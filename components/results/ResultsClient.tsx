@@ -91,6 +91,14 @@ interface SessionTab {
     label: string;
 }
 
+function hasScheduledPracticeSession(race: Race | null, key: 'fp1' | 'fp2' | 'fp3'): boolean {
+    if (!race) return false;
+
+    if (key === 'fp1') return !!race.FirstPractice;
+    if (key === 'fp2') return !!race.SecondPractice;
+    return !!race.ThirdPractice;
+}
+
 function getSessionTabs(
     race: Race | null, 
     sprintResults: RaceResult[], 
@@ -99,7 +107,8 @@ function getSessionTabs(
     openf1SprintQuali: SprintQualiResult[]
 ): SessionTab[] {
     const tabs: SessionTab[] = [];
-    const hasPracticeSession = (key: 'fp1' | 'fp2' | 'fp3') => key in practiceResults || key in practiceErrors;
+    const hasPracticeSession = (key: 'fp1' | 'fp2' | 'fp3') =>
+        hasScheduledPracticeSession(race, key) || key in practiceResults || key in practiceErrors;
 
     // FP sessions first
     if (hasPracticeSession('fp1')) tabs.push({ key: 'fp1', label: 'FP1' });
