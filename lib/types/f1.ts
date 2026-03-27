@@ -353,12 +353,21 @@ export const DRIVER_IMAGE_MAP: Record<string, string> = {
     sargeant: 'LOGSAR01_Logan_Sargeant/logsar01',
     lawson: 'LIALAW01_Liam_Lawson/lialaw01',
     bearman: 'OLIBEA01_Oliver_Bearman/olibea01',
-    colapinto: 'FRANCOL01_Franco_Colapinto/francol01',
+    colapinto: 'FRACOL01_Franco_Colapinto/fracol01',
     doohan: 'JACDOO01_Jack_Doohan/jacdoo01',
     hadjar: 'ISAHAD01_Isack_Hadjar/isahad01',
-    antonelli: 'ANDANT01_Andrea_Kimi_Antonelli/andant01',
-    bortoleto: 'GABBOT01_Gabriel_Bortoleto/gabbot01',
+    antonelli: 'ANDANT01_Kimi_Antonelli/andant01',
+    bortoleto: 'GABBOR01_Gabriel_Bortoleto/gabbor01',
+    arvid_lindblad: 'ARVLIN01_Arvid_Lindblad/arvlin01',
     lindblad: 'ARVLIN01_Arvid_Lindblad/arvlin01',
+};
+
+const DRIVER_IMAGE_ALIASES: Record<string, string> = {
+    lindblad: 'arvid_lindblad',
+};
+
+const DRIVER_IMAGE_DIRECTORY_MAP: Record<string, string> = {
+    antonelli: 'K',
 };
 
 export const TEAM_LOGO_MAP: Record<string, string> = {
@@ -385,10 +394,12 @@ export function getTeamLogoUrl(constructorId: string): string {
 }
 
 export function getDriverImageUrl(driverId: string): string {
-    const path = DRIVER_IMAGE_MAP[driverId];
+    const normalizedDriverId = DRIVER_IMAGE_ALIASES[driverId] || driverId;
+    const path = DRIVER_IMAGE_MAP[normalizedDriverId];
     if (!path) return '';
     const code = path.split('/')[0];
-    return `https://media.formula1.com/d_driver_fallback_image.png/content/dam/fom-website/drivers/${code.charAt(0)}/${path}.png.transform/2col/image.png`;
+    const directory = DRIVER_IMAGE_DIRECTORY_MAP[normalizedDriverId] || code.charAt(0);
+    return `https://media.formula1.com/d_driver_fallback_image.png/content/dam/fom-website/drivers/${directory}/${path}.png.transform/2col/image.png`;
 }
 
 // ===== Game Types =====
