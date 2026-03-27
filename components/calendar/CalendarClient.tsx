@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { Race, getFlagUrl } from '@/lib/types/f1';
 
@@ -45,9 +46,24 @@ export default function CalendarClient({ races, season }: CalendarClientProps) {
   const now = Date.now();
   const windows = races.map(getRaceWindow);
   const nextRaceIndex = windows.findIndex((window) => now <= window.end);
+  const nextRaceRef = useRef<HTMLAnchorElement>(null);
+  const hasAutoScrolled = useRef(false);
+
+  useEffect(() => {
+    if (hasAutoScrolled.current || nextRaceIndex <= 0 || !nextRaceRef.current) return;
+    if (window.scrollY > 40) return;
+    if (!window.matchMedia('(max-width: 767px)').matches) return;
+
+    hasAutoScrolled.current = true;
+    requestAnimationFrame(() => {
+      if (!nextRaceRef.current) return;
+      const top = nextRaceRef.current.getBoundingClientRect().top + window.scrollY - 88;
+      window.scrollTo({ top: Math.max(0, top), behavior: 'auto' });
+    });
+  }, [nextRaceIndex]);
 
   return (
-    <div className="flex flex-col gap-3">
+    <div className="flex flex-col gap-2.5">
       {races.map((race, index) => {
         const window = windows[index];
         const isPast = now > window.end;
@@ -56,57 +72,75 @@ export default function CalendarClient({ races, season }: CalendarClientProps) {
         return (
           <Link
             key={`${race.season}-${race.round}`}
+            ref={isNext ? nextRaceRef : null}
             href={`/results?season=${race.season}&round=${race.round}`}
-            className={`relative rounded-xl p-4 border transition-all ${
+            className={`group rounded-lg border px-3 py-2.5 transition-all duration-200 ${
               isNext
-                ? 'border-f1-red shadow-[0_0_18px_rgba(225,6,0,0.25)] bg-f1-red/5'
+                ? 'bg-f1-red/10 border-f1-red/50 shadow-[0_0_12px_rgba(225,6,0,0.18)]'
                 : 'border-f1-border bg-f1-surface/35 hover:border-f1-red/35'
             } ${isPast ? 'opacity-60' : ''}`}
+            style={{ borderLeftWidth: 3, borderLeftColor: isNext ? '#e10600' : 'rgba(255,255,255,0.12)' }}
           >
-            <div className="flex flex-col md:flex-row md:items-center gap-4 md:gap-6">
-              <div className="flex items-center gap-3 min-w-[130px]">
-                <div className="w-9 h-9 rounded-lg bg-black/40 border border-f1-border flex items-center justify-center font-mono text-sm font-bold text-f1-red">
+            <div className="flex items-center gap-3">
+              <div className="w-8 text-center flex-shrink-0">
+                <span className={`text-base font-bold font-mono ${isNext ? 'text-f1-red' : 'text-white'}`}>
                   {String(race.round).padStart(2, '0')}
-                </div>
-                {isPast && (
-                  <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-emerald-500/20 border border-emerald-400/50 text-emerald-300">
-                    <span className="material-icons text-[12px] leading-none">check</span>
-                  </span>
-                )}
+                </span>
+                <p className="text-[8px] font-mono uppercase tracking-widest text-f1-text-muted mt-0.5">Round</p>
               </div>
 
-              <div className="flex items-start gap-3 flex-1 min-w-0">
+              <div className="w-8 flex justify-center flex-shrink-0">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={getFlagUrl(race.Circuit.Location.country)}
                   alt={race.Circuit.Location.country}
-                  className="w-8 h-6 rounded object-cover mt-0.5"
+                  className="w-8 h-6 rounded object-cover"
                 />
-                <div className="min-w-0">
-                  <p className="text-base md:text-lg font-bold leading-tight truncate">{race.Circuit.Location.country}</p>
-                  <p className="text-sm text-f1-text-secondary truncate">{race.Circuit.circuitName}</p>
-                </div>
               </div>
 
-              <div className="flex items-center gap-3 md:justify-end">
-                <p className="text-sm md:text-base font-mono tracking-wider text-f1-text-secondary uppercase whitespace-nowrap">
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-bold text-white group-hover:text-f1-red transition-colors truncate">
+                  {race.raceName}
+                </p>
+                <p className="text-[11px] text-f1-text-secondary truncate">
+                  {race.Circuit.circuitName} • {race.Circuit.Location.country}
+                </p>
+              </div>
+
+              <div className="flex flex-col items-end gap-1.5 flex-shrink-0">
+                <p className="text-[11px] sm:text-xs font-mono tracking-wider text-f1-text-secondary uppercase whitespace-nowrap">
                   {formatDateRange(race)}
                 </p>
-                {race.Sprint && (
-                  <span className="px-2 py-1 rounded bg-orange-500/20 border border-orange-500/40 text-orange-300 text-[10px] font-bold uppercase tracking-widest">
-                    Sprint
-                  </span>
-                )}
-                {isNext && (
-                  <span className="px-2 py-1 rounded bg-f1-red/20 border border-f1-red/40 text-f1-red text-[10px] font-bold uppercase tracking-widest">
-                    Next
-                  </span>
-                )}
+                <div className="flex items-center gap-1.5">
+                  {race.Sprint && (
+                    <span className="px-2 py-0.5 rounded bg-orange-500/20 border border-orange-500/40 text-orange-300 text-[9px] font-bold uppercase tracking-widest">
+                      Sprint
+                    </span>
+                  )}
+                  {isNext && (
+                    <span className="px-2 py-0.5 rounded bg-f1-red/20 border border-f1-red/40 text-f1-red text-[9px] font-bold uppercase tracking-widest">
+                      Next
+                    </span>
+                  )}
+                </div>
               </div>
             </div>
 
-            <div className="mt-3 text-[11px] uppercase tracking-widest text-f1-text-muted">
-              {season} season
+            <div className="mt-2 flex items-center gap-2 text-[10px] uppercase tracking-widest text-f1-text-muted">
+              {isPast && (
+                <span className="inline-flex items-center gap-1 text-emerald-300">
+                  <span className="material-icons text-[12px] leading-none">check</span>
+                  Completed
+                </span>
+              )}
+              {!isPast && !isNext && (
+                <span>Upcoming</span>
+              )}
+              {isNext && (
+                <span>Upcoming</span>
+              )}
+              <span className="text-f1-border">•</span>
+              <span>{season} season</span>
             </div>
           </Link>
         );
