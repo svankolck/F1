@@ -153,7 +153,7 @@ export default async function HomePage() {
         </div>
 
         {/* Right: Circuit Info Card */}
-        <div className="lg:col-span-5 lg:row-start-2 relative flex items-start justify-center self-stretch z-10">
+        <div className="lg:col-span-5 lg:col-start-8 lg:row-start-2 relative flex items-start justify-center self-stretch z-10">
           <div className="absolute inset-0 bg-f1-red/5 blur-3xl rounded-full" />
           <div className="relative w-full h-full p-5 glass-card hover:border-f1-red/30 transition-colors duration-500 overflow-hidden group">
             {/* Background Image */}
