@@ -79,7 +79,7 @@ export default async function HomePage() {
         <div className="absolute inset-0 grid-overlay bg-[size:40px_40px] z-0" />
 
         {/* Left: Race Header */}
-        <div className="lg:col-span-7 z-10 relative">
+        <div className="lg:col-span-6 z-10 relative">
           {/* Tags */}
           <div className="flex items-center gap-3 mb-4">
             <span className="px-3 py-1 rounded glass-card text-[10px] font-bold tracking-widest text-f1-red uppercase border border-f1-red/20">
@@ -120,7 +120,7 @@ export default async function HomePage() {
         </div>
 
         {/* Left: Countdown + Schedule */}
-        <div className="lg:col-span-7 z-10 relative">
+        <div className="lg:col-span-6 z-10 relative">
           <div className="flex w-full max-w-md flex-col">
             {/* Countdown */}
             {nextRace && (
@@ -149,23 +149,13 @@ export default async function HomePage() {
             )}
 
             {nextRace && <RaceWeekendSchedule race={nextRace} />}
-
-            <div className="mt-5">
-              <Link
-                href="/calendar"
-                className="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-f1-border hover:border-f1-red/40 bg-f1-surface/40 hover:bg-f1-red/10 transition-colors text-sm font-bold uppercase tracking-wider"
-              >
-                View Full Calendar
-                <span className="material-icons text-base">arrow_forward</span>
-              </Link>
-            </div>
           </div>
         </div>
 
         {/* Right: Circuit Info Card */}
-        <div className="lg:col-span-5 relative flex items-start justify-center z-10">
+        <div className="lg:col-span-6 lg:row-start-2 relative flex items-start justify-center self-stretch z-10">
           <div className="absolute inset-0 bg-f1-red/5 blur-3xl rounded-full" />
-          <div className="relative w-full p-5 glass-card hover:border-f1-red/30 transition-colors duration-500 overflow-hidden group">
+          <div className="relative w-full h-full p-5 glass-card hover:border-f1-red/30 transition-colors duration-500 overflow-hidden group">
             {/* Background Image */}
             {circuitDetails?.imageUrl && (
               <>
@@ -257,6 +247,18 @@ export default async function HomePage() {
                 </div>
               </div>
             </div>
+          </div>
+        </div>
+
+        <div className="lg:col-span-6 z-10 relative">
+          <div className="mt-5 lg:mt-0">
+            <Link
+              href="/calendar"
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-f1-border hover:border-f1-red/40 bg-f1-surface/40 hover:bg-f1-red/10 transition-colors text-sm font-bold uppercase tracking-wider"
+            >
+              View Full Calendar
+              <span className="material-icons text-base">arrow_forward</span>
+            </Link>
           </div>
         </div>
       </section>
