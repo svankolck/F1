@@ -158,6 +158,7 @@ export default function StandingsTable(props: StandingsTableProps) {
         <div className="flex flex-col gap-1.5">
             {(standings as ConstructorStanding[]).map((standing, idx) => {
                 const teamColor = getTeamColor(standing.Constructor.constructorId);
+                const teamLogo = getTeamLogoUrl(standing.Constructor.constructorId);
                 const delta = getPositionDelta(
                     standing.position,
                     previousStandings,
@@ -197,12 +198,18 @@ export default function StandingsTable(props: StandingsTableProps) {
                             className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 p-1"
                             style={{ backgroundColor: `${teamColor}20`, border: `1px solid ${teamColor}40` }}
                         >
-                            {/* eslint-disable-next-line @next/next/no-img-element */}
-                            <img
-                                src={getTeamLogoUrl(standing.Constructor.constructorId)}
-                                alt={standing.Constructor.name}
-                                className="w-full h-full object-contain"
-                            />
+                            {teamLogo ? (
+                                /* eslint-disable-next-line @next/next/no-img-element */
+                                <img
+                                    src={teamLogo}
+                                    alt={standing.Constructor.name}
+                                    className="w-full h-full object-contain"
+                                />
+                            ) : (
+                                <span className="text-[10px] font-bold uppercase text-white/80">
+                                    {standing.Constructor.name.slice(0, 3)}
+                                </span>
+                            )}
                         </div>
 
                         {/* Team name */}

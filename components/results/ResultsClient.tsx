@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { QualifyingResult, Race, RaceResult, getFlagUrl } from '@/lib/types/f1';
 import { PracticeResult, PracticeSessionError, SprintQualiResult } from '@/lib/api/openf1-results';
+import { normalizeConstructorId } from '@/lib/utils/team-colors';
 import RaceSlider from './RaceSlider';
 import PodiumShowcase from './PodiumShowcase';
 import ClassificationTable from './ClassificationTable';
@@ -148,7 +149,7 @@ function mapSQtoQualifying(results: SprintQualiResult[]): QualifyingResult[] {
             dateOfBirth: ''
         },
         Constructor: {
-            constructorId: r.teamName.toLowerCase().replace(' ', '-'),
+            constructorId: normalizeConstructorId(r.teamName),
             url: '',
             name: r.teamName,
             nationality: ''

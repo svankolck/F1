@@ -4,6 +4,7 @@ const nextConfig = {
         remotePatterns: [
             { protocol: 'https', hostname: 'flagcdn.com' },
             { protocol: 'https', hostname: 'media.formula1.com' },
+            { protocol: 'https', hostname: 'assets.multiviewer.dev' },
             { protocol: 'https', hostname: 'lh3.googleusercontent.com' },
             { protocol: 'https', hostname: 'rjswxfjzyuwvhiplocse.supabase.co' },
         ],
@@ -25,7 +26,7 @@ const nextConfig = {
                             "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://vercel.live https://va.vercel-scripts.com",
                             "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
                             "font-src 'self' https://fonts.gstatic.com",
-                            "img-src 'self' data: blob: https://flagcdn.com https://media.formula1.com https://lh3.googleusercontent.com https://rjswxfjzyuwvhiplocse.supabase.co",
+                            "img-src 'self' data: blob: https://flagcdn.com https://media.formula1.com https://assets.multiviewer.dev https://lh3.googleusercontent.com https://rjswxfjzyuwvhiplocse.supabase.co",
                             "connect-src 'self' https://rjswxfjzyuwvhiplocse.supabase.co https://*.supabase.co https://api.jolpi.ca https://vercel.live https://va.vercel-scripts.com wss://rjswxfjzyuwvhiplocse.supabase.co",
                             "frame-src 'self' https://vercel.live",
                             "object-src 'none'",
