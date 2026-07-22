@@ -7,8 +7,8 @@ import AuthProvider from '@/components/auth/AuthProvider';
 export const metadata: Metadata = {
   title: 'F1 #247 — Driven By Northern Madness',
   description:
-    'Live timing, championship standings, race results, and prediction game for Formula 1.',
-  keywords: ['F1', 'Formula 1', 'live timing', 'race results', 'championship standings'],
+    'Formula 1 calendar, championship standings, race results, and prediction game.',
+  keywords: ['F1', 'Formula 1', 'race calendar', 'race results', 'championship standings'],
 };
 
 export default function RootLayout({

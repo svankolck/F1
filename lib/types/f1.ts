@@ -155,14 +155,6 @@ export interface OpenF1Driver {
     session_key: number;
 }
 
-export interface OpenF1Position {
-    session_key: number;
-    driver_number: number;
-    position: number;
-    date: string;
-    meeting_key: number;
-}
-
 export interface OpenF1Lap {
     session_key: number;
     driver_number: number;
@@ -174,38 +166,6 @@ export interface OpenF1Lap {
     is_pit_out_lap: boolean;
     st_speed: number | null;
     date_start: string;
-}
-
-export interface OpenF1Stint {
-    session_key: number;
-    driver_number: number;
-    stint_number: number;
-    compound: string;
-    tyre_age_at_start: number;
-    lap_start: number;
-    lap_end: number;
-}
-
-export interface OpenF1Pit {
-    session_key: number;
-    driver_number: number;
-    lap_number: number;
-    pit_duration: number | null;
-    date: string;
-}
-
-export interface OpenF1RaceControl {
-    meeting_key: number;
-    session_key: number;
-    date: string;
-    driver_number: number | null;
-    lap_number: number | null;
-    category: string;
-    flag: string | null;
-    scope: string | null;
-    sector: number | null;
-    qualifying_phase: number | null;
-    message: string;
 }
 
 // ===== App Types =====

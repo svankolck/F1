@@ -4,7 +4,7 @@ This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-
 ## 🤖 AI Agent Context
 This project is linked to **Antigravity**. 
 - **Repository**: `https://github.com/svankolck/F1.git`
-- **Deployment**: [f1-app.vercel.app](https://f1-app.vercel.app)
+- **Deployment**: [f1-roan.vercel.app](https://f1-roan.vercel.app)
 - **Database**: Supabase
 - **Local Testing**: Runs on port 3000. Use `server_browser_setup.md` for browser interactions.
 - **Persistent Context**: Refer to `knowledge/f1-app_context.md` for deep context.
@@ -49,4 +49,3 @@ For project-specific deployment instructions, including Supabase configuration a
 
 To learn more about Next.js, take a look at the following resources:
 ...
-

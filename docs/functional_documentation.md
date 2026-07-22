@@ -50,12 +50,7 @@ Spelers die een sessie vergeten in te vullen pakken automatisch terug op hun **D
 
 De app hangt sterk af van externe bronnen. Dit zijn de fallbacks en foutanalyses.
 
-### 3.1 Live Timing (OpenF1 API) ligt plat of is leeg
-- **Symptoom:** Gebruikers zien "Timing data currently not available" of de timing tabel blijft op "Replay modus" hangen tijdens een live race.
-- **Root-cause:** OpenF1 heeft vertraging (~3 tot 5 minuten) of de OpenF1 service ligt plat.
-- **Actie:** Geen beheeractie mogelijk behalve wachten. De app valt veilig terug zonder te crashen.
-
-### 3.2 Race Uitslagen of Klassement(Jolpica API) update niet
+### 3.1 Race Uitslagen of Klassement (Jolpica API) update niet
 - **Symptoom:** De race eindigde 30 minuten geleden, maar de uitslagpagina of kalender laat de race nog niet als "afgerond" zien.
 - **Actie:** Jolpica (de backend) synchroniseert de Wikipedia/Ergast F1 tabellen en heeft af en toe vertraging. In de tussentijd moet de beheerder **wachten met het berekenen van de game-punten**; het calculate-endpoint trekt namelijk data in uit Jolpica om te bepalen wie er gewonnen heeft. Als de uitslag onbeslist is, scoort niemand P1 tot P3.
 

@@ -9,17 +9,19 @@ Add the following environment variables to your Vercel project settings:
 |----------|-------------|
 | `NEXT_PUBLIC_SUPABASE_URL` | Your Supabase Project URL |
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Your Supabase Project Anon Key |
+| `SUPABASE_SERVICE_ROLE_KEY` | Server-only key for prediction writes and score calculation |
+| `CRON_SECRET` | Secret used to authorize the automatic scoring cron route |
 
 ## 2. Supabase Configuration (CRITICAL)
 You MUST update your Supabase Auth settings to allow Vercel to handle redirects:
 
 1.  Go to your **Supabase Dashboard**.
 2.  Navigate to **Authentication** > **URL Configuration**.
-3.  Update **Site URL** to your Vercel production URL (e.g., `https://f1-app.vercel.app`).
+3.  Update **Site URL** to the production URL: `https://f1-roan.vercel.app`.
 4.  Add your Vercel development and preview URLs to **Redirect URLs**:
     *   `http://localhost:3000/**` (for local development)
     *   `https://*-your-username.vercel.app/**` (for Vercel previews)
-    *   `https://your-domain.vercel.app/**` (for production)
+    *   `https://f1-roan.vercel.app/**` (for production)
 
 ## 3. Database Migrations
 Ensure all migrations in `supabase/migrations/` have been applied to your **production** Supabase project.

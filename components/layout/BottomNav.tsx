@@ -7,7 +7,6 @@ import { useAuth } from '@/components/auth/AuthProvider';
 const NAV_ITEMS = [
     { href: '/', icon: 'home', label: 'Home' },
     { href: '/calendar', icon: 'calendar_month', label: 'Calendar' },
-    { href: '/timing', icon: 'timer', label: 'Timing' },
     { href: '/standings', icon: 'leaderboard', label: 'Standings' },
     { href: '/results', icon: 'flag', label: 'Results' },
     { href: '/game', icon: 'sports_esports', label: 'Game', authOnly: true },

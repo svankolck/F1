@@ -17,15 +17,14 @@ Basis opzetten van de F1 #247 webapp: project scaffolding, design system, API-in
   - Dark theme (`#1a0a0a`), rode accent (`#e10600`)
   - Fonts: Space Grotesk (headings), JetBrains Mono (data)
   - Glassmorphism cards, grid-patronen, animaties
-- [x] `BottomNav` component (6 tabs: Home, Timing, Standings, Results, Game, Login)
+- [x] `BottomNav` component met Home, Calendar, Standings, Results, Game en accountnavigatie
 - [x] `Header` component met F1 #247 branding
 - [x] Root `Layout` met header + navigatie
 - [x] Jolpica API wrapper (`lib/api/jolpica.ts`)
   - Racekalender, standen, uitslagen, kwalificatie
   - ISR caching (revalidate: 300s)
-- [x] OpenF1 API wrapper (`lib/api/openf1.ts`)
-  - Sessies, rijders, posities, rondetijden, stints, pitstops
-  - Polling cache (revalidate: 30s)
+- [x] OpenF1-resultsintegratie (`lib/api/openf1-results.ts`)
+  - Aanvullende historische trainings- en sprintkwalificatie-uitslagen
 - [x] Home page
   - Countdown timer naar volgende race
   - Circuit info card met echte track SVG (Melbourne)
@@ -55,7 +54,7 @@ GET /ergast/f1/{seizoen}/driverstandings.json      → WK-stand
 | `components/home/Countdown.tsx` | Client-side countdown timer |
 | `components/home/PodiumCards.tsx` | Podium met rijderfoto's |
 | `lib/api/jolpica.ts` | Jolpica API wrapper |
-| `lib/api/openf1.ts` | OpenF1 API wrapper |
+| `lib/api/openf1-results.ts` | Aanvullende OpenF1-uitslagen |
 | `lib/types/f1.ts` | TypeScript types + helper functies |
 | `public/tracks/melbourne.svg` | Circuit SVG (Albert Park) |
 

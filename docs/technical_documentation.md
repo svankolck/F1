@@ -6,7 +6,7 @@ This document outlines the technical architecture, data flow, API integrations, 
 
 ## 🏎️ 1. Overview & Tech Stack
 
-A full-stack Next.js application designed to provide F1 fans with live timing, historical results, driver standings, and an interactive prediction game. 
+A full-stack Next.js application designed to provide F1 fans with race calendars, historical results, driver standings, and an interactive prediction game.
 
 **Core Stack:**
 - **Framework:** Next.js 14+ (App Router, Server Actions)
@@ -17,25 +17,25 @@ A full-stack Next.js application designed to provide F1 fans with live timing, h
 
 **External F1 APIs:**
 - **Jolpica F1 API** (Ergast replacement): Used for historical data, race schedules, and official classifying results.
-- **OpenF1 API:** Used for live, real-time telemetry, pit stops, and race control messages.
+- **OpenF1 API:** Used to supplement historical session results, including practice and sprint qualifying data.
 
 ---
 
 ## 🏛️ 2. Application Architecture
 
-The app uses the Next.js App Router paradigm, strictly separating Server Components (fastest load, SEO, direct DB access) from Client Components (interactivity, live polling).
+The app uses the Next.js App Router paradigm, separating Server Components (fast initial load, SEO, direct DB access) from Client Components (interactive filters, charts, profiles, and predictions).
 
 ### Directory Structure
 - `/app/` — Next.js routing, Server Components, and API endpoints (`/api/...`).
-- `/components/` — Reusable React Client Components organized by feature (`/game`, `/standings`, `/timing`, `/auth`).
-- `/lib/api/` — Typed wrapper functions for external F1 APIs (`jolpica.ts`, `openf1.ts`, `game.ts`).
+- `/components/` — Reusable React Client Components organized by feature (`/game`, `/standings`, `/results`, `/auth`).
+- `/lib/api/` — Typed wrapper functions for external F1 APIs (`jolpica.ts`, `openf1-results.ts`, `game.ts`).
 - `/lib/types/` — Shared TypeScript interfaces and UI constants (e.g., TEAM_COLORS, DRIVER_IMAGE_MAP).
 - `/lib/supabase/` — Supabase clients (`server.ts`, `client.ts`, `admin.ts`).
 - `/supabase/migrations/` — Verifiable SQL migrations defining the database schema and Row Level Security (RLS).
 
 ### API Route Design
 To prevent client-side secrets exposure and CORS issues, the app routes external traffic through its own Next.js API ecosystem:
-- `/api/timing` — Proxies and merges OpenF1 live data.
+- `/api/results` — Combines Jolpica classifications with supplementary OpenF1 session results.
 - `/api/game/predictions` — Secure POST endpoint to save user predictions.
 - `/api/game/calculate` — Protected admin endpoint to tally points after a race.
 
@@ -95,14 +95,9 @@ Points are awarded via `/api/game/calculate` (authorized via service_role):
 - **Use Cases:** Retrieving the 2026 season calendar, past season standings, constructor battles, and official race classifications.
 - **Caching:** Standard Next.js `fetch` caching with specific `revalidate` times (e.g., 24 hours for schedules, 1 hour for standings).
 
-### OpenF1 Integration (`lib/api/openf1.ts`)
-- **Use Cases:** Live Timing dashboard during race weekends.
-- **Features:** 
-  - Dynamic session detection (Practice vs Quali vs Race).
-  - Race control broadcasting (flags, penalties, safety cars) via `/race_control`.
-  - Pit stop counters aggregated per driver via `/pit`.
-  - Live telemetry gap/interval times.
-- **Replay Mode:** If no session is currently live, the API falls back to the most recent completed race to showcase the timing dashboard functionality.
+### OpenF1 Results Integration (`lib/api/openf1-results.ts`)
+- **Use Cases:** Supplementing the results page with completed practice and sprint qualifying classifications when Jolpica does not expose them.
+- **Scope:** OpenF1 is not used for live timing, telemetry polling, race control, pit-stop counters, or replay mode.
 
 ---
 

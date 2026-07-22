@@ -42,8 +42,6 @@ Admin dashboard voor beheer en finale optimalisatie, testing en deployment.
 - [ ] **Mobile polish**
   - Touch targets minimaal 44×44px
   - Haptic feedback op interacties (waar ondersteund)
-  - Pull-to-refresh op live timing
-  - Landscape modus voor timing tabel
   - Safe area's voor notch/eiland devices
   - PWA manifest + service worker voor offline fallback
 - [ ] **SEO & Accessibility**
