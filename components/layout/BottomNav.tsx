@@ -29,7 +29,7 @@ export default function BottomNav() {
         visibleItems.length >= 7 ? 'max-w-xl' : visibleItems.length === 6 ? 'max-w-lg' : 'max-w-md';
 
     return (
-        <nav className="fixed bottom-0 left-0 w-full bg-f1-bg/95 backdrop-blur-md border-t border-f1-border z-50">
+        <nav className="fixed bottom-[max(0.75rem,3svh)] left-0 w-full bg-f1-bg/95 backdrop-blur-md border-t border-f1-border z-50 md:bottom-0">
             <div className={`mx-auto px-2 transition-all duration-300 ${navMaxWidthClass}`}>
                 <div
                     className="grid h-[60px] items-center"

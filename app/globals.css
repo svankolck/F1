@@ -96,9 +96,15 @@ body {
   }
 }
 
-/* Bottom nav safe area */
+/* Keep content clear of the raised mobile bottom navigation. */
 .pb-nav {
-  padding-bottom: 70px;
+  padding-bottom: calc(70px + max(0.75rem, 3svh));
+}
+
+@media (min-width: 768px) {
+  .pb-nav {
+    padding-bottom: 70px;
+  }
 }
 
 /* Gradient overlay for images */
