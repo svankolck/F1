@@ -9,6 +9,10 @@ jobs:
   quality:
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    env:
+      # Build-only placeholders: production values live in Vercel.
+      NEXT_PUBLIC_SUPABASE_URL: https://placeholder.supabase.co
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: placeholder-anon-key
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
