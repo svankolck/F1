@@ -59,7 +59,7 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
         }
         const p = await fetchProfile(user.id, supabase);
         setProfile(p);
-    }, [user]);
+    }, [user, supabase]);
 
     useEffect(() => {
         // Get initial session
