@@ -40,7 +40,6 @@ export default function ProfileClient({ user, initialProfile, drivers }: Profile
     const [newPassword, setNewPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
     const [passwordMessage, setPasswordMessage] = useState('');
-    const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
     const router = useRouter();
     const { signOut, refreshProfile } = useAuth();
@@ -235,38 +234,6 @@ export default function ProfileClient({ user, initialProfile, drivers }: Profile
                     Sign Out
                 </button>
 
-                {!showDeleteConfirm ? (
-                    <button
-                        onClick={() => setShowDeleteConfirm(true)}
-                        className="w-full py-3 text-red-400 text-xs font-mono uppercase tracking-widest hover:text-red-300 transition-colors"
-                    >
-                        Delete Account
-                    </button>
-                ) : (
-                    <div className="glass-card p-4 border border-red-500/30">
-                        <p className="text-red-400 text-xs mb-3">
-                            Are you sure you want to delete your account? This action cannot be undone.
-                        </p>
-                        <div className="flex gap-2">
-                            <button
-                                onClick={() => setShowDeleteConfirm(false)}
-                                className="flex-1 py-2 bg-white/10 text-white text-xs font-bold uppercase rounded-lg hover:bg-white/20 transition-colors"
-                            >
-                                Cancel
-                            </button>
-                            <button
-                                onClick={async () => {
-                                    // Note: admin-level delete requires a server-side function
-                                    await signOut();
-                                    router.push('/');
-                                }}
-                                className="flex-1 py-2 bg-red-600 text-white text-xs font-bold uppercase rounded-lg hover:bg-red-700 transition-colors"
-                            >
-                                Delete
-                            </button>
-                        </div>
-                    </div>
-                )}
             </div>
         </div>
     );

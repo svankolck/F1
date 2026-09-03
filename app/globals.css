@@ -2,7 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
 
 :root {
   --f1-bg: #1a0a0a;
@@ -103,7 +102,7 @@ body {
 
 @media (min-width: 768px) {
   .pb-nav {
-    padding-bottom: 70px;
+    padding-bottom: 1rem;
   }
 }
 

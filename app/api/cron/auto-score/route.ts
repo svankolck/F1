@@ -18,29 +18,39 @@ const SCORABLE_SESSIONS: GameSessionType[] = ['sprint_qualifying', 'sprint', 'qu
 
 export async function GET(request: NextRequest) {
     // Verify cron secret
+    const cronSecret = process.env.CRON_SECRET;
+    if (!cronSecret) {
+        console.error('CRON_SECRET is not configured');
+        return NextResponse.json({ error: 'Cron is not configured' }, { status: 503 });
+    }
+
     const authHeader = request.headers.get('authorization');
-    if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+    if (authHeader !== `Bearer ${cronSecret}`) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     const now = Date.now();
-    const admin = createAdminClient();
     const season = new Date().getFullYear();
     const scored: string[] = [];
     const skipped: string[] = [];
     const errors: string[] = [];
 
     try {
+        const admin = createAdminClient();
         const races = await getRaceCalendar(String(season));
 
         // Get existing scoring log entries
-        const { data: existingLogs } = await admin
+        const { data: existingLogs, error: logQueryError } = await admin
             .from('scoring_log')
-            .select('season, round, session_type')
+            .select('season, round, session_type, status')
             .eq('season', season);
 
+        if (logQueryError) throw new Error(`Unable to read scoring log: ${logQueryError.message}`);
+
         const scoredSet = new Set(
-            (existingLogs || []).map(l => `${l.season}-${l.round}-${l.session_type}`)
+            (existingLogs || [])
+                .filter(log => log.status !== 'failed')
+                .map(log => `${log.season}-${log.round}-${log.session_type}`)
         );
 
         for (const race of races) {
@@ -58,7 +68,10 @@ export async function GET(request: NextRequest) {
                 }
 
                 // Check if enough time has passed since session start
-                const sessionStart = new Date(session.startTime).getTime();
+                const scoringSession = session.type === 'sprint_qualifying'
+                    ? schedule.sessions.find(candidate => candidate.type === 'sprint') ?? session
+                    : session;
+                const sessionStart = new Date(scoringSession.startTime).getTime();
                 const buffer = SCORING_BUFFERS[session.type] || SCORING_BUFFERS.race;
 
                 if (now < sessionStart + buffer) {
@@ -87,6 +100,8 @@ export async function GET(request: NextRequest) {
                             status: 'failed',
                             scored_count: 0,
                             error_message: msg,
+                            attempt_count: 1,
+                            last_attempt_at: new Date().toISOString(),
                         }, { onConflict: 'season,round,session_type' });
                     } catch { /* ignore log error */ }
                 }

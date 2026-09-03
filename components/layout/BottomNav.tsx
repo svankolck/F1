@@ -29,7 +29,7 @@ export default function BottomNav() {
         visibleItems.length >= 7 ? 'max-w-xl' : visibleItems.length === 6 ? 'max-w-lg' : 'max-w-md';
 
     return (
-        <nav className="fixed bottom-0 left-0 w-full pb-[max(0.75rem,3svh)] bg-f1-bg/95 backdrop-blur-md border-t border-f1-border z-50 md:pb-0">
+        <nav aria-label="Mobile navigation" className="fixed bottom-0 left-0 w-full pb-[max(0.75rem,3svh)] bg-f1-bg/95 backdrop-blur-md border-t border-f1-border z-50 md:hidden">
             <div className={`mx-auto px-2 transition-all duration-300 ${navMaxWidthClass}`}>
                 <div
                     className="grid h-[60px] items-center"
@@ -43,6 +43,7 @@ export default function BottomNav() {
                             <Link
                                 key={item.href}
                                 href={item.href}
+                                aria-current={isActive ? 'page' : undefined}
                                 className={`flex flex-col items-center justify-center w-full h-full relative transition-colors ${isActive
                                     ? 'text-f1-red'
                                     : 'text-f1-text-muted hover:text-white'

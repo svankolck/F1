@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { DriverStanding, ConstructorStanding, getTeamColor, getDriverImageUrl, getTeamLogoUrl } from '@/lib/types/f1';
 
 interface DriverStandingsTableProps {
@@ -71,6 +72,7 @@ export default function StandingsTable(props: StandingsTableProps) {
                         <Link
                             key={standing.Driver.driverId}
                             href={`/standings/${standing.Driver.driverId}?season=${season || ''}&round=${round || ''}`}
+                            prefetch={false}
                             className="group"
                         >
                             <div
@@ -101,10 +103,12 @@ export default function StandingsTable(props: StandingsTableProps) {
                                 {/* Driver photo */}
                                 <div className="w-8 h-8 rounded-full overflow-hidden bg-f1-surface flex-shrink-0">
                                     {driverImg ? (
-                                        /* eslint-disable-next-line @next/next/no-img-element */
-                                        <img
+                                        <Image
                                             src={driverImg}
                                             alt={standing.Driver.familyName}
+                                            width={32}
+                                            height={32}
+                                            sizes="32px"
                                             className="w-full h-full object-cover object-top"
                                         />
                                     ) : (

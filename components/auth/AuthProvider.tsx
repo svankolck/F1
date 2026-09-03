@@ -37,8 +37,7 @@ export function useAuth() {
     return context;
 }
 
-async function fetchProfile(userId: string): Promise<Profile | null> {
-    const supabase = createClient();
+async function fetchProfile(userId: string, supabase = createClient()): Promise<Profile | null> {
     const { data } = await supabase
         .from('profiles')
         .select('*')
@@ -58,7 +57,7 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
             setProfile(null);
             return;
         }
-        const p = await fetchProfile(user.id);
+        const p = await fetchProfile(user.id, supabase);
         setProfile(p);
     }, [user]);
 
@@ -69,7 +68,7 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
                 const { data: { user: currentUser } } = await supabase.auth.getUser();
                 setUser(currentUser);
                 if (currentUser) {
-                    const p = await fetchProfile(currentUser.id);
+                    const p = await fetchProfile(currentUser.id, supabase);
                     setProfile(p);
                 }
             } catch {
@@ -87,7 +86,7 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
                 const currentUser = session?.user ?? null;
                 setUser(currentUser);
                 if (currentUser) {
-                    const p = await fetchProfile(currentUser.id);
+                    const p = await fetchProfile(currentUser.id, supabase);
                     setProfile(p);
                 } else {
                     setProfile(null);

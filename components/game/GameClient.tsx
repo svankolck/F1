@@ -1,15 +1,20 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import dynamic from 'next/dynamic';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/components/auth/AuthProvider';
 import { GameDriver, WeekendSchedule, Prediction, GameSessionType, Race, getFlagUrl } from '@/lib/types/f1';
 import RoundSlider from '@/components/standings/RoundSlider';
 import GameLeaderboard from './GameLeaderboard';
-import GamePointsChart from './GamePointsChart';
 import GameResultsBoard from './GameResultsBoard';
 import AdminPanel from './AdminPanel';
 import WeekendSessionsBoard from './WeekendSessionsBoard';
+
+const GamePointsChart = dynamic(() => import('./GamePointsChart'), {
+    ssr: false,
+    loading: () => <div className="glass-card h-64 animate-pulse" aria-label="Loading points chart" />,
+});
 
 interface GameClientProps {
     initialSchedule: WeekendSchedule | null;
@@ -25,11 +30,22 @@ export default function GameClient({ initialSchedule, initialDrivers, initialRac
     const router = useRouter();
     const searchParams = useSearchParams();
     const { user } = useAuth();
-    const [activeTab, setActiveTab] = useState<TabType>('prediction');
+    const requestedTab = searchParams.get('tab');
+    const [activeTab, setActiveTab] = useState<TabType>(
+        requestedTab === 'results' || requestedTab === 'stand' || (requestedTab === 'admin' && isAdmin) ? requestedTab : 'prediction'
+    );
     const [schedule, setSchedule] = useState<WeekendSchedule | null>(initialSchedule);
     const [drivers] = useState<GameDriver[]>(initialDrivers);
     const [activeRound, setActiveRound] = useState<string>(searchParams.get('round') || initialSchedule?.round.toString() || '1');
     const [isLoading, setIsLoading] = useState(false);
+
+    const selectTab = useCallback((tab: TabType) => {
+        setActiveTab(tab);
+        const params = new URLSearchParams(searchParams.toString());
+        if (tab === 'prediction') params.delete('tab');
+        else params.set('tab', tab);
+        router.replace(`/game${params.size ? `?${params.toString()}` : ''}`, { scroll: false });
+    }, [router, searchParams]);
 
     // Build country flag map
     const countryFlags: Record<string, string> = {};
@@ -288,7 +304,7 @@ export default function GameClient({ initialSchedule, initialDrivers, initialRac
             {/* Tab toggle */}
             <div className="flex gap-1 p-1 rounded-xl bg-f1-surface/30 border border-f1-border/20">
                 <button
-                    onClick={() => setActiveTab('prediction')}
+                    onClick={() => selectTab('prediction')}
                     className={`flex-1 py-2 px-4 rounded-lg text-xs font-bold uppercase tracking-wider transition-all
                         ${activeTab === 'prediction'
                             ? 'bg-f1-red text-white shadow-lg shadow-f1-red/20'
@@ -299,7 +315,7 @@ export default function GameClient({ initialSchedule, initialDrivers, initialRac
                     Prediction
                 </button>
                 <button
-                    onClick={() => setActiveTab('results')}
+                    onClick={() => selectTab('results')}
                     className={`flex-1 py-2 px-4 rounded-lg text-xs font-bold uppercase tracking-wider transition-all
                         ${activeTab === 'results'
                             ? 'bg-f1-red text-white shadow-lg shadow-f1-red/20'
@@ -310,7 +326,7 @@ export default function GameClient({ initialSchedule, initialDrivers, initialRac
                     Results
                 </button>
                 <button
-                    onClick={() => setActiveTab('stand')}
+                    onClick={() => selectTab('stand')}
                     className={`flex-1 py-2 px-4 rounded-lg text-xs font-bold uppercase tracking-wider transition-all
                         ${activeTab === 'stand'
                             ? 'bg-f1-red text-white shadow-lg shadow-f1-red/20'
@@ -322,7 +338,7 @@ export default function GameClient({ initialSchedule, initialDrivers, initialRac
                 </button>
                 {isAdmin && (
                     <button
-                        onClick={() => setActiveTab('admin')}
+                        onClick={() => selectTab('admin')}
                         className={`flex-1 py-2 px-4 rounded-lg text-xs font-bold uppercase tracking-wider transition-all
                             ${activeTab === 'admin'
                                 ? 'bg-f1-red text-white shadow-lg shadow-f1-red/20'

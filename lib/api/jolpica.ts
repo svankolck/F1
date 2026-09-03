@@ -5,6 +5,7 @@ const BASE_URL = 'https://api.jolpi.ca/ergast/f1';
 async function fetchJolpica<T>(endpoint: string): Promise<T> {
     const res = await fetch(`${BASE_URL}${endpoint}.json`, {
         next: { revalidate: 300 }, // Cache for 5 minutes
+        signal: AbortSignal.timeout(10_000),
     });
     if (!res.ok) throw new Error(`Jolpica API error: ${res.status}`);
     const data = await res.json();

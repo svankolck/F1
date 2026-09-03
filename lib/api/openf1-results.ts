@@ -14,6 +14,7 @@ async function fetchOpenF1<T>(endpoint: string, params?: Record<string, string>)
     while (attempt <= OPENF1_MAX_RETRIES) {
         const res = await fetch(url.toString(), {
             next: { revalidate: 300 },
+            signal: AbortSignal.timeout(10_000),
         });
 
         if (res.ok) {
@@ -151,6 +152,7 @@ const CIRCUIT_NAME_MAP: Record<string, string> = {
     jeddah: 'Jeddah',
     baku: 'Baku',
     madring: 'Madrid',
+    sepang: 'Sepang',
 };
 
 export function getOpenF1CircuitName(jolpicaCircuitId: string): string {

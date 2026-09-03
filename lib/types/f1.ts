@@ -230,6 +230,7 @@ export const COUNTRY_CODES: Record<string, string> = {
     'Italy': 'it',
     'Japan': 'jp',
     'Mexico': 'mx',
+    'Malaysia': 'my',
     'Monaco': 'mc',
     'Netherlands': 'nl',
     'Portugal': 'pt',
@@ -273,6 +274,7 @@ export const CIRCUIT_SVG_MAP: Record<string, string> = {
     zandvoort: 'zandvoort',
     monza: 'monza',
     madring: '', // Madrid — new for 2026, no SVG yet
+    sepang: '', // Sepang — SVG not yet available
     marina_bay: 'marina-bay',
     losail: 'lusail',
     americas: 'austin',

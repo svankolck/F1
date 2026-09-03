@@ -1,12 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getQualifyingResults, getRaceCalendar, getRaceResults, getSprintResults } from '@/lib/api/jolpica';
 import { getOpenF1ResultsForRound } from '@/lib/api/openf1-results';
+import { parseRound, parseSeason, PUBLIC_CACHE_HEADERS } from '@/lib/api/params';
 
 export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
-    const season = searchParams.get('season') || 'current';
-    const round = searchParams.get('round') || '1';
+    const season = parseSeason(searchParams.get('season'));
+    const round = parseRound(searchParams.get('round'), '1');
     const circuitId = searchParams.get('circuitId');
+
+    if (!season || !round) return NextResponse.json({ error: 'Invalid results parameters' }, { status: 400 });
 
     const year = season === 'current' ? new Date().getFullYear() : parseInt(season);
 
@@ -27,7 +30,7 @@ export async function GET(request: NextRequest) {
                 practiceResults: openf1Data.practiceResults,
                 practiceErrors: openf1Data.practiceErrors,
                 openf1SprintQualifying: openf1Data.sprintQualifying,
-            });
+            }, { headers: PUBLIC_CACHE_HEADERS });
         }
 
         const races = await getRaceCalendar(season).catch(() => []);
@@ -41,7 +44,7 @@ export async function GET(request: NextRequest) {
             practiceResults: openf1Data.practiceResults,
             practiceErrors: openf1Data.practiceErrors,
             openf1SprintQualifying: openf1Data.sprintQualifying,
-        });
+        }, { headers: PUBLIC_CACHE_HEADERS });
     } catch (error) {
         console.error('Results API error:', error);
         return NextResponse.json(
@@ -55,7 +58,7 @@ export async function GET(request: NextRequest) {
                 openf1SprintQualifying: [],
                 error: 'Failed to fetch race results' 
             },
-            { status: 500 }
+            { status: 502 }
         );
     }
 }

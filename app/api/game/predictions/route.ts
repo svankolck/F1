@@ -53,9 +53,14 @@ export async function POST(request: NextRequest) {
         const season = Number(body.season);
         const round = Number(body.round);
         const sessionType = body.sessionType;
+        const validSessionTypes: GameSessionType[] = ['qualifying', 'sprint_qualifying', 'sprint', 'race'];
+        if (!validSessionTypes.includes(sessionType)) {
+            return NextResponse.json({ error: 'Invalid session type' }, { status: 400 });
+        }
+
         const hasPole = sessionType === 'qualifying' || sessionType === 'sprint_qualifying';
 
-        if (!Number.isInteger(season) || !Number.isInteger(round)) {
+        if (!Number.isInteger(season) || !Number.isInteger(round) || season < 1950 || season > new Date().getFullYear() + 1 || round < 1 || round > 30) {
             return NextResponse.json({ error: 'Invalid season or round' }, { status: 400 });
         }
 

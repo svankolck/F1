@@ -4,7 +4,7 @@ import CalendarClient from '@/components/calendar/CalendarClient';
 export const revalidate = 300;
 
 export default async function CalendarPage() {
-  const season = '2026';
+  const season = String(new Date().getFullYear());
   const races = await getRaceCalendar(season);
 
   return (

@@ -8,7 +8,7 @@ import { getRaceCalendar } from '@/lib/api/jolpica';
 import { GameSessionType, Prediction } from '@/lib/types/f1';
 
 export default async function GamePage() {
-    const supabase = createClient();
+    const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
 
     if (!user) {

@@ -28,7 +28,8 @@ export default function LoginClient() {
 
     const router = useRouter();
     const searchParams = useSearchParams();
-    const redirect = searchParams.get('redirect') || '/';
+    const requestedRedirect = searchParams.get('redirect') || '/';
+    const redirect = requestedRedirect.startsWith('/') && !requestedRedirect.startsWith('//') ? requestedRedirect : '/';
     const supabase = createClient();
 
     const validate = useCallback((): boolean => {
@@ -70,14 +71,17 @@ export default function LoginClient() {
         setLoading(true);
         setErrors({});
 
-        // Check if username is unique
-        const { data: existingUser } = await supabase
-            .from('profiles')
-            .select('username')
-            .eq('username', username)
-            .single();
+        const normalizedUsername = username.trim().toLowerCase();
+        const availability = await fetch(`/api/usernames/availability?username=${encodeURIComponent(normalizedUsername)}`);
+        const availabilityBody = await availability.json() as { available?: boolean };
 
-        if (existingUser) {
+        if (!availability.ok) {
+            setErrors({ general: 'Unable to check username. Please try again.' });
+            setLoading(false);
+            return;
+        }
+
+        if (!availabilityBody.available) {
             setErrors({ username: 'Username is already taken' });
             setLoading(false);
             return;
@@ -90,7 +94,7 @@ export default function LoginClient() {
                 data: {
                     first_name: firstName,
                     last_name: lastName,
-                    username,
+                    username: normalizedUsername,
                 },
             },
         });

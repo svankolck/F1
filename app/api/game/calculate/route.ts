@@ -4,6 +4,12 @@ import { createAdminClient } from '@/lib/supabase/admin';
 import { GameSessionType } from '@/lib/types/f1';
 import { calculateScores } from '@/lib/api/scoring';
 
+const SESSION_TYPES: GameSessionType[] = ['qualifying', 'sprint_qualifying', 'sprint', 'race'];
+
+function isValidRound(value: unknown): value is number {
+    return Number.isInteger(value) && (value as number) >= 1 && (value as number) <= 30;
+}
+
 // POST: Admin triggers score calculation
 export async function POST(request: NextRequest) {
     try {
@@ -27,7 +33,11 @@ export async function POST(request: NextRequest) {
             sessionType: GameSessionType;
         };
 
-        const result = await calculateScores(season, round, sessionType, user.id);
+        if (!Number.isInteger(Number(season)) || Number(season) < 1950 || Number(season) > new Date().getFullYear() + 1 || !isValidRound(Number(round)) || !SESSION_TYPES.includes(sessionType)) {
+            return NextResponse.json({ error: 'Invalid scoring request' }, { status: 400 });
+        }
+
+        const result = await calculateScores(String(season), String(round), sessionType, user.id);
 
         return NextResponse.json({
             message: `Scored ${result.scored} predictions`,
@@ -63,6 +73,10 @@ export async function PATCH(request: NextRequest) {
             sessionType: GameSessionType;
             status: 'official' | 'provisional';
         };
+
+        if (!Number.isInteger(season) || season < 1950 || season > new Date().getFullYear() + 1 || !isValidRound(round) || !SESSION_TYPES.includes(sessionType) || !['official', 'provisional'].includes(status)) {
+            return NextResponse.json({ error: 'Invalid status update' }, { status: 400 });
+        }
 
         const admin = createAdminClient();
         const { error } = await admin

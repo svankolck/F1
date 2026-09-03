@@ -107,17 +107,21 @@ export async function calculateScores(
     }
 
     // Get all predictions + defaults
-    const { data: predictions } = await admin
+    const { data: predictions, error: predictionsError } = await admin
         .from('predictions')
         .select('user_id, pole_driver_id, p1_driver_id, p2_driver_id, p3_driver_id')
         .eq('season', parseInt(season))
         .eq('round', parseInt(round))
         .eq('session_type', sessionType);
 
-    const { data: profileDefaults } = await admin
+    if (predictionsError) throw new Error(`Failed to load predictions: ${predictionsError.message}`);
+
+    const { data: profileDefaults, error: defaultsError } = await admin
         .from('profiles')
         .select('id, default_pole_driver, default_p1_driver, default_p2_driver, default_p3_driver')
         .or('default_pole_driver.not.is.null,default_p1_driver.not.is.null,default_p2_driver.not.is.null,default_p3_driver.not.is.null');
+
+    if (defaultsError) throw new Error(`Failed to load profile defaults: ${defaultsError.message}`);
 
     const predictionMap = new Map<string, StoredPrediction>();
     for (const pred of (predictions || [])) {
@@ -155,7 +159,7 @@ export async function calculateScores(
 
     const effectivePredictions = Array.from(predictionMap.values());
     if (effectivePredictions.length === 0) {
-        await admin.from('scoring_log').upsert({
+        const { error: logError } = await admin.from('scoring_log').upsert({
             season: parseInt(season),
             round: parseInt(round),
             session_type: sessionType,
@@ -167,6 +171,8 @@ export async function calculateScores(
             actual_p2: actualP2,
             actual_p3: actualP3,
         }, { onConflict: 'season,round,session_type' });
+
+        if (logError) throw new Error(`Failed to save scoring log: ${logError.message}`);
 
         return { scored: 0, results: { actualPole, actualP1, actualP2, actualP3 } };
     }
@@ -214,7 +220,7 @@ export async function calculateScores(
 
     if (error) throw new Error(`Failed to save scores: ${error.message}`);
 
-    await admin.from('scoring_log').upsert({
+    const { error: logError } = await admin.from('scoring_log').upsert({
         season: parseInt(season),
         round: parseInt(round),
         session_type: sessionType,
@@ -226,6 +232,8 @@ export async function calculateScores(
         actual_p2: actualP2,
         actual_p3: actualP3,
     }, { onConflict: 'season,round,session_type' });
+
+    if (logError) throw new Error(`Failed to save scoring log: ${logError.message}`);
 
     return { scored: scores.length, results: { actualPole, actualP1, actualP2, actualP3 } };
 }
